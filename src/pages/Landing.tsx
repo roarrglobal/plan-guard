@@ -9,20 +9,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
-import { Textarea } from "@/components/ui/textarea";
 import UsageLimitsModal from "@/components/landing/UsageLimitsModal";
+import { LandingAnalysisDemo } from "@/components/landing/LandingAnalysisDemo";
+import { EnhancedLiveStats } from "@/components/landing/EnhancedLiveStats";
+import { LLMComparisonSection } from "@/components/landing/LLMComparisonSection";
 import { useAuth } from "@/contexts/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
-
-// Example decisions for the demo
-const exampleDecisions = [
-  { label: "Career move", text: "I'm thinking about leaving my job to start a company. I have 6 months of savings and a product idea I've validated with 20 potential customers." },
-  { label: "Product launch", text: "We're considering launching our MVP next month, but only 3 of our 5 core features are ready. Should we launch now or wait?" },
-  { label: "Investment", text: "I'm thinking of investing 20% of my savings into crypto. I've done research but the market seems volatile." },
-  { label: "Relocation", text: "My company is offering a transfer to Singapore with a 40% raise but I'd be leaving my family and friends behind." },
-  { label: "Partnership", text: "A potential business partner wants 40% equity for bringing sales expertise. I have the product but need distribution." },
-  { label: "Major purchase", text: "Considering buying a house at the top of my budget. Interest rates might go down but prices are stable." }
-];
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -31,7 +23,6 @@ export default function Landing() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [isAnnual, setIsAnnual] = useState(false);
   const [limitsModalOpen, setLimitsModalOpen] = useState(false);
-  const [demoText, setDemoText] = useState("");
   const [showComparison, setShowComparison] = useState(false);
 
   const scrollToSection = (id: string) => {
@@ -44,13 +35,6 @@ export default function Landing() {
       navigate("/dashboard");
     } else {
       navigate("/login");
-    }
-  };
-
-  const handleTryDemo = () => {
-    if (demoText.trim()) {
-      // For demo, navigate to analyze with prefilled text
-      navigate("/login", { state: { prefillDecision: demoText } });
     }
   };
 
@@ -176,49 +160,15 @@ export default function Landing() {
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="bg-background border-2 border-border rounded-2xl p-6 md:p-7 shadow-lg"
             >
-              <div className="flex items-center gap-2 mb-4">
-                <Target className="w-5 h-5 text-primary" />
-                <span className="font-semibold">Try Snag — Free</span>
-              </div>
-              
-              <p className="text-sm text-muted-foreground mb-3">What decision are you considering?</p>
-              
-              <Textarea
-                value={demoText}
-                onChange={(e) => setDemoText(e.target.value)}
-                placeholder="Describe your decision in a few sentences..."
-                className="min-h-[120px] mb-4 resize-none"
-              />
-
-              <div className="flex flex-wrap gap-2 mb-5">
-                {exampleDecisions.map((ex, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setDemoText(ex.text)}
-                    className="text-xs px-3 py-1.5 bg-muted text-muted-foreground rounded-full hover:bg-muted/80 transition-colors"
-                  >
-                    {ex.label}
-                  </button>
-                ))}
-              </div>
-
-              <Button 
-                onClick={handleTryDemo}
-                disabled={!demoText.trim()}
-                className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground py-6"
-              >
-                Stress-Test This Decision <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-
-              <p className="text-xs text-muted-foreground text-center mt-4">
-                Your first analysis is free. No signup required.
-              </p>
+              <LandingAnalysisDemo />
             </motion.div>
           </div>
         </div>
       </section>
+
+      {/* Live Stats Section */}
+      <EnhancedLiveStats />
 
       {/* PART 2: What You Get */}
       <section className="py-12 md:py-16 bg-muted">
@@ -459,6 +409,9 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      {/* LLM Comparison Section */}
+      <LLMComparisonSection />
 
       {/* PART 6: Pricing */}
       <section id="pricing" className="py-16 md:py-20 bg-muted">
