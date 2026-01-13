@@ -36,6 +36,7 @@ import SwotAnalysisPage from "./pages/SwotAnalysisPage";
 import PorterAnalysisPage from "./pages/PorterAnalysisPage";
 import PremortemAnalysisPage from "./pages/PremortemAnalysisPage";
 import JournalDetailPage from "./pages/JournalDetailPage";
+import ReportsPage from "./pages/ReportsPage";
 
 const queryClient = new QueryClient();
 
@@ -81,6 +82,7 @@ const App = () => {
                 <Route path="/frameworks/premortem/:id" element={<PremortemAnalysisPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/profile" element={<ProfileSettings />} />
+                <Route path="/reports" element={<ReportsPage />} />
               </Route>
               
               <Route path="*" element={<NotFound />} />
