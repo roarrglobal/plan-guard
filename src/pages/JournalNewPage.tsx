@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import type { Json } from "@/integrations/supabase/types";
 import { 
   ArrowLeft,
   PenLine,
@@ -159,13 +160,13 @@ export default function JournalNewPage() {
     
     const { error } = await supabase
       .from("journal_entries")
-      .insert({
+      .insert([{
         user_id: user.id,
         entry_type: entryType,
         mood,
-        content: getContent(),
+        content: getContent() as Json,
         word_count: calculateWordCount(),
-      });
+      }]);
 
     if (error) {
       toast({
