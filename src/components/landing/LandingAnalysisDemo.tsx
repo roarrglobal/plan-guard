@@ -269,6 +269,20 @@ export function LandingAnalysisDemo() {
           ? "Create a free account to continue analyzing decisions."
           : "Your first analysis is free. No signup required."}
       </p>
+
+      {/* Dev/Testing: Reset free trial */}
+      {hasUsedFreeTrial && (
+        <button
+          onClick={() => {
+            localStorage.removeItem("snag_free_trial_used");
+            setHasUsedFreeTrial(false);
+            setResult(null);
+          }}
+          className="text-[10px] text-muted-foreground/50 hover:text-muted-foreground mt-2 underline"
+        >
+          Reset demo (testing only)
+        </button>
+      )}
     </div>
   );
 }
