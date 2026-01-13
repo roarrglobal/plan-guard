@@ -322,8 +322,11 @@ export default function Landing() {
             ].map((card, i) => (
               <motion.div 
                 key={i} 
-                className="bg-card border border-border rounded-xl p-6 min-w-[220px] flex-shrink-0 md:flex-shrink"
-                variants={scaleIn}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+                className="bg-background border border-border rounded-xl p-6 min-w-[220px] flex-shrink-0 md:flex-shrink shadow-card"
                 whileHover={{ y: -5 }}
               >
                 <card.icon className={`w-8 h-8 ${card.color} mb-4`} />
@@ -348,7 +351,7 @@ export default function Landing() {
             {/* Left Column - Input */}
             <AnimatedSection delay={0.1}>
               <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4">THE DECISION</p>
-              <div className="bg-card border border-border rounded-xl p-5">
+              <div className="bg-background border border-border rounded-xl p-5 shadow-card">
                 <p className="text-foreground leading-relaxed">
                   "I'm considering leaving my PM role to join an early-stage AI startup as co-founder. 8% equity, no salary for 6 months. I have savings and believe in the product."
                 </p>
@@ -363,7 +366,7 @@ export default function Landing() {
                 <Collapsible open={expandedSections.includes("blindspots")}>
                   <CollapsibleTrigger 
                     onClick={() => toggleSection("blindspots")}
-                    className="w-full flex items-center justify-between bg-card border border-border rounded-xl p-4 hover:bg-muted/50 transition-colors"
+                    className="w-full flex items-center justify-between bg-background border border-border rounded-xl p-4 hover:bg-muted/50 transition-colors shadow-card"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-1 h-8 bg-primary rounded-full" />
@@ -371,7 +374,7 @@ export default function Landing() {
                     </div>
                     <ChevronDown className={`w-4 h-4 transition-transform ${expandedSections.includes("blindspots") ? "rotate-180" : ""}`} />
                   </CollapsibleTrigger>
-                  <CollapsibleContent className="bg-card border border-t-0 border-border rounded-b-xl px-4 pb-4 -mt-2">
+                  <CollapsibleContent className="bg-background border border-t-0 border-border rounded-b-xl px-4 pb-4 -mt-2">
                     <p className="text-sm text-muted-foreground pt-2">
                       You're assuming 8% is fair without seeing the full cap table or understanding dilution through future rounds. You're also assuming 6 months of runway is enough — most startups take 18-24 months to reach sustainable revenue.
                     </p>
@@ -382,7 +385,7 @@ export default function Landing() {
                 <Collapsible open={expandedSections.includes("failure1")}>
                   <CollapsibleTrigger 
                     onClick={() => toggleSection("failure1")}
-                    className="w-full flex items-center justify-between bg-card border border-border rounded-xl p-4 hover:bg-muted/50 transition-colors"
+                    className="w-full flex items-center justify-between bg-background border border-border rounded-xl p-4 hover:bg-muted/50 transition-colors shadow-card"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-1 h-8 bg-destructive rounded-full" />
@@ -390,7 +393,7 @@ export default function Landing() {
                     </div>
                     <ChevronDown className={`w-4 h-4 transition-transform ${expandedSections.includes("failure1") ? "rotate-180" : ""}`} />
                   </CollapsibleTrigger>
-                  <CollapsibleContent className="bg-card border border-t-0 border-border rounded-b-xl px-4 pb-4 -mt-2">
+                  <CollapsibleContent className="bg-background border border-t-0 border-border rounded-b-xl px-4 pb-4 -mt-2">
                     <p className="text-sm text-muted-foreground pt-2">
                       Co-founder conflict by month 9. Mechanism: Different expectations about workload, equity, and decision-making surface under stress. Likelihood: High. Impact: Company dies or you leave with nothing.
                     </p>
@@ -401,7 +404,7 @@ export default function Landing() {
                 <Collapsible open={expandedSections.includes("warning")}>
                   <CollapsibleTrigger 
                     onClick={() => toggleSection("warning")}
-                    className="w-full flex items-center justify-between bg-card border border-border rounded-xl p-4 hover:bg-muted/50 transition-colors"
+                    className="w-full flex items-center justify-between bg-background border border-border rounded-xl p-4 hover:bg-muted/50 transition-colors shadow-card"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-1 h-8 bg-warning rounded-full" />
@@ -409,7 +412,7 @@ export default function Landing() {
                     </div>
                     <ChevronDown className={`w-4 h-4 transition-transform ${expandedSections.includes("warning") ? "rotate-180" : ""}`} />
                   </CollapsibleTrigger>
-                  <CollapsibleContent className="bg-card border border-t-0 border-border rounded-b-xl px-4 pb-4 -mt-2">
+                  <CollapsibleContent className="bg-background border border-t-0 border-border rounded-b-xl px-4 pb-4 -mt-2">
                     <p className="text-sm text-muted-foreground pt-2">
                       If the other founders are vague about the cap table, option pool, or previous commitments — that's a red flag in the first week.
                     </p>
@@ -420,7 +423,7 @@ export default function Landing() {
                 <Collapsible open={expandedSections.includes("kill")}>
                   <CollapsibleTrigger 
                     onClick={() => toggleSection("kill")}
-                    className="w-full flex items-center justify-between bg-card border border-border rounded-xl p-4 hover:bg-muted/50 transition-colors"
+                    className="w-full flex items-center justify-between bg-background border border-border rounded-xl p-4 hover:bg-muted/50 transition-colors shadow-card"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-1 h-8 bg-muted-foreground rounded-full" />
@@ -428,7 +431,7 @@ export default function Landing() {
                     </div>
                     <ChevronDown className={`w-4 h-4 transition-transform ${expandedSections.includes("kill") ? "rotate-180" : ""}`} />
                   </CollapsibleTrigger>
-                  <CollapsibleContent className="bg-card border border-t-0 border-border rounded-b-xl px-4 pb-4 -mt-2">
+                  <CollapsibleContent className="bg-background border border-t-0 border-border rounded-b-xl px-4 pb-4 -mt-2">
                     <p className="text-sm text-muted-foreground pt-2">
                       If salary doesn't materialize by month 6 as promised, or if you've burned through 50% of savings without clear revenue path — stop and reassess.
                     </p>
@@ -439,7 +442,7 @@ export default function Landing() {
                 <Collapsible open={expandedSections.includes("unasked")}>
                   <CollapsibleTrigger 
                     onClick={() => toggleSection("unasked")}
-                    className="w-full flex items-center justify-between bg-card border border-border rounded-xl p-4 hover:bg-muted/50 transition-colors"
+                    className="w-full flex items-center justify-between bg-background border border-border rounded-xl p-4 hover:bg-muted/50 transition-colors shadow-card"
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-1 h-8 bg-secondary rounded-full" />
@@ -447,7 +450,7 @@ export default function Landing() {
                     </div>
                     <ChevronDown className={`w-4 h-4 transition-transform ${expandedSections.includes("unasked") ? "rotate-180" : ""}`} />
                   </CollapsibleTrigger>
-                  <CollapsibleContent className="bg-card border border-t-0 border-border rounded-b-xl px-4 pb-4 -mt-2">
+                  <CollapsibleContent className="bg-background border border-t-0 border-border rounded-b-xl px-4 pb-4 -mt-2">
                     <p className="text-sm text-muted-foreground pt-2">
                       Why is your contribution worth only 8%? If you're giving up salary and taking equal risk, why aren't you asking for 15-20%?
                     </p>
@@ -552,8 +555,11 @@ export default function Landing() {
             ].map((feature, i) => (
               <motion.div 
                 key={i} 
-                className="bg-card border border-border rounded-xl p-5"
-                variants={scaleIn}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+                className="bg-background border border-border rounded-xl p-5 shadow-card"
               >
                 <feature.icon className="w-6 h-6 text-muted-foreground mb-3" />
                 <h3 className="font-semibold mb-2 text-sm">{feature.title}</h3>
