@@ -58,7 +58,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate("/login");
+      navigate("/login", { replace: true });
       return;
     }
 

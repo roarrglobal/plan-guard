@@ -4,9 +4,11 @@ import { Menu, X, FileText, Brain, Shield, Check, Plus, Minus, ArrowRight, Build
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import AnimatedScorecard from "@/components/landing/AnimatedScorecard";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Landing() {
   const navigate = useNavigate();
+  const { user, isLoading: authLoading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [planText, setPlanText] = useState("");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -43,9 +45,15 @@ export default function Landing() {
               <button onClick={() => scrollToSection("pricing")} className="text-small text-foreground hover:text-primary transition-colors">
                 Pricing
               </button>
-              <button onClick={() => navigate("/login")} className="text-small text-foreground hover:text-primary transition-colors">
-                Login
-              </button>
+              {!authLoading && user ? (
+                <button onClick={() => navigate("/dashboard")} className="text-small font-medium text-cobalt hover:text-cobalt/80 transition-colors">
+                  Dashboard
+                </button>
+              ) : (
+                <button onClick={() => navigate("/login")} className="text-small text-foreground hover:text-primary transition-colors">
+                  Login
+                </button>
+              )}
             </div>
 
             {/* Mobile Menu Button */}
@@ -68,9 +76,15 @@ export default function Landing() {
               <button onClick={() => scrollToSection("pricing")} className="text-left text-body text-foreground py-2">
                 Pricing
               </button>
-              <button onClick={() => { setMobileMenuOpen(false); navigate("/login"); }} className="text-left text-body text-foreground py-2">
-                Login
-              </button>
+              {!authLoading && user ? (
+                <button onClick={() => { setMobileMenuOpen(false); navigate("/dashboard"); }} className="text-left text-body font-medium text-cobalt py-2">
+                  Dashboard
+                </button>
+              ) : (
+                <button onClick={() => { setMobileMenuOpen(false); navigate("/login"); }} className="text-left text-body text-foreground py-2">
+                  Login
+                </button>
+              )}
             </div>
           </div>
         )}
