@@ -449,12 +449,13 @@ export function AnalysisResults({
           </button>
         </div>
 
-        {onSave && !isLoggedIn && (
+        {/* Save button - show for logged in users, or prompt login for non-logged in */}
+        {onSave && (
           <button
             onClick={onSave}
-            className="w-full text-center text-[14px] font-medium text-[#0047AB] mt-2 py-2"
+            className="w-full text-center text-[14px] font-medium text-[#0047AB] mt-2 py-2 hover:underline"
           >
-          Save this analysis
+            {isLoggedIn ? "Save to Dashboard" : "Login to Save"}
           </button>
         )}
       </div>
