@@ -53,6 +53,285 @@ export type Database = {
         }
         Relationships: []
       }
+      decisions: {
+        Row: {
+          ai_nudge: string | null
+          category: string | null
+          chosen_option: string | null
+          confidence: number | null
+          created_at: string
+          deadline: string | null
+          decision_text: string
+          deep_snag_id: string | null
+          id: string
+          options: Json | null
+          outcome_check_date: string | null
+          outcome_logged_at: string | null
+          outcome_notes: string | null
+          outcome_status: string | null
+          stakes: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_nudge?: string | null
+          category?: string | null
+          chosen_option?: string | null
+          confidence?: number | null
+          created_at?: string
+          deadline?: string | null
+          decision_text: string
+          deep_snag_id?: string | null
+          id?: string
+          options?: Json | null
+          outcome_check_date?: string | null
+          outcome_logged_at?: string | null
+          outcome_notes?: string | null
+          outcome_status?: string | null
+          stakes?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_nudge?: string | null
+          category?: string | null
+          chosen_option?: string | null
+          confidence?: number | null
+          created_at?: string
+          deadline?: string | null
+          decision_text?: string
+          deep_snag_id?: string | null
+          id?: string
+          options?: Json | null
+          outcome_check_date?: string | null
+          outcome_logged_at?: string | null
+          outcome_notes?: string | null
+          outcome_status?: string | null
+          stakes?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "decisions_deep_snag_id_fkey"
+            columns: ["deep_snag_id"]
+            isOneToOne: false
+            referencedRelation: "analyses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      framework_analyses: {
+        Row: {
+          ai_enhancement: Json | null
+          created_at: string
+          framework_type: string
+          id: string
+          inputs: Json
+          title: string | null
+          updated_at: string
+          user_id: string
+          visual_data: Json | null
+        }
+        Insert: {
+          ai_enhancement?: Json | null
+          created_at?: string
+          framework_type: string
+          id?: string
+          inputs?: Json
+          title?: string | null
+          updated_at?: string
+          user_id: string
+          visual_data?: Json | null
+        }
+        Update: {
+          ai_enhancement?: Json | null
+          created_at?: string
+          framework_type?: string
+          id?: string
+          inputs?: Json
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+          visual_data?: Json | null
+        }
+        Relationships: []
+      }
+      habit_completions: {
+        Row: {
+          completed_at: string
+          created_at: string
+          habit_id: string
+          id: string
+          notes: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at: string
+          created_at?: string
+          habit_id: string
+          id?: string
+          notes?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          created_at?: string
+          habit_id?: string
+          id?: string
+          notes?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "habit_completions_habit_id_fkey"
+            columns: ["habit_id"]
+            isOneToOne: false
+            referencedRelation: "habits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      habits: {
+        Row: {
+          best_streak: number | null
+          category: string | null
+          created_at: string
+          current_streak: number | null
+          frequency: string
+          frequency_days: number[] | null
+          id: string
+          is_active: boolean | null
+          name: string
+          reminder_time: string | null
+          user_id: string
+          why_it_matters: string | null
+        }
+        Insert: {
+          best_streak?: number | null
+          category?: string | null
+          created_at?: string
+          current_streak?: number | null
+          frequency?: string
+          frequency_days?: number[] | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          reminder_time?: string | null
+          user_id: string
+          why_it_matters?: string | null
+        }
+        Update: {
+          best_streak?: number | null
+          category?: string | null
+          created_at?: string
+          current_streak?: number | null
+          frequency?: string
+          frequency_days?: number[] | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          reminder_time?: string | null
+          user_id?: string
+          why_it_matters?: string | null
+        }
+        Relationships: []
+      }
+      journal_entries: {
+        Row: {
+          content: Json
+          created_at: string
+          entry_type: string
+          id: string
+          mood: string | null
+          updated_at: string
+          user_id: string
+          word_count: number | null
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          entry_type: string
+          id?: string
+          mood?: string | null
+          updated_at?: string
+          user_id: string
+          word_count?: number | null
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          entry_type?: string
+          id?: string
+          mood?: string | null
+          updated_at?: string
+          user_id?: string
+          word_count?: number | null
+        }
+        Relationships: []
+      }
+      post_mortems: {
+        Row: {
+          ai_analysis: Json | null
+          created_at: string
+          description: string
+          id: string
+          linked_decision_id: string | null
+          outcome_rating: number | null
+          outcome_status: string | null
+          post_mortem_type: string
+          timeframe_end: string | null
+          timeframe_start: string | null
+          title: string | null
+          updated_at: string
+          user_id: string
+          user_inputs: Json
+        }
+        Insert: {
+          ai_analysis?: Json | null
+          created_at?: string
+          description: string
+          id?: string
+          linked_decision_id?: string | null
+          outcome_rating?: number | null
+          outcome_status?: string | null
+          post_mortem_type: string
+          timeframe_end?: string | null
+          timeframe_start?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id: string
+          user_inputs?: Json
+        }
+        Update: {
+          ai_analysis?: Json | null
+          created_at?: string
+          description?: string
+          id?: string
+          linked_decision_id?: string | null
+          outcome_rating?: number | null
+          outcome_status?: string | null
+          post_mortem_type?: string
+          timeframe_end?: string | null
+          timeframe_start?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+          user_inputs?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_mortems_linked_decision_id_fkey"
+            columns: ["linked_decision_id"]
+            isOneToOne: false
+            referencedRelation: "decisions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           allow_connections: boolean | null
@@ -145,25 +424,40 @@ export type Database = {
       tier_limits: {
         Row: {
           analyses_monthly: number
+          decisions_daily: number | null
           documents_monthly: number
+          frameworks_monthly: number | null
+          habits_limit: number | null
+          journal_daily: number | null
           max_file_bytes: number
           max_words: number
+          post_mortems_monthly: number | null
           storage_bytes: number
           tier: string
         }
         Insert: {
           analyses_monthly: number
+          decisions_daily?: number | null
           documents_monthly: number
+          frameworks_monthly?: number | null
+          habits_limit?: number | null
+          journal_daily?: number | null
           max_file_bytes: number
           max_words: number
+          post_mortems_monthly?: number | null
           storage_bytes: number
           tier: string
         }
         Update: {
           analyses_monthly?: number
+          decisions_daily?: number | null
           documents_monthly?: number
+          frameworks_monthly?: number | null
+          habits_limit?: number | null
+          journal_daily?: number | null
           max_file_bytes?: number
           max_words?: number
+          post_mortems_monthly?: number | null
           storage_bytes?: number
           tier?: string
         }
@@ -174,43 +468,97 @@ export type Database = {
           analyses_limit: number
           analyses_used: number | null
           created_at: string | null
+          decisions_today: number | null
           documents_limit: number
           documents_used: number | null
+          frameworks_limit: number | null
+          frameworks_used: number | null
           id: string
+          journal_entries_today: number | null
           period_end: string
           period_start: string
+          post_mortems_limit: number | null
+          post_mortems_used: number | null
           storage_limit_bytes: number
           storage_used_bytes: number | null
           updated_at: string | null
           user_id: string
+          visual_exports_used: number | null
         }
         Insert: {
           analyses_limit: number
           analyses_used?: number | null
           created_at?: string | null
+          decisions_today?: number | null
           documents_limit: number
           documents_used?: number | null
+          frameworks_limit?: number | null
+          frameworks_used?: number | null
           id?: string
+          journal_entries_today?: number | null
           period_end: string
           period_start: string
+          post_mortems_limit?: number | null
+          post_mortems_used?: number | null
           storage_limit_bytes: number
           storage_used_bytes?: number | null
           updated_at?: string | null
           user_id: string
+          visual_exports_used?: number | null
         }
         Update: {
           analyses_limit?: number
           analyses_used?: number | null
           created_at?: string | null
+          decisions_today?: number | null
           documents_limit?: number
           documents_used?: number | null
+          frameworks_limit?: number | null
+          frameworks_used?: number | null
           id?: string
+          journal_entries_today?: number | null
           period_end?: string
           period_start?: string
+          post_mortems_limit?: number | null
+          post_mortems_used?: number | null
           storage_limit_bytes?: number
           storage_used_bytes?: number | null
           updated_at?: string | null
           user_id?: string
+          visual_exports_used?: number | null
+        }
+        Relationships: []
+      }
+      visual_exports: {
+        Row: {
+          created_at: string
+          framework_type: string
+          id: string
+          image_url: string | null
+          source_id: string
+          source_type: string
+          user_id: string
+          visual_data: Json
+        }
+        Insert: {
+          created_at?: string
+          framework_type: string
+          id?: string
+          image_url?: string | null
+          source_id: string
+          source_type: string
+          user_id: string
+          visual_data?: Json
+        }
+        Update: {
+          created_at?: string
+          framework_type?: string
+          id?: string
+          image_url?: string | null
+          source_id?: string
+          source_type?: string
+          user_id?: string
+          visual_data?: Json
         }
         Relationships: []
       }
@@ -240,15 +588,22 @@ export type Database = {
           analyses_limit: number
           analyses_used: number | null
           created_at: string | null
+          decisions_today: number | null
           documents_limit: number
           documents_used: number | null
+          frameworks_limit: number | null
+          frameworks_used: number | null
           id: string
+          journal_entries_today: number | null
           period_end: string
           period_start: string
+          post_mortems_limit: number | null
+          post_mortems_used: number | null
           storage_limit_bytes: number
           storage_used_bytes: number | null
           updated_at: string | null
           user_id: string
+          visual_exports_used: number | null
         }
         SetofOptions: {
           from: "*"
@@ -260,6 +615,14 @@ export type Database = {
       increment_document_usage: {
         Args: { p_file_size: number; p_user_id: string }
         Returns: boolean
+      }
+      increment_framework_usage: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
+      increment_post_mortem_usage: {
+        Args: { p_user_id: string }
+        Returns: undefined
       }
     }
     Enums: {
