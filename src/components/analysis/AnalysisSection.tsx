@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface AnalysisSectionProps {
@@ -38,19 +39,26 @@ export function AnalysisSection({
         <span className="text-[14px] font-bold text-[#1A1A1A] uppercase tracking-wide">
           {title}
         </span>
-        <ChevronDown
-          className={cn(
-            "w-5 h-5 text-[#999999] transition-transform duration-200",
-            isOpen && "rotate-180"
-          )}
-        />
+        <motion.div
+          animate={{ rotate: isOpen ? 180 : 0 }}
+          transition={{ duration: 0.2, ease: "easeInOut" }}
+        >
+          <ChevronDown className="w-5 h-5 text-[#999999]" />
+        </motion.div>
       </button>
 
-      {isOpen && (
-        <div className="px-4 pb-4 pt-0">
-          {children}
-        </div>
-      )}
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+          >
+            <div className="px-4 pb-4 pt-0">{children}</div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
