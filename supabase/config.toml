@@ -2,3 +2,6 @@ project_id = "xlmvxgotcodvmnlpobxh"
 
 [functions.analyze-plan]
 verify_jwt = false
+
+[functions.get-public-stats]
+verify_jwt = false
