@@ -110,8 +110,74 @@ serve(async (req) => {
       );
     }
 
-    const { content, entryType, mood } = body;
+    const { content, entryType, mood, action, analysisType } = body;
 
+    // Handle extraction action for Pre-Mortem/Post-Mortem
+    if (action === "extract") {
+      const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+      if (!LOVABLE_API_KEY) {
+        return new Response(
+          JSON.stringify({ extracted: content }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const extractionPrompt = analysisType === "pre_mortem" 
+        ? `The user has written a journal entry. Extract any decision, plan, goal, or intention they're considering. Frame it as a decision to be stress-tested.
+
+Entry type: ${entryType}
+Content:
+${content}
+
+Return ONLY the extracted decision/plan as a single paragraph. No JSON, no formatting. Just the extracted text that can be analyzed for potential failure modes and blind spots.`
+        : `The user has written a journal entry. Extract any outcome, event, experience, or completed situation they're reflecting on. Frame it as something to analyze retrospectively.
+
+Entry type: ${entryType}
+Content:
+${content}
+
+Return ONLY the extracted outcome/event as a single paragraph. No JSON, no formatting. Just the extracted text that can be analyzed for lessons learned and root causes.`;
+
+      try {
+        const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-3-flash-preview",
+            messages: [
+              { role: "user", content: extractionPrompt },
+            ],
+          }),
+        });
+
+        if (!response.ok) {
+          console.error("AI extraction failed:", response.status);
+          return new Response(
+            JSON.stringify({ extracted: content }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        const aiResponse = await response.json();
+        const extracted = aiResponse.choices?.[0]?.message?.content?.trim() || content;
+
+        return new Response(
+          JSON.stringify({ extracted }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      } catch (err) {
+        console.error("Extraction error:", err);
+        return new Response(
+          JSON.stringify({ extracted: content }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
+    // Regular journal analysis
     // Extract text content from structured journal content
     let textContent = "";
     if (typeof content === "string") {
@@ -127,6 +193,19 @@ serve(async (req) => {
       if (content.vision) parts.push(`Vision: ${content.vision}`);
       if (content.action_today) parts.push(`Action today: ${content.action_today}`);
       if (content.release) parts.push(`Releasing: ${content.release}`);
+      // Handle gratitude fields
+      if (content.gratitude_1) parts.push(`Grateful for: ${content.gratitude_1}`);
+      if (content.gratitude_2) parts.push(`Grateful for: ${content.gratitude_2}`);
+      if (content.gratitude_3) parts.push(`Grateful for: ${content.gratitude_3}`);
+      // Handle evening review fields
+      if (content.went_well) parts.push(`What went well: ${content.went_well}`);
+      if (content.could_be_better) parts.push(`Could be better: ${content.could_be_better}`);
+      if (content.learned) parts.push(`Learned: ${content.learned}`);
+      // Handle morning fields
+      if (content.intention) parts.push(`Intention: ${content.intention}`);
+      if (content.looking_forward_to) parts.push(`Looking forward to: ${content.looking_forward_to}`);
+      // Handle text field
+      if (content.text) parts.push(content.text);
       textContent = parts.join("\n\n");
     }
 
