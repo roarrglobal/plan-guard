@@ -87,6 +87,31 @@ export function useUsage() {
     return data as boolean;
   };
 
+  // Synchronous check using cached usage data
+  const canUseFeatureSync = (feature: "analysis" | "document_upload"): boolean => {
+    if (!usage) return true; // Allow if no usage data yet
+    
+    // Unlimited check
+    if (usage.analyses_limit === -1) return true;
+    
+    if (feature === "analysis") {
+      return usage.analyses_used < usage.analyses_limit;
+    } else if (feature === "document_upload") {
+      if (usage.documents_limit === 0) return false; // Free tier
+      return usage.documents_used < usage.documents_limit;
+    }
+    
+    return true;
+  };
+
+  // Check storage limit
+  const canUploadFile = (fileSize: number): boolean => {
+    if (!usage) return true;
+    if (usage.storage_limit_bytes === -1) return true;
+    if (usage.storage_limit_bytes === 0) return false; // Free tier
+    return (usage.storage_used_bytes + fileSize) <= usage.storage_limit_bytes;
+  };
+
   // Format bytes to human readable
   const formatBytes = (bytes: number): string => {
     if (bytes === 0) return "0 B";
@@ -117,6 +142,8 @@ export function useUsage() {
     isLoading,
     daysUntilReset,
     canUseFeature,
+    canUseFeatureSync,
+    canUploadFile,
     formatBytes,
     getPercentage,
     getProgressColor,

@@ -4,10 +4,12 @@ import { ArrowRight, Paperclip } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DocumentUploadModal } from "@/components/upload/DocumentUploadModal";
 import { UpgradePromptModal } from "@/components/upload/UpgradePromptModal";
+import LimitReachedModal from "@/components/usage/LimitReachedModal";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { useUsage } from "@/hooks/useUsage";
 
 interface AnalysisInputProps {
   onSubmit: (text: string) => void;
@@ -21,11 +23,6 @@ interface AnalysisInputProps {
 const MAX_CHARS = 1000;
 const MIN_CHARS = 20;
 
-// TODO: Replace with actual subscription check
-const useIsPro = () => {
-  return true;
-};
-
 export function AnalysisInput({
   onSubmit,
   isLoading = false,
@@ -37,12 +34,17 @@ export function AnalysisInput({
   const [text, setText] = useState("");
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
+  const [limitModalOpen, setLimitModalOpen] = useState(false);
+  const [limitType, setLimitType] = useState<"analysis" | "document" | "storage">("document");
   const [isUploading, setIsUploading] = useState(false);
   
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const isPro = useIsPro();
+  const { tier, canUseFeatureSync, canUploadFile, refetch: refetchUsage } = useUsage();
+  
+  // Check if user has Pro tier or higher
+  const isPro = tier !== "free";
 
   const charCount = text.length;
   const isValid = charCount >= MIN_CHARS && charCount <= MAX_CHARS;
@@ -59,11 +61,19 @@ export function AnalysisInput({
   };
 
   const handleAttachClick = () => {
-    if (isPro) {
-      setUploadModalOpen(true);
-    } else {
+    if (!isPro) {
       setUpgradeModalOpen(true);
+      return;
     }
+    
+    // Check document upload limit
+    if (!canUseFeatureSync("document_upload")) {
+      setLimitType("document");
+      setLimitModalOpen(true);
+      return;
+    }
+    
+    setUploadModalOpen(true);
   };
 
   const handleDocumentUpload = async (file: File, context: string) => {
@@ -73,6 +83,14 @@ export function AnalysisInput({
         description: "Please sign in to upload documents.",
         variant: "destructive",
       });
+      return;
+    }
+
+    // Check storage limit
+    if (!canUploadFile(file.size)) {
+      setLimitType("storage");
+      setLimitModalOpen(true);
+      setUploadModalOpen(false);
       return;
     }
 
@@ -157,6 +175,9 @@ export function AnalysisInput({
       if (saveError) {
         console.error("Failed to save analysis:", saveError);
       }
+
+      // Refetch usage to update counts
+      refetchUsage();
 
       setUploadModalOpen(false);
       
@@ -258,6 +279,13 @@ export function AnalysisInput({
       <UpgradePromptModal
         open={upgradeModalOpen}
         onOpenChange={setUpgradeModalOpen}
+      />
+
+      <LimitReachedModal
+        open={limitModalOpen}
+        onOpenChange={setLimitModalOpen}
+        limitType={limitType}
+        currentTier={tier}
       />
     </>
   );
