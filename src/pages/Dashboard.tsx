@@ -14,6 +14,11 @@ import { MonthlyRecapModal, useMonthlyRecap } from "@/components/dashboard/Month
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { TrialBadge } from "@/components/softlaunch/TrialBadge";
+import { UsageCounter } from "@/components/softlaunch/UsageCounter";
+import { WaitlistModal } from "@/components/softlaunch/WaitlistModal";
+import { TrialExpiredModal } from "@/components/softlaunch/TrialExpiredModal";
+import { useSoftLaunch } from "@/hooks/useSoftLaunch";
 
 interface SavedAnalysis {
   id: string;
@@ -52,6 +57,19 @@ export default function Dashboard() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showAllAnalyses, setShowAllAnalyses] = useState(false);
   const { shouldShow: showRecap, markAsShown: closeRecap } = useMonthlyRecap();
+  
+  // Soft launch state
+  const softLaunch = useSoftLaunch();
+  const [showWaitlistModal, setShowWaitlistModal] = useState(false);
+  const [showTrialExpiredModal, setShowTrialExpiredModal] = useState(false);
+  const [waitlistLimitType, setWaitlistLimitType] = useState<"deep_snag" | "journal" | "retro" | "general">("general");
+  
+  // Show trial expired modal on first load if trial expired
+  useEffect(() => {
+    if (softLaunch.isTrialExpired && !softLaunch.waitlistJoined && user) {
+      setShowTrialExpiredModal(true);
+    }
+  }, [softLaunch.isTrialExpired, softLaunch.waitlistJoined, user]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -224,13 +242,31 @@ export default function Dashboard() {
                 
                 {/* Hero Section - Greeting & Quick Start */}
                 <section className="space-y-4">
-                  <div>
-                    <h1 className="text-2xl font-bold text-foreground">
-                      {greeting}, {displayName}
-                    </h1>
-                    <p className="text-muted-foreground text-sm mt-1">
-                      {format(new Date(), "EEEE, MMMM d, yyyy")}
-                    </p>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h1 className="text-2xl font-bold text-foreground">
+                        {greeting}, {displayName}
+                      </h1>
+                      <p className="text-muted-foreground text-sm mt-1">
+                        {format(new Date(), "EEEE, MMMM d, yyyy")}
+                      </p>
+                    </div>
+                    <TrialBadge />
+                  </div>
+                  
+                  {/* Usage counters */}
+                  <div className="flex items-center gap-4 text-xs">
+                    <UsageCounter 
+                      used={softLaunch.limits.deepSnags.used} 
+                      limit={softLaunch.limits.deepSnags.limit} 
+                      label="Deep Snag used" 
+                    />
+                    <span className="text-border">•</span>
+                    <UsageCounter 
+                      used={softLaunch.limits.journalsPerDay.used} 
+                      limit={softLaunch.limits.journalsPerDay.limit} 
+                      label="journals today" 
+                    />
                   </div>
 
                   {/* Primary Action Card */}
@@ -310,6 +346,25 @@ export default function Dashboard() {
           </main>
         </PullToRefresh>
       </div>
+      
+      {/* Soft Launch Modals */}
+      <WaitlistModal 
+        open={showWaitlistModal} 
+        onOpenChange={setShowWaitlistModal}
+        limitType={waitlistLimitType}
+      />
+      <TrialExpiredModal 
+        open={showTrialExpiredModal} 
+        onOpenChange={setShowTrialExpiredModal}
+        stats={{
+          deepSnags: softLaunch.deepSnagsUsed,
+          journals: softLaunch.journalsToday,
+          blindSpots: analyses.reduce((acc, a) => {
+            const result = a.result as { blind_spots?: unknown[] };
+            return acc + (result?.blind_spots?.length || 0);
+          }, 0),
+        }}
+      />
     </>
   );
 }

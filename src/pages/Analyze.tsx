@@ -10,6 +10,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useUsage } from "@/hooks/useUsage";
+import { useSoftLaunch } from "@/hooks/useSoftLaunch";
+import { WaitlistModal } from "@/components/softlaunch/WaitlistModal";
 import LimitReachedModal from "@/components/usage/LimitReachedModal";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
@@ -19,10 +21,12 @@ export default function Analyze() {
   const { toast } = useToast();
   const { user } = useAuth();
   const { canUseFeature, tier, refetch: refetchUsage } = useUsage();
+  const softLaunch = useSoftLaunch();
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [limitModalOpen, setLimitModalOpen] = useState(false);
+  const [waitlistModalOpen, setWaitlistModalOpen] = useState(false);
   const [sourceJournalId, setSourceJournalId] = useState<string | null>(null);
   
   // New selector states
@@ -77,12 +81,21 @@ export default function Analyze() {
   }, [location]);
 
   const handleAnalyze = async (text: string) => {
+    // Check soft launch limit first
+    if (!softLaunch.canUseDeepSnag) {
+      setWaitlistModalOpen(true);
+      return;
+    }
+    
     // Check usage limit before proceeding
     const canAnalyze = await canUseFeature("analysis");
     if (!canAnalyze) {
       setLimitModalOpen(true);
       return;
     }
+    
+    // Increment soft launch usage
+    await softLaunch.incrementDeepSnags();
 
     setInput(text);
     setIsLoading(true);
@@ -261,6 +274,12 @@ export default function Analyze() {
         onOpenChange={setLimitModalOpen}
         limitType="analysis"
         currentTier={tier}
+      />
+      
+      <WaitlistModal
+        open={waitlistModalOpen}
+        onOpenChange={setWaitlistModalOpen}
+        limitType="deep_snag"
       />
     </>
   );

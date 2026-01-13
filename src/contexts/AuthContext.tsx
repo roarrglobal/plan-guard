@@ -25,6 +25,14 @@ export interface Profile {
   lifetime_deep_snags_used: number | null;
   lifetime_post_mortems_used: number | null;
   lifetime_frameworks_used: number | null;
+  // Soft launch fields
+  trial_start_date: string | null;
+  trial_expired: boolean | null;
+  deep_snags_used: number | null;
+  retros_used: number | null;
+  waitlist_joined: boolean | null;
+  waitlist_joined_at: string | null;
+  discount_code: string | null;
 }
 
 export type ProfileUpdates = Partial<Omit<Profile, 'id' | 'user_id' | 'preferences'>>;
