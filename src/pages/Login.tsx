@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   
   const [isSignUp, setIsSignUp] = useState(false);
@@ -16,6 +16,13 @@ export default function Login() {
   const [displayName, setDisplayName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Redirect to dashboard if already logged in
+  useEffect(() => {
+    if (!authLoading && user) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [user, authLoading, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +42,7 @@ export default function Login() {
             title: "Account created",
             description: "Welcome to Snag!",
           });
-          navigate("/dashboard");
+          navigate("/dashboard", { replace: true });
         }
       } else {
         const { error } = await signIn(email, password);
@@ -50,7 +57,7 @@ export default function Login() {
             title: "Welcome back",
             description: "Successfully signed in",
           });
-          navigate("/dashboard");
+          navigate("/dashboard", { replace: true });
         }
       }
     } finally {
