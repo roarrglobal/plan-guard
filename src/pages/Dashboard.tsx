@@ -21,6 +21,7 @@ import { DashboardDailyPrompt } from "@/components/dashboard/DashboardDailyPromp
 import { DashboardStreakStats } from "@/components/dashboard/DashboardStreakStats";
 import { DashboardTodaysHabits } from "@/components/dashboard/DashboardTodaysHabits";
 import { DashboardPendingOutcomes } from "@/components/dashboard/DashboardPendingOutcomes";
+import { UsageWarningBanner } from "@/components/usage/UsageWarningBanner";
 
 interface SavedAnalysis {
   id: string;
@@ -322,6 +323,9 @@ export default function Dashboard() {
             ) : (
               /* Main Dashboard View */
               <>
+                {/* Usage Warning Banner */}
+                <UsageWarningBanner onUpgrade={() => navigate("/settings")} />
+
                 {/* Daily Prompt Card */}
                 <DashboardDailyPrompt />
 
@@ -340,8 +344,8 @@ export default function Dashboard() {
                 {/* Recent Snags */}
                 <DashboardRecentSnags
                   analyses={analyses}
-                  onViewAll={() => setShowAllAnalyses(true)}
-                  onSelectAnalysis={(id) => setExpandedId(id)}
+                  onViewAll={() => navigate("/analyses")}
+                  onSelectAnalysis={(id) => navigate(`/analysis/${id}`)}
                 />
 
                 {/* Expanded Analysis Card */}

@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { Plus, CheckCircle, AlertTriangle, XCircle, RefreshCw, Zap, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
@@ -50,6 +51,7 @@ export default function PostMortemPage() {
   const [quickRetros, setQuickRetros] = useState<QuickRetro[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"all" | "full" | "quick">("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -104,9 +106,19 @@ export default function PostMortemPage() {
     ...quickRetros.map(qr => ({ ...qr, type: "quick" as const })),
   ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
-  const filteredItems = activeTab === "all" 
-    ? allItems 
-    : allItems.filter(item => item.type === (activeTab === "full" ? "full" : "quick"));
+  const filteredItems = allItems
+    .filter(item => activeTab === "all" || item.type === (activeTab === "full" ? "full" : "quick"))
+    .filter(item => {
+      const searchLower = searchQuery.toLowerCase();
+      if (item.type === "full") {
+        const pm = item as PostMortem;
+        return pm.description.toLowerCase().includes(searchLower) || 
+               (pm.title?.toLowerCase().includes(searchLower));
+      } else {
+        const qr = item as QuickRetro;
+        return qr.description.toLowerCase().includes(searchLower);
+      }
+    });
 
   return (
     <div className="min-h-screen bg-background">
@@ -190,7 +202,16 @@ export default function PostMortemPage() {
           ))}
         </div>
 
-        {/* List */}
+        {/* Search */}
+        <div className="relative mb-6">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Search post-mortems..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 bg-white"
+          />
+        </div>
         {filteredItems.length === 0 ? (
           <div className="text-center py-16">
             <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">

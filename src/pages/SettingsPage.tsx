@@ -1,11 +1,12 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { ArrowLeft, User, LogOut, Trash2, ChevronRight, CreditCard } from "lucide-react";
+import { ArrowLeft, User, LogOut, Trash2, ChevronRight, CreditCard, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SnagLogo } from "@/components/SnagLogo";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { SubscriptionSettings } from "@/components/subscription/SubscriptionSettings";
+import { ThemeToggle } from "@/components/settings/ThemeToggle";
 
 export default function SettingsPage() {
   const navigate = useNavigate();
@@ -147,6 +148,23 @@ export default function SettingsPage() {
               </div>
               <ChevronRight className="w-5 h-5 text-muted-foreground" />
             </div>
+          </div>
+        </section>
+
+        {/* Appearance section */}
+        <section className="mb-8">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+            Appearance
+          </h2>
+          <div className="analysis-card p-4">
+            <div className="flex items-center gap-3 mb-4">
+              <Palette className="w-5 h-5 text-muted-foreground" />
+              <div>
+                <p className="font-medium text-foreground">Theme</p>
+                <p className="text-sm text-muted-foreground">Choose your preferred appearance</p>
+              </div>
+            </div>
+            <ThemeToggle />
           </div>
         </section>
 
