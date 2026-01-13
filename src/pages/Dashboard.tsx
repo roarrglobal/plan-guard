@@ -16,6 +16,7 @@ import { DashboardProgress } from "@/components/dashboard/DashboardProgress";
 import { DashboardQuickActions } from "@/components/dashboard/DashboardQuickActions";
 import { DashboardEmptyState } from "@/components/dashboard/DashboardEmptyState";
 import { DashboardInsights } from "@/components/dashboard/DashboardInsights";
+import { MonthlyRecapModal, useMonthlyRecap } from "@/components/dashboard/MonthlyRecapModal";
 
 interface SavedAnalysis {
   id: string;
@@ -53,6 +54,7 @@ export default function Dashboard() {
   const [activeFilter, setActiveFilter] = useState("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(false);
+  const { shouldShow: showRecap, markAsShown: closeRecap } = useMonthlyRecap();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -135,7 +137,13 @@ export default function Dashboard() {
   const showEmptyState = !hasAnalyses && !searchQuery && activeFilter === "all";
 
   return (
-    <div className="h-screen bg-[#FAFAFA] flex flex-col overflow-hidden">
+    <>
+      {/* Monthly Recap Modal */}
+      {showRecap && hasAnalyses && (
+        <MonthlyRecapModal analyses={analyses} onClose={closeRecap} />
+      )}
+      
+      <div className="h-screen bg-[#FAFAFA] flex flex-col overflow-hidden">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-white border-b border-[#E5E5E5] flex-shrink-0">
         <div className="px-4 py-4">
@@ -312,6 +320,7 @@ export default function Dashboard() {
           </main>
         </PullToRefresh>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
