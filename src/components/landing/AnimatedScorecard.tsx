@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, forwardRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -48,12 +48,22 @@ function AnimatedCounter({ value, duration = 2000 }: { value: number; duration?:
   return <span ref={ref}>{count.toLocaleString()}</span>;
 }
 
-export default function AnimatedScorecard() {
+const AnimatedScorecard = forwardRef<HTMLElement>((_, ref) => {
   const [stats, setStats] = useState<Stats | null>(null);
   const [currentActivityIndex, setCurrentActivityIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const sectionRef = useRef<HTMLElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-50px" });
+  
+  // Merge refs if external ref is provided
+  const mergedRef = (node: HTMLElement | null) => {
+    sectionRef.current = node;
+    if (typeof ref === 'function') {
+      ref(node);
+    } else if (ref) {
+      ref.current = node;
+    }
+  };
 
   useEffect(() => {
     fetchStats();
@@ -137,7 +147,7 @@ export default function AnimatedScorecard() {
   }
 
   return (
-    <section ref={sectionRef} className="bg-[#0A0A0A] py-12 md:py-16">
+    <section ref={mergedRef} className="bg-[#0A0A0A] py-12 md:py-16">
       <div className="container mx-auto px-6 max-w-[800px]">
         {/* Main Counter */}
         <div className="text-center mb-6">
@@ -208,4 +218,8 @@ export default function AnimatedScorecard() {
       </div>
     </section>
   );
-}
+});
+
+AnimatedScorecard.displayName = "AnimatedScorecard";
+
+export default AnimatedScorecard;
