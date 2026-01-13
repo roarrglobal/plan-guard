@@ -18,6 +18,7 @@ export interface Profile {
   allow_connections: boolean | null;
   discoverable: boolean | null;
   preferences: Json;
+  subscription_tier: string | null;
 }
 
 export type ProfileUpdates = Partial<Omit<Profile, 'id' | 'user_id' | 'preferences'>>;
