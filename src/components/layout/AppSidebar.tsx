@@ -90,6 +90,7 @@ const navItems: NavItem[] = [
       { label: "Pre-Mortem", href: "/frameworks/premortem/new", icon: <Lightbulb className="w-4 h-4" />, feature: "framework" },
     ]
   },
+  { label: "Reports", href: "/reports", icon: <FileText className="w-4 h-4" /> },
   { label: "Visual Exports", href: "/visual-exports", icon: <Image className="w-4 h-4" />, feature: "visual_export" },
   { label: "Document Upload", href: "/upload", icon: <FileUp className="w-4 h-4" />, feature: "document_upload" },
   { label: "Patterns & Insights", href: "/patterns", icon: <Lightbulb className="w-4 h-4" />, feature: "patterns" },
