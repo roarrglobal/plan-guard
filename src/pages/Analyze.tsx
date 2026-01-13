@@ -2,55 +2,11 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SnagLogo } from "@/components/SnagLogo";
 import { AnalysisInput } from "@/components/AnalysisInput";
-import { LoadingScreen } from "@/components/LoadingScreen";
-import { ResultsView, type AnalysisResult } from "@/components/ResultsView";
+import { AnalysisLoading } from "@/components/analysis/AnalysisLoading";
+import { AnalysisResults, type AnalysisResult } from "@/components/analysis/AnalysisResults";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-
-// Fallback mock analysis for demo purposes
-const mockAnalysis: AnalysisResult = {
-  blind_spots: [
-    "You're assuming users will understand the value proposition without education",
-    "Competitor response hasn't been factored into your timeline",
-    "Team capacity during holiday season may be 30-40% lower than planned",
-  ],
-  failure_modes: [
-    {
-      what: "Launch delays push past market window",
-      mechanism: "Integration complexity causes cascading delays. Each dependency failure compounds timeline by 2-3 weeks.",
-      likelihood: "High",
-      impact: "Competitors capture early adopters. Marketing momentum lost. Team morale drops.",
-    },
-    {
-      what: "User acquisition costs exceed budget",
-      mechanism: "CAC assumptions based on best-case scenarios. Reality shows 2-3x higher costs in competitive markets.",
-      likelihood: "Medium",
-      impact: "Runway shortened by 40%. Forced to raise bridge funding at worse terms.",
-    },
-    {
-      what: "Core feature fails to resonate",
-      mechanism: "Product-market fit assumed but not validated. Users want different primary use case.",
-      likelihood: "Medium",
-      impact: "Pivot required within 6 months. Existing users churned. Team requires restructuring.",
-    },
-  ],
-  warning_signals: [
-    "Sprint velocity drops below 70% for two consecutive weeks",
-    "User interviews reveal confusion about core value proposition",
-    "Key team member starts updating LinkedIn profile",
-    "Beta users stop logging in after day 3",
-    "Customer support tickets per user exceed 0.5 in first week",
-  ],
-  kill_criteria: [
-    "If day-7 retention drops below 20% by end of month 2, consider major pivot",
-    "If CAC exceeds $50 with no improvement trend by week 6, pause paid acquisition",
-    "If NPS drops below 20 after 500 users, halt growth initiatives for product fixes",
-  ],
-  unasked_question:
-    "What happens to this plan if your biggest assumption—that users will pay before seeing results—turns out to be wrong?",
-};
 
 export default function Analyze() {
   const navigate = useNavigate();
@@ -131,49 +87,39 @@ export default function Analyze() {
   };
 
   if (isLoading) {
-    return <LoadingScreen />;
+    return <AnalysisLoading />;
   }
 
   if (result) {
     return (
-      <div className="min-h-screen bg-background">
-        {/* Header */}
-        <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-lg border-b border-border">
-          <div className="flex items-center justify-between p-4 safe-top">
-            <Button variant="ghost" size="icon" onClick={handleNewAnalysis}>
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-            <SnagLogo size="sm" />
-            <div className="w-11" /> {/* Spacer for centering */}
-          </div>
-        </header>
-
-        <ResultsView
-          result={result}
-          originalInput={input}
-          onNewAnalysis={handleNewAnalysis}
-          onSave={handleSave}
-          isLoggedIn={false}
-        />
-      </div>
+      <AnalysisResults
+        result={result}
+        originalInput={input}
+        onNewAnalysis={handleNewAnalysis}
+        onSave={handleSave}
+        isLoggedIn={false}
+      />
     );
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}
-      <header className="flex items-center justify-between p-4 safe-top border-b border-border">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
+      <header className="flex items-center justify-between px-4 py-3 border-b border-[#E5E5E5]">
+        <button
+          onClick={() => navigate("/")}
+          className="p-2 -ml-2 text-[#666666] hover:text-[#1A1A1A] transition-colors"
+        >
           <ArrowLeft className="w-5 h-5" />
-        </Button>
-        <SnagLogo size="sm" />
-        <div className="w-11" /> {/* Spacer for centering */}
+        </button>
+        <span className="text-[18px] font-bold text-cobalt">Snag</span>
+        <div className="w-9" />
       </header>
 
       {/* Input area */}
       <main className="flex-1 flex flex-col p-4">
         <div className="flex-1 flex flex-col justify-center max-w-lg mx-auto w-full">
-          <h2 className="text-xl font-semibold text-foreground mb-6 text-center">
+          <h2 className="text-[20px] font-semibold text-[#1A1A1A] mb-6 text-center">
             What's your plan?
           </h2>
           <AnalysisInput onSubmit={handleAnalyze} />
