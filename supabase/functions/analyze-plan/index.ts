@@ -243,7 +243,24 @@ serve(async (req) => {
       );
     }
 
-    console.log("Analysis completed successfully");
+    // Auto-detect category based on decision_type from context
+    const decisionType = analysisResult.context_extracted?.decision_type?.toLowerCase() || "";
+    let category = "other";
+    
+    if (decisionType.includes("career") || decisionType.includes("job") || decisionType.includes("hiring") || decisionType.includes("promotion")) {
+      category = "career";
+    } else if (decisionType.includes("business") || decisionType.includes("product") || decisionType.includes("startup") || decisionType.includes("investment") || decisionType.includes("expansion")) {
+      category = "business";
+    } else if (decisionType.includes("personal") || decisionType.includes("relationship") || decisionType.includes("health") || decisionType.includes("life")) {
+      category = "personal";
+    } else if (decisionType.includes("travel") || decisionType.includes("relocation") || decisionType.includes("move") || decisionType.includes("trip")) {
+      category = "travel";
+    }
+    
+    // Add category to the result
+    analysisResult.category = category;
+
+    console.log("Analysis completed successfully with category:", category);
 
     return new Response(JSON.stringify(analysisResult), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

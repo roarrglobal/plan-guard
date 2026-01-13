@@ -92,11 +92,15 @@ export default function Analyze() {
     if (!result) return;
 
     try {
+      // Extract category from the analysis result (auto-detected by AI)
+      const category = (result as any).category || "other";
+      
       const { error } = await supabase.from("analyses").insert([{
         user_id: user.id,
         original_input: input,
         result: JSON.parse(JSON.stringify(result)),
         title: input.slice(0, 100),
+        category: category,
       }]);
 
       if (error) {
