@@ -19,6 +19,12 @@ export interface Profile {
   discoverable: boolean | null;
   preferences: Json;
   subscription_tier: string | null;
+  subscription_status: string | null;
+  trial_ends_at: string | null;
+  subscription_ends_at: string | null;
+  lifetime_deep_snags_used: number | null;
+  lifetime_post_mortems_used: number | null;
+  lifetime_frameworks_used: number | null;
 }
 
 export type ProfileUpdates = Partial<Omit<Profile, 'id' | 'user_id' | 'preferences'>>;

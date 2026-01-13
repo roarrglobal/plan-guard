@@ -1,10 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { ArrowLeft, User, CreditCard, LogOut, Trash2, ChevronRight, ExternalLink } from "lucide-react";
+import { ArrowLeft, User, LogOut, Trash2, ChevronRight, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SnagLogo } from "@/components/SnagLogo";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { SubscriptionSettings } from "@/components/subscription/SubscriptionSettings";
 
 export default function SettingsPage() {
   const navigate = useNavigate();
@@ -151,18 +152,7 @@ export default function SettingsPage() {
 
         {/* Subscription section */}
         <section className="mb-8">
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-            Subscription
-          </h2>
-          <div className="analysis-card">
-            <button className="w-full flex items-center justify-between p-4 touch-target">
-              <div className="flex items-center gap-3">
-                <ExternalLink className="w-5 h-5 text-muted-foreground" />
-                <span className="font-medium text-foreground">Manage subscription</span>
-              </div>
-              <ChevronRight className="w-5 h-5 text-muted-foreground" />
-            </button>
-          </div>
+          <SubscriptionSettings />
         </section>
 
         {/* Danger zone */}

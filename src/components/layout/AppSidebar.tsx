@@ -17,11 +17,20 @@ import {
   FileText,
   BarChart3,
   Lightbulb,
-  X
+  X,
+  Lock,
+  Users,
+  Image,
+  FileUp
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useTierCheck } from "@/hooks/useFeatureAccess";
+import { useUsage } from "@/hooks/useUsage";
+import { UsageBadge } from "@/components/subscription/UsageCounter";
+import { useState } from "react";
+import { FeatureUpgradeModal } from "@/components/subscription/FeatureUpgradeModal";
 
 interface AppSidebarProps {
   open: boolean;
@@ -35,13 +44,15 @@ interface NavItem {
   href: string;
   icon: React.ReactNode;
   children?: NavItem[];
+  feature?: "deep_snag" | "post_mortem" | "framework" | "visual_export" | "document_upload" | "patterns" | "team_workspace";
+  showUsage?: boolean;
 }
 
 const quickActions = [
   { label: "New Journal Entry", href: "/journal/new", icon: <Plus className="w-4 h-4" /> },
   { label: "Capture Decision", href: "/decisions/new", icon: <Zap className="w-4 h-4" /> },
-  { label: "Deep Snag", href: "/analyze", icon: <Target className="w-4 h-4" /> },
-  { label: "Post-Mortem", href: "/post-mortem/new", icon: <Search className="w-4 h-4" /> },
+  { label: "Deep Snag", href: "/analyze", icon: <Target className="w-4 h-4" />, feature: "deep_snag" as const },
+  { label: "Post-Mortem", href: "/post-mortem/new", icon: <Search className="w-4 h-4" />, feature: "post_mortem" as const },
 ];
 
 const navItems: NavItem[] = [
@@ -72,19 +83,24 @@ const navItems: NavItem[] = [
     href: "/frameworks", 
     icon: <Target className="w-4 h-4" />,
     children: [
-      { label: "Deep Snag", href: "/analyze", icon: <Target className="w-4 h-4" /> },
-      { label: "Post-Mortem", href: "/post-mortem", icon: <Search className="w-4 h-4" /> },
-      { label: "SWOT", href: "/frameworks/swot/new", icon: <BarChart3 className="w-4 h-4" /> },
-      { label: "Porter's 5 Forces", href: "/frameworks/porter/new", icon: <Target className="w-4 h-4" /> },
-      { label: "Pre-Mortem", href: "/frameworks/premortem/new", icon: <Lightbulb className="w-4 h-4" /> },
+      { label: "Deep Snag", href: "/analyze", icon: <Target className="w-4 h-4" />, feature: "deep_snag", showUsage: true },
+      { label: "Post-Mortem", href: "/post-mortem", icon: <Search className="w-4 h-4" />, feature: "post_mortem", showUsage: true },
+      { label: "SWOT", href: "/frameworks/swot/new", icon: <BarChart3 className="w-4 h-4" />, feature: "framework" },
+      { label: "Porter's 5 Forces", href: "/frameworks/porter/new", icon: <Target className="w-4 h-4" />, feature: "framework" },
+      { label: "Pre-Mortem", href: "/frameworks/premortem/new", icon: <Lightbulb className="w-4 h-4" />, feature: "framework" },
     ]
   },
-  { label: "Patterns & Insights", href: "/patterns", icon: <Lightbulb className="w-4 h-4" /> },
+  { label: "Visual Exports", href: "/visual-exports", icon: <Image className="w-4 h-4" />, feature: "visual_export" },
+  { label: "Document Upload", href: "/upload", icon: <FileUp className="w-4 h-4" />, feature: "document_upload" },
+  { label: "Patterns & Insights", href: "/patterns", icon: <Lightbulb className="w-4 h-4" />, feature: "patterns" },
+  { label: "Team Workspace", href: "/team", icon: <Users className="w-4 h-4" />, feature: "team_workspace" },
   { label: "Settings", href: "/settings", icon: <Settings className="w-4 h-4" /> },
 ];
 
 export function AppSidebar({ open, onClose, collapsed, onToggleCollapse }: AppSidebarProps) {
   const location = useLocation();
+  const { isFree, hasProFeatures, hasTeamFeatures } = useTierCheck();
+  const { usage } = useUsage();
 
   const isActive = (href: string) => {
     if (href === "/dashboard") return location.pathname === "/dashboard";
@@ -93,6 +109,26 @@ export function AppSidebar({ open, onClose, collapsed, onToggleCollapse }: AppSi
       return location.pathname === path && location.search.includes(query.split("=")[1]);
     }
     return location.pathname.startsWith(href);
+  };
+
+  const isFeatureLocked = (feature?: NavItem["feature"]) => {
+    if (!feature) return false;
+    
+    switch (feature) {
+      case "deep_snag":
+      case "post_mortem":
+      case "framework":
+        // These have trial usage for free users
+        return false; // We'll show usage instead
+      case "visual_export":
+      case "document_upload":
+      case "patterns":
+        return !hasProFeatures;
+      case "team_workspace":
+        return !hasTeamFeatures;
+      default:
+        return false;
+    }
   };
 
   return (
@@ -113,14 +149,12 @@ export function AppSidebar({ open, onClose, collapsed, onToggleCollapse }: AppSi
             </p>
             <div className="space-y-1">
               {quickActions.map((action) => (
-                <Link
+                <QuickActionItem
                   key={action.href}
-                  to={action.href}
-                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-foreground rounded-lg hover:bg-muted transition-colors"
-                >
-                  <span className="text-primary">{action.icon}</span>
-                  {action.label}
-                </Link>
+                  action={action}
+                  isFree={isFree}
+                  usage={usage}
+                />
               ))}
             </div>
           </div>
@@ -140,6 +174,9 @@ export function AppSidebar({ open, onClose, collapsed, onToggleCollapse }: AppSi
                 item={item}
                 collapsed={collapsed}
                 isActive={isActive}
+                isLocked={isFeatureLocked(item.feature)}
+                isFree={isFree}
+                usage={usage}
               />
             ))}
           </div>
@@ -191,15 +228,13 @@ export function AppSidebar({ open, onClose, collapsed, onToggleCollapse }: AppSi
           </p>
           <div className="space-y-1">
             {quickActions.map((action) => (
-              <Link
+              <QuickActionItem
                 key={action.href}
-                to={action.href}
-                onClick={onClose}
-                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-foreground rounded-lg hover:bg-muted transition-colors"
-              >
-                <span className="text-primary">{action.icon}</span>
-                {action.label}
-              </Link>
+                action={action}
+                isFree={isFree}
+                usage={usage}
+                onNavigate={onClose}
+              />
             ))}
           </div>
         </div>
@@ -216,6 +251,9 @@ export function AppSidebar({ open, onClose, collapsed, onToggleCollapse }: AppSi
                 item={item}
                 collapsed={false}
                 isActive={isActive}
+                isLocked={isFeatureLocked(item.feature)}
+                isFree={isFree}
+                usage={usage}
                 onNavigate={onClose}
               />
             ))}
@@ -226,54 +264,165 @@ export function AppSidebar({ open, onClose, collapsed, onToggleCollapse }: AppSi
   );
 }
 
+function QuickActionItem({ 
+  action, 
+  isFree, 
+  usage,
+  onNavigate 
+}: { 
+  action: typeof quickActions[0]; 
+  isFree: boolean; 
+  usage: any;
+  onNavigate?: () => void;
+}) {
+  const [showUpgrade, setShowUpgrade] = useState(false);
+
+  // Check if this is a trial feature that's been used up
+  const isTrialUsed = () => {
+    if (!action.feature || !isFree) return false;
+    // For free tier, we check lifetime usage from profile (handled by feature access check)
+    return false; // Let the actual page handle the check
+  };
+
+  return (
+    <>
+      <Link
+        to={action.href}
+        onClick={onNavigate}
+        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-foreground rounded-lg hover:bg-muted transition-colors"
+      >
+        <span className="text-primary">{action.icon}</span>
+        {action.label}
+      </Link>
+
+      {action.feature && (
+        <FeatureUpgradeModal
+          open={showUpgrade}
+          onOpenChange={setShowUpgrade}
+          feature={action.feature}
+          reason="trial_used"
+        />
+      )}
+    </>
+  );
+}
+
 function NavItemComponent({ 
   item, 
   collapsed, 
   isActive,
+  isLocked,
+  isFree,
+  usage,
   onNavigate
 }: { 
   item: NavItem; 
   collapsed: boolean; 
   isActive: (href: string) => boolean;
+  isLocked: boolean;
+  isFree: boolean;
+  usage: any;
   onNavigate?: () => void;
 }) {
+  const [showUpgrade, setShowUpgrade] = useState(false);
   const hasChildren = item.children && item.children.length > 0;
   const isItemActive = isActive(item.href);
   const hasActiveChild = hasChildren && item.children?.some(child => isActive(child.href));
 
+  const getUsageForFeature = (feature?: NavItem["feature"]) => {
+    if (!feature || !usage) return null;
+    
+    switch (feature) {
+      case "deep_snag":
+        return { used: usage.analyses_used || 0, limit: usage.analyses_limit };
+      case "post_mortem":
+        return { used: usage.post_mortems_used || 0, limit: usage.post_mortems_limit || 0 };
+      case "document_upload":
+        return { used: usage.documents_used || 0, limit: usage.documents_limit };
+      default:
+        return null;
+    }
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (isLocked) {
+      e.preventDefault();
+      setShowUpgrade(true);
+    } else {
+      onNavigate?.();
+    }
+  };
+
   if (collapsed) {
     return (
-      <Link
-        to={item.href}
-        onClick={onNavigate}
-        className={cn(
-          "flex items-center justify-center p-2 rounded-lg transition-colors",
-          isItemActive || hasActiveChild
-            ? "bg-primary/10 text-primary"
-            : "text-muted-foreground hover:text-foreground hover:bg-muted"
+      <>
+        <Link
+          to={isLocked ? "#" : item.href}
+          onClick={handleClick}
+          className={cn(
+            "flex items-center justify-center p-2 rounded-lg transition-colors relative",
+            isItemActive || hasActiveChild
+              ? "bg-primary/10 text-primary"
+              : "text-muted-foreground hover:text-foreground hover:bg-muted",
+            isLocked && "opacity-60"
+          )}
+          title={item.label}
+        >
+          {item.icon}
+          {isLocked && (
+            <Lock className="w-2.5 h-2.5 absolute -top-0.5 -right-0.5 text-muted-foreground" />
+          )}
+        </Link>
+
+        {item.feature && (
+          <FeatureUpgradeModal
+            open={showUpgrade}
+            onOpenChange={setShowUpgrade}
+            feature={item.feature}
+            reason={isLocked ? "pro_feature" : undefined}
+          />
         )}
-        title={item.label}
-      >
-        {item.icon}
-      </Link>
+      </>
     );
   }
 
   if (!hasChildren) {
+    const usageInfo = getUsageForFeature(item.feature);
+
     return (
-      <Link
-        to={item.href}
-        onClick={onNavigate}
-        className={cn(
-          "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors",
-          isItemActive
-            ? "bg-primary/10 text-primary"
-            : "text-muted-foreground hover:text-foreground hover:bg-muted"
+      <>
+        <Link
+          to={isLocked ? "#" : item.href}
+          onClick={handleClick}
+          className={cn(
+            "flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg transition-colors",
+            isItemActive
+              ? "bg-primary/10 text-primary"
+              : "text-muted-foreground hover:text-foreground hover:bg-muted",
+            isLocked && "opacity-60"
+          )}
+        >
+          <span className="flex items-center gap-2">
+            {item.icon}
+            {item.label}
+          </span>
+          <span className="flex items-center gap-1.5">
+            {item.showUsage && usageInfo && !isFree && (
+              <UsageBadge used={usageInfo.used} limit={usageInfo.limit} />
+            )}
+            {isLocked && <Lock className="w-3.5 h-3.5 text-muted-foreground" />}
+          </span>
+        </Link>
+
+        {item.feature && (
+          <FeatureUpgradeModal
+            open={showUpgrade}
+            onOpenChange={setShowUpgrade}
+            feature={item.feature}
+            reason={isLocked ? "pro_feature" : undefined}
+          />
         )}
-      >
-        {item.icon}
-        {item.label}
-      </Link>
+      </>
     );
   }
 
@@ -294,20 +443,16 @@ function NavItemComponent({
       </Link>
       <div className="pl-6 space-y-1">
         {item.children?.map((child) => (
-          <Link
+          <NavItemComponent
             key={child.href}
-            to={child.href}
-            onClick={onNavigate}
-            className={cn(
-              "flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-colors",
-              isActive(child.href)
-                ? "text-primary font-medium"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            {child.icon}
-            {child.label}
-          </Link>
+            item={child}
+            collapsed={false}
+            isActive={isActive}
+            isLocked={false} // Children inherit from parent or check individually
+            isFree={isFree}
+            usage={usage}
+            onNavigate={onNavigate}
+          />
         ))}
       </div>
     </div>
