@@ -1,112 +1,178 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Settings, ChevronRight, FileText } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { SnagLogo } from "@/components/SnagLogo";
+import { ArrowLeft, Plus, Trash2, Clock, LogOut } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import type { Json } from "@/integrations/supabase/types";
 
-interface Analysis {
+interface SavedAnalysis {
   id: string;
-  input: string;
-  createdAt: Date;
+  title: string | null;
+  original_input: string;
+  result: Json;
+  created_at: string;
 }
-
-// Mock data for demo
-const mockAnalyses: Analysis[] = [
-  {
-    id: "1",
-    input: "Launch a SaaS product for small business accounting by Q2 with a team of 3 engineers",
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2), // 2 days ago
-  },
-  {
-    id: "2",
-    input: "Expand to European market before end of year with existing product",
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5), // 5 days ago
-  },
-  {
-    id: "3",
-    input: "Hire 5 sales reps and hit $1M ARR in next 6 months",
-    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7), // 7 days ago
-  },
-];
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [analyses] = useState<Analysis[]>(mockAnalyses);
+  const { user, profile, signOut, isLoading: authLoading } = useAuth();
+  const { toast } = useToast();
+  const [analyses, setAnalyses] = useState<SavedAnalysis[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const truncateText = (text: string, maxLength: number = 80) => {
-    if (text.length <= maxLength) return text;
-    return text.slice(0, maxLength).trim() + "...";
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate("/login");
+      return;
+    }
+
+    if (user) {
+      fetchAnalyses();
+    }
+  }, [user, authLoading, navigate]);
+
+  const fetchAnalyses = async () => {
+    const { data, error } = await supabase
+      .from("analyses")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching analyses:", error);
+      toast({
+        title: "Error loading analyses",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      setAnalyses(data || []);
+    }
+    setIsLoading(false);
   };
 
+  const deleteAnalysis = async (id: string) => {
+    const { error } = await supabase.from("analyses").delete().eq("id", id);
+
+    if (error) {
+      toast({
+        title: "Error deleting analysis",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      setAnalyses((prev) => prev.filter((a) => a.id !== id));
+      toast({
+        title: "Analysis deleted",
+      });
+    }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
+
+  if (authLoading || isLoading) {
+    return (
+      <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center">
+        <div className="w-8 h-8 border-3 border-[#E5E5E5] border-t-[#0047AB] rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-[#FAFAFA] flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-lg border-b border-border">
-        <div className="flex items-center justify-between p-4 safe-top">
-          <SnagLogo size="md" />
-          <Button variant="ghost" size="icon" onClick={() => navigate("/settings")}>
-            <Settings className="w-5 h-5" />
-          </Button>
+      <header className="sticky top-0 z-40 bg-white border-b border-[#E5E5E5]">
+        <div className="flex items-center justify-between px-4 py-3">
+          <button
+            onClick={() => navigate("/")}
+            className="p-2 -ml-2 text-[#666666] hover:text-[#1A1A1A] transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <span className="text-[18px] font-bold text-[#1A1A1A]">
+            My Analyses
+          </span>
+          <button
+            onClick={handleSignOut}
+            className="p-2 -mr-2 text-[#666666] hover:text-[#1A1A1A] transition-colors"
+            title="Sign out"
+          >
+            <LogOut className="w-5 h-5" />
+          </button>
         </div>
       </header>
 
-      {/* Main content */}
-      <main className="flex-1 flex flex-col p-4">
-        {/* New Analysis CTA */}
+      {/* Content */}
+      <main className="flex-1 px-4 py-4 max-w-[680px] mx-auto w-full">
+        {/* User info */}
+        <div className="bg-white border border-[#E5E5E5] rounded-lg p-4 mb-4">
+          <p className="text-[15px] text-[#333333]">
+            Welcome, <span className="font-medium">{profile?.display_name || user?.email}</span>
+          </p>
+          <p className="text-[13px] text-[#666666] mt-1">
+            {analyses.length} saved {analyses.length === 1 ? "analysis" : "analyses"}
+          </p>
+        </div>
+
+        {/* New Analysis button */}
         <Button
-          variant="hero"
-          size="xl"
-          className="w-full mb-6"
           onClick={() => navigate("/analyze")}
+          className="w-full bg-[#0047AB] hover:bg-[#003A8C] text-white font-semibold py-3 rounded-lg mb-6 gap-2"
         >
           <Plus className="w-5 h-5" />
           New Analysis
         </Button>
 
-        {/* Usage indicator */}
-        <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 mb-6">
-          <p className="text-sm text-primary font-medium">
-            Pro Plan • Unlimited analyses
-          </p>
-        </div>
-
-        {/* Past analyses */}
-        <div>
-          <h2 className="text-lg font-semibold text-foreground mb-4">Past Analyses</h2>
-
-          {analyses.length === 0 ? (
-            <div className="text-center py-12">
-              <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">No analyses yet</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Start by analyzing your first plan
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {analyses.map((analysis) => (
-                <button
-                  key={analysis.id}
-                  onClick={() => navigate(`/analysis/${analysis.id}`)}
-                  className="w-full analysis-card hover:bg-muted/50 transition-colors text-left group"
-                >
-                  <div className="flex items-start justify-between gap-3 p-4">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-foreground font-medium leading-snug">
-                        {truncateText(analysis.input)}
-                      </p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {format(analysis.createdAt, "MMM d, yyyy")}
-                      </p>
+        {/* Analyses list */}
+        {analyses.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-[15px] text-[#666666] mb-2">
+              No saved analyses yet
+            </p>
+            <p className="text-[13px] text-[#999999]">
+              Start a new analysis to see it here
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {analyses.map((analysis) => (
+              <div
+                key={analysis.id}
+                className="bg-white border border-[#E5E5E5] rounded-lg p-4"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <button
+                    onClick={() =>
+                      navigate(`/analysis/${analysis.id}`, {
+                        state: { analysis },
+                      })
+                    }
+                    className="flex-1 text-left"
+                  >
+                    <p className="text-[15px] font-medium text-[#333333] line-clamp-2">
+                      {analysis.title || analysis.original_input.slice(0, 100)}
+                    </p>
+                    <div className="flex items-center gap-1 mt-2 text-[12px] text-[#999999]">
+                      <Clock className="w-3.5 h-3.5" />
+                      {format(new Date(analysis.created_at), "MMM d, yyyy")}
                     </div>
-                    <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0 mt-1" />
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+                  </button>
+                  <button
+                    onClick={() => deleteAnalysis(analysis.id)}
+                    className="p-2 text-[#999999] hover:text-[#D64045] transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );
