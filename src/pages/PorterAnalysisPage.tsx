@@ -10,10 +10,11 @@ import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { 
   ArrowLeft, Save, Sparkles, Users, Building, 
-  Package, ShoppingCart, Swords 
+  Package, ShoppingCart, Swords, FileText
 } from "lucide-react";
 import { toast } from "sonner";
 import { Json } from "@/integrations/supabase/types";
+import { exportFrameworkPDF, type FrameworkData } from "@/lib/pdfExport";
 
 interface ForceData {
   rating: number;
@@ -40,7 +41,7 @@ const defaultForce: ForceData = { rating: 50, notes: "", factors: [""] };
 export default function PorterAnalysisPage() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, profile } = useAuth();
   const isNew = id === "new";
 
   const [title, setTitle] = useState("");
@@ -173,6 +174,26 @@ export default function PorterAnalysisPage() {
     toast.success("AI analysis complete");
   };
 
+  const handleExportPDF = () => {
+    const pdfData: FrameworkData = {
+      title: title || "Porter's Five Forces",
+      frameworkType: "porter",
+      inputs: data as unknown as Record<string, unknown>,
+      aiEnhancement: aiEnhancement ? {
+        overallAssessment: aiEnhancement.overallAssessment,
+        recommendations: aiEnhancement.recommendations,
+        riskLevel: aiEnhancement.riskLevel,
+      } : undefined,
+    };
+
+    try {
+      exportFrameworkPDF(pdfData, profile?.display_name || undefined);
+      toast.success("PDF exported successfully");
+    } catch (error) {
+      toast.error("Failed to export PDF");
+    }
+  };
+
   if (authLoading || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -213,6 +234,12 @@ export default function PorterAnalysisPage() {
           <Sparkles className="h-4 w-4 mr-2" />
           {isEnhancing ? "Analyzing..." : "AI Enhance"}
         </Button>
+        {!isNew && (
+          <Button variant="outline" onClick={handleExportPDF}>
+            <FileText className="h-4 w-4 mr-2" />
+            Export PDF
+          </Button>
+        )}
         <Button onClick={handleSave} disabled={isSaving}>
           <Save className="h-4 w-4 mr-2" />
           {isSaving ? "Saving..." : "Save"}

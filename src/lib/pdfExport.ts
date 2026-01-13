@@ -478,6 +478,95 @@ export function exportFrameworkPDF(data: FrameworkData, author?: string): void {
     });
 
     yPos += boxHeight * 2 + 30;
+  } else if (data.frameworkType === "porter") {
+    // Porter's Five Forces
+    const porterData = data.inputs as {
+      rivalry?: { rating: number; notes: string };
+      newEntrants?: { rating: number; notes: string };
+      substitutes?: { rating: number; notes: string };
+      buyerPower?: { rating: number; notes: string };
+      supplierPower?: { rating: number; notes: string };
+    };
+
+    const forces = [
+      { key: "rivalry", label: "Competitive Rivalry", color: COLORS.danger },
+      { key: "newEntrants", label: "Threat of New Entrants", color: [128, 0, 128] as [number, number, number] },
+      { key: "substitutes", label: "Threat of Substitutes", color: COLORS.accent },
+      { key: "buyerPower", label: "Buyer Power", color: COLORS.primary },
+      { key: "supplierPower", label: "Supplier Power", color: COLORS.success },
+    ];
+
+    yPos = addSectionHeader(doc, "Competitive Forces Analysis", yPos);
+
+    // Create table data
+    const tableData = forces.map((force) => {
+      const forceData = porterData[force.key as keyof typeof porterData];
+      const rating = forceData?.rating || 0;
+      const intensity = rating > 66 ? "High" : rating > 33 ? "Medium" : "Low";
+      return [force.label, `${rating}%`, intensity, forceData?.notes || "-"];
+    });
+
+    autoTable(doc, {
+      startY: yPos,
+      head: [["Force", "Rating", "Intensity", "Notes"]],
+      body: tableData,
+      theme: "striped",
+      headStyles: {
+        fillColor: COLORS.primary,
+        fontSize: 9,
+      },
+      bodyStyles: {
+        fontSize: 8,
+      },
+      columnStyles: {
+        0: { cellWidth: 45 },
+        1: { cellWidth: 20, halign: "center" },
+        2: { cellWidth: 25, halign: "center" },
+        3: { cellWidth: "auto" },
+      },
+      margin: { left: margin, right: margin },
+    });
+
+    yPos = (doc as any).lastAutoTable.finalY + 15;
+
+    // Visual gauge for each force
+    yPos = addSectionHeader(doc, "Force Intensity Visualization", yPos);
+    
+    forces.forEach((force, index) => {
+      const forceData = porterData[force.key as keyof typeof porterData];
+      const rating = forceData?.rating || 0;
+      
+      if (yPos > 250) {
+        doc.addPage();
+        yPos = 30;
+      }
+
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(...COLORS.secondary);
+      doc.text(force.label, margin, yPos);
+      
+      // Draw gauge background
+      const gaugeWidth = 100;
+      const gaugeHeight = 6;
+      const gaugeX = margin + 55;
+      
+      doc.setFillColor(...COLORS.lightGray);
+      doc.roundedRect(gaugeX, yPos - 4, gaugeWidth, gaugeHeight, 2, 2, "F");
+      
+      // Draw gauge fill
+      doc.setFillColor(...force.color);
+      doc.roundedRect(gaugeX, yPos - 4, (rating / 100) * gaugeWidth, gaugeHeight, 2, 2, "F");
+      
+      // Draw rating text
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "normal");
+      doc.text(`${rating}%`, gaugeX + gaugeWidth + 5, yPos);
+      
+      yPos += 12;
+    });
+
+    yPos += 10;
   }
 
   // AI Enhancement if available
