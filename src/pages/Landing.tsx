@@ -1,10 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Menu, X, FileText, Brain, Shield, Check, Plus, Minus, ArrowRight, Building, ChevronDown, XCircle } from "lucide-react";
+import { 
+  Menu, X, Check, Plus, Minus, ArrowRight, Building, ChevronDown,
+  BookOpen, Target, Search, BarChart3, Flame, Briefcase,
+  Sun, Zap, Calendar, TrendingUp, Users, Rocket, Home
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
-import AnimatedScorecard from "@/components/landing/AnimatedScorecard";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import UsageLimitsModal from "@/components/landing/UsageLimitsModal";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -12,21 +16,21 @@ export default function Landing() {
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [planText, setPlanText] = useState("");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [isAnnual, setIsAnnual] = useState(false);
   const [limitsModalOpen, setLimitsModalOpen] = useState(false);
 
-  const handleAnalyze = () => {
-    if (planText.trim().length > 10) {
-      sessionStorage.setItem("snag_input", planText);
-      navigate("/analyze");
-    }
-  };
-
   const scrollToSection = (id: string) => {
     setMobileMenuOpen(false);
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleGetStarted = () => {
+    if (user) {
+      navigate("/dashboard");
+    } else {
+      navigate("/login");
+    }
   };
 
   return (
@@ -35,56 +39,49 @@ export default function Landing() {
       <nav className="sticky top-0 z-50 bg-background border-b border-border">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            {/* Logo */}
             <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold text-cobalt">Snag</span>
+              <span className="text-2xl font-bold text-primary">Snag</span>
             </div>
 
-            {/* Desktop Nav */}
             <div className="hidden md:flex items-center gap-6">
-              <button onClick={() => scrollToSection("how-it-works")} className="text-small text-foreground hover:text-primary transition-colors">
+              <button onClick={() => scrollToSection("features")} className="text-sm text-foreground hover:text-primary transition-colors">
+                Features
+              </button>
+              <button onClick={() => scrollToSection("how-it-works")} className="text-sm text-foreground hover:text-primary transition-colors">
                 How it Works
               </button>
-              <button onClick={() => scrollToSection("pricing")} className="text-small text-foreground hover:text-primary transition-colors">
+              <button onClick={() => scrollToSection("pricing")} className="text-sm text-foreground hover:text-primary transition-colors">
                 Pricing
               </button>
               {!authLoading && user ? (
-                <button onClick={() => navigate("/dashboard")} className="text-small font-medium text-cobalt hover:text-cobalt/80 transition-colors">
+                <Button onClick={() => navigate("/dashboard")} variant="default" size="sm">
                   Dashboard
-                </button>
+                </Button>
               ) : (
-                <button onClick={() => navigate("/login")} className="text-small text-foreground hover:text-primary transition-colors">
+                <Button onClick={() => navigate("/login")} variant="outline" size="sm">
                   Login
-                </button>
+                </Button>
               )}
             </div>
 
-            {/* Mobile Menu Button */}
-            <button 
-              className="md:hidden p-2"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
+            <button className="md:hidden p-2" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden bg-background border-t border-border py-4">
             <div className="container mx-auto px-4 flex flex-col gap-4">
-              <button onClick={() => scrollToSection("how-it-works")} className="text-left text-body text-foreground py-2">
-                How it Works
-              </button>
-              <button onClick={() => scrollToSection("pricing")} className="text-left text-body text-foreground py-2">
-                Pricing
-              </button>
+              <button onClick={() => scrollToSection("features")} className="text-left py-2">Features</button>
+              <button onClick={() => scrollToSection("how-it-works")} className="text-left py-2">How it Works</button>
+              <button onClick={() => scrollToSection("pricing")} className="text-left py-2">Pricing</button>
               {!authLoading && user ? (
-                <button onClick={() => { setMobileMenuOpen(false); navigate("/dashboard"); }} className="text-left text-body font-medium text-cobalt py-2">
+                <button onClick={() => { setMobileMenuOpen(false); navigate("/dashboard"); }} className="text-left font-medium text-primary py-2">
                   Dashboard
                 </button>
               ) : (
-                <button onClick={() => { setMobileMenuOpen(false); navigate("/login"); }} className="text-left text-body text-foreground py-2">
+                <button onClick={() => { setMobileMenuOpen(false); navigate("/login"); }} className="text-left py-2">
                   Login
                 </button>
               )}
@@ -94,177 +91,460 @@ export default function Landing() {
       </nav>
 
       {/* Hero Section */}
-      <section className="min-h-[calc(100vh-64px)] flex flex-col justify-center py-12 md:py-20">
-        <div className="container mx-auto px-4 max-w-2xl">
-          <h1 className="text-display-mobile md:text-display text-center mb-6">
-            <span className="gradient-text">Find the snag before it finds you.</span>
+      <section className="py-16 md:py-24">
+        <div className="container mx-auto px-4 max-w-3xl text-center">
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            <span className="gradient-text">Think better. Decide better. Learn from everything.</span>
           </h1>
           
-          <p className="text-body-lg text-muted-foreground text-center mb-8 max-w-xl mx-auto">
-            Stress-test any plan in 2 minutes. Surface blind spots, failure modes, and warning signs you'd never think of alone.
+          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+            Snag is your decision journal — capture daily thoughts, stress-test big choices before you commit, extract wisdom from every outcome.
           </p>
 
-          {/* Input */}
-          <div className="space-y-4">
-            <textarea
-              value={planText}
-              onChange={(e) => setPlanText(e.target.value)}
-              placeholder="Describe your plan or decision..."
-              rows={4}
-              className="w-full bg-background border border-border rounded-lg px-4 py-4 text-body text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-cobalt transition-colors resize-none"
-            />
-            
-            <Button 
-              onClick={handleAnalyze}
-              disabled={planText.trim().length < 10}
-              className="w-full bg-crimson hover:bg-crimson-hover text-white font-semibold py-4 rounded-lg transition-colors"
-            >
-              Analyze My Plan — Free
+          {/* Value proposition pills */}
+          <div className="flex flex-wrap justify-center gap-3 mb-8">
+            {[
+              { icon: "📓", label: "Daily Journaling" },
+              { icon: "🎯", label: "Pre-Mortem Analysis" },
+              { icon: "🔍", label: "Post-Mortem Learning" },
+              { icon: "📊", label: "Visual Frameworks" }
+            ].map((pill, i) => (
+              <span key={i} className="inline-flex items-center gap-2 bg-muted text-foreground text-sm px-4 py-2 rounded-full">
+                <span>{pill.icon}</span>
+                <span>{pill.label}</span>
+              </span>
+            ))}
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+            <Button onClick={handleGetStarted} className="bg-secondary hover:bg-secondary/90 text-secondary-foreground px-8 py-6 text-base font-semibold">
+              Start Your Journal — Free
             </Button>
-            
-            <p className="text-small text-muted-foreground text-center">
-              No signup required. 3 free analyses.
+            <button onClick={() => scrollToSection("how-it-works")} className="text-primary font-medium hover:underline">
+              See how it works ↓
+            </button>
+          </div>
+
+          <p className="text-sm text-muted-foreground">
+            Join 10,000+ people thinking more clearly
+          </p>
+        </div>
+      </section>
+
+      {/* What is Snag? Section */}
+      <section className="py-16 md:py-20 bg-muted">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+            <span className="gradient-text">One place for all your thinking</span>
+          </h2>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {[
+              {
+                icon: BookOpen,
+                color: "text-primary",
+                bgColor: "bg-primary/10",
+                title: "Capture",
+                description: "Journal daily. Track moods. Build habits. Log decisions as they happen. Your thoughts, organized."
+              },
+              {
+                icon: Target,
+                color: "text-secondary",
+                bgColor: "bg-secondary/10",
+                title: "Analyze",
+                description: "Stress-test decisions before you commit. Extract lessons after outcomes. Use proven frameworks."
+              },
+              {
+                icon: TrendingUp,
+                color: "text-success",
+                bgColor: "bg-success/10",
+                title: "Learn",
+                description: "Track what actually happened. See your patterns. Build personal decision intelligence over time."
+              }
+            ].map((item, i) => (
+              <div key={i} className="text-center">
+                <div className={`w-16 h-16 ${item.bgColor} rounded-full flex items-center justify-center mx-auto mb-4`}>
+                  <item.icon className={`w-8 h-8 ${item.color}`} />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
+                <p className="text-muted-foreground">{item.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section id="features" className="py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
+            <span className="gradient-text">Powerful alone. Unstoppable together.</span>
+          </h2>
+          <p className="text-lg text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
+            Everything you need to think better
+          </p>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+            {[
+              {
+                icon: BookOpen,
+                color: "bg-primary",
+                title: "Daily Journal",
+                subtitle: "Your private thinking space",
+                features: ["Free writing & prompts", "Gratitude practice", "Manifestation & goals", "Mood tracking", "Morning & evening rituals"],
+                badge: "Build the habit",
+                badgeColor: "bg-primary/10 text-primary"
+              },
+              {
+                icon: Flame,
+                color: "bg-warning",
+                title: "Habit Tracker",
+                subtitle: "Streaks that stick",
+                features: ["Daily habit tracking", "Streak counting", "Visual progress", "Reminders", "Habit-to-journal connection"],
+                badge: "Stay consistent",
+                badgeColor: "bg-warning/10 text-warning"
+              },
+              {
+                icon: Target,
+                color: "bg-secondary",
+                title: "Pre-Mortem Analysis",
+                subtitle: "Find flaws before reality does",
+                features: ["Blind spot detection", "Failure mode mapping", "Warning signals", "Kill criteria", "The unasked question"],
+                badge: "Prevent regret",
+                badgeColor: "bg-secondary/10 text-secondary"
+              },
+              {
+                icon: Search,
+                color: "bg-[hsl(271,81%,56%)]",
+                title: "Post-Mortem Analysis",
+                subtitle: "Learn from everything",
+                features: ["Root cause analysis (5 Whys)", "Success & failure factors", "Lessons extracted", "Action items", "The uncomfortable truth"],
+                badge: "Build wisdom",
+                badgeColor: "bg-[hsl(271,81%,56%)]/10 text-[hsl(271,81%,56%)]"
+              },
+              {
+                icon: BarChart3,
+                color: "bg-success",
+                title: "Visual Frameworks",
+                subtitle: "See your thinking",
+                features: ["Risk matrices", "Fishbone diagrams", "Decision trees", "Five Whys ladders", "Export as PNG/PDF"],
+                badge: "Share insights",
+                badgeColor: "bg-success/10 text-success"
+              },
+              {
+                icon: Briefcase,
+                color: "bg-primary",
+                title: "Business Frameworks",
+                subtitle: "Consulting-grade tools",
+                features: ["Porter's Five Forces", "SWOT Analysis", "MEDDPICC (Sales)", "BANT (Sales)", "Decision matrices"],
+                badge: "Professional grade",
+                badgeColor: "bg-primary/10 text-primary"
+              }
+            ].map((card, i) => (
+              <div key={i} className="bg-card border border-border rounded-2xl p-7 hover:shadow-lg transition-shadow relative">
+                <span className={`absolute top-4 right-4 text-xs font-medium px-3 py-1 rounded-full ${card.badgeColor}`}>
+                  {card.badge}
+                </span>
+                <div className={`w-12 h-12 ${card.color} rounded-xl flex items-center justify-center mb-4`}>
+                  <card.icon className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold mb-1">{card.title}</h3>
+                <p className="text-sm text-muted-foreground mb-4">{card.subtitle}</p>
+                <ul className="space-y-2">
+                  {card.features.map((feature, j) => (
+                    <li key={j} className="flex items-center gap-2 text-sm text-foreground">
+                      <Check className="w-4 h-4 text-success flex-shrink-0" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section id="how-it-works" className="py-16 md:py-20 bg-muted">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+            <span className="gradient-text">How Snag works</span>
+          </h2>
+
+          <div className="max-w-4xl mx-auto">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[
+                { time: "Start your day", icon: Sun, color: "bg-warning", title: "Capture intentions", text: "Journal your thoughts. Set your mood. Review your habits. Capture any decisions on your mind." },
+                { time: "As decisions arise", icon: Zap, color: "bg-primary", title: "Log & reflect", text: "Quick-capture decisions in seconds. Get instant AI reflection. Tag stakes and deadlines." },
+                { time: "When stakes are high", icon: Target, color: "bg-secondary", title: "Run a Deep Snag", text: "Full pre-mortem analysis. Surface blind spots, failure modes, warning signals. Know what could go wrong before you commit." },
+                { time: "When things conclude", icon: Search, color: "bg-[hsl(271,81%,56%)]", title: "Run a Post-Mortem", text: "Analyze what happened. Find root causes. Extract lessons. Generate visual frameworks to capture and share insights." },
+                { time: "Every week", icon: Calendar, color: "bg-primary", title: "Review & reflect", text: "See your patterns. Check pending outcomes. Understand your decision-making style." },
+                { time: "Month after month", icon: TrendingUp, color: "bg-success", title: "Build intelligence", text: "Your personal decision database grows. Snag learns your patterns. Outcomes teach you what actually works." }
+              ].map((step, i) => (
+                <div key={i} className="bg-card rounded-xl p-6 border border-border">
+                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{step.time}</span>
+                  <div className={`w-10 h-10 ${step.color} rounded-lg flex items-center justify-center my-3`}>
+                    <step.icon className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="font-semibold mb-2">{step.title}</h3>
+                  <p className="text-sm text-muted-foreground">{step.text}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* The Difference Section */}
+      <section className="py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
+            <span className="gradient-text">The difference</span>
+          </h2>
+          <p className="text-lg text-muted-foreground text-center mb-12 max-w-xl mx-auto">
+            AI chatbots forget. Snag remembers — and learns.
+          </p>
+
+          <div className="max-w-4xl mx-auto overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="text-left py-4 px-4 font-semibold">Aspect</th>
+                  <th className="text-center py-4 px-4 font-semibold bg-muted">ChatGPT / Claude</th>
+                  <th className="text-center py-4 px-4 font-semibold border-l-4 border-primary">Snag</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { aspect: "Memory", chatgpt: "Stores facts about you", snag: "Stores every decision with full context" },
+                  { aspect: "Follow-up", chatgpt: "You must ask", snag: "Prompts you in 30/60/90 days" },
+                  { aspect: "Outcomes", chatgpt: "Doesn't know what happened", snag: "Tracks what actually occurred" },
+                  { aspect: "Patterns", chatgpt: "Manual (you ask)", snag: "Automatic monthly reports" },
+                  { aspect: "Visual outputs", chatgpt: "Limited", snag: "Professional frameworks, exportable" },
+                  { aspect: "Business tools", chatgpt: "Explain if asked", snag: "Pre-built guided templates" },
+                  { aspect: "Accountability", chatgpt: "None", snag: "Streaks, habits, reminders" }
+                ].map((row, i) => (
+                  <tr key={i} className="border-b border-border/50">
+                    <td className="py-3 px-4 font-medium">{row.aspect}</td>
+                    <td className="py-3 px-4 text-center text-muted-foreground bg-muted">{row.chatgpt}</td>
+                    <td className="py-3 px-4 text-center border-l-4 border-primary">{row.snag}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="max-w-3xl mx-auto mt-8 bg-primary/5 border-l-4 border-primary rounded-lg p-5">
+            <p className="text-foreground">
+              After 6 months with Snag, you have a personal decision intelligence system built on YOUR history, YOUR patterns, YOUR outcomes. That's not something you can export to ChatGPT.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Animated Scorecard */}
-      <AnimatedScorecard />
-
-      {/* Trust Bar */}
-      <section className="bg-muted py-6">
+      {/* Use Cases Section */}
+      <section className="py-16 md:py-20 bg-muted">
         <div className="container mx-auto px-4">
-          <p className="text-small font-medium text-muted-foreground text-center">
-            Join 500+ professionals making smarter decisions
-          </p>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section id="how-it-works" className="section-padding">
-        <div className="container mx-auto px-4">
-          <h2 className="text-h1 text-center mb-12">
-            <span className="gradient-text">How Snag Works</span>
-          </h2>
-
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {[
-              {
-                icon: FileText,
-                title: "Describe your plan",
-                description: "Type any decision — career move, product launch, investment, hire."
-              },
-              {
-                icon: Brain,
-                title: "Get instant analysis",
-                description: "Snag identifies blind spots, failure modes, warning signals, and the question you haven't asked."
-              },
-              {
-                icon: Shield,
-                title: "Decide with confidence",
-                description: "Move forward knowing you've stress-tested what could go wrong — before it does."
-              }
-            ].map((step, i) => (
-              <div key={i} className="bg-card rounded-xl p-8 shadow-card hover:shadow-card-hover transition-shadow">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <step.icon className="w-6 h-6 text-cobalt" />
-                </div>
-                <h3 className="text-h3 text-foreground mb-2">{step.title}</h3>
-                <p className="text-body text-muted-foreground">{step.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Use Cases */}
-      <section className="section-padding bg-muted">
-        <div className="container mx-auto px-4">
-          <h2 className="text-h1 text-center mb-12">
-            <span className="gradient-text">What will you Snag?</span>
-          </h2>
-
-          <div className="grid sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
-            {[
-              { quote: "Should I leave my job for this startup offer?", label: "Career Decisions" },
-              { quote: "Is this product ready to launch?", label: "Product Launches" },
-              { quote: "Should we expand into this new market?", label: "Business Strategy" },
-              { quote: "Is this hire the right call?", label: "Team Decisions" }
-            ].map((item, i) => (
-              <div key={i} className="bg-background border border-border rounded-xl p-6">
-                <p className="text-body-lg font-medium text-foreground mb-3">"{item.quote}"</p>
-                <span className="text-micro uppercase text-cobalt font-medium">{item.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Sample Output */}
-      <section className="section-padding">
-        <div className="container mx-auto px-4">
-          <h2 className="text-h1 text-center mb-12">
-            <span className="gradient-text">See Snag in Action</span>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+            <span className="gradient-text">Built for thinkers, makers, and leaders</span>
           </h2>
 
           <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            {/* Input Card */}
-            <div className="bg-card rounded-xl p-6">
-              <p className="text-micro uppercase text-muted-foreground font-semibold mb-4">THE PLAN</p>
-              <p className="text-body text-foreground">
-                I'm considering leaving my senior PM role to join an early-stage AI startup as co-founder with 8% equity and no salary for 6 months.
-              </p>
-            </div>
-
-            {/* Output Card */}
-            <div className="bg-background border border-border rounded-xl p-6">
-              <p className="text-micro uppercase text-cobalt font-semibold mb-4">SNAG ANALYSIS</p>
-              <div className="space-y-3">
-                <div>
-                  <span className="text-micro uppercase text-crimson font-semibold">BLIND SPOTS</span>
-                  <p className="text-small text-foreground mt-1">Opportunity cost of current career trajectory...</p>
+            {[
+              {
+                icon: Users,
+                title: "Career Decisions",
+                examples: ["Should I take this job offer?", "Is it time to ask for a raise?", "Should I change industries?"],
+                quote: "I snagged my job change. Avoided a disaster.",
+                attribution: "— Product Manager, Tech"
+              },
+              {
+                icon: Rocket,
+                title: "Startup Decisions",
+                examples: ["Should I raise this round?", "Is this the right co-founder?", "Should we pivot?"],
+                quote: "Every board meeting starts with a Deep Snag.",
+                attribution: "— Founder, Series A startup"
+              },
+              {
+                icon: Users,
+                title: "Team Decisions",
+                examples: ["Should we ship this feature?", "Is this hire the right call?", "Should we expand to this market?"],
+                quote: "Our post-mortems are actually useful now.",
+                attribution: "— VP Engineering"
+              },
+              {
+                icon: Home,
+                title: "Personal Decisions",
+                examples: ["Should I relocate for this opportunity?", "Is this the right time to buy?", "Should I go back to school?"],
+                quote: "I journal every morning. Snag knows me better than I know myself.",
+                attribution: "— Consultant"
+              }
+            ].map((card, i) => (
+              <div key={i} className="bg-card border border-border rounded-2xl p-7">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                    <card.icon className="w-5 h-5 text-primary" />
+                  </div>
+                  <h3 className="text-lg font-semibold">{card.title}</h3>
                 </div>
-                <div>
-                  <span className="text-micro uppercase text-crimson font-semibold">FAILURE MODE #1</span>
-                  <p className="text-small text-foreground mt-1">Runway runs out before product-market fit...</p>
+                <ul className="space-y-2 mb-4">
+                  {card.examples.map((ex, j) => (
+                    <li key={j} className="text-muted-foreground text-sm">"{ex}"</li>
+                  ))}
+                </ul>
+                <div className="border-t border-border pt-4">
+                  <p className="text-sm italic text-foreground">"{card.quote}"</p>
+                  <p className="text-xs text-muted-foreground mt-1">{card.attribution}</p>
                 </div>
               </div>
-              <button 
-                onClick={() => scrollToSection("pricing")}
-                className="text-small text-cobalt font-medium mt-4 inline-flex items-center gap-1 hover:underline"
-              >
-                See full analysis <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Pricing */}
-      <section id="pricing" className="section-padding bg-muted">
+      {/* Sample Output Preview */}
+      <section className="py-16 md:py-20">
         <div className="container mx-auto px-4">
-          <h2 className="text-h1 text-center mb-4">
-            <span className="gradient-text">Pricing that scales with you</span>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+            <span className="gradient-text">What you get</span>
           </h2>
-          <p className="text-body-lg text-muted-foreground text-center mb-8">
-            Start free. Grow with confidence.
+
+          <Tabs defaultValue="premortem" className="max-w-5xl mx-auto">
+            <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-8">
+              <TabsTrigger value="premortem">Pre-Mortem</TabsTrigger>
+              <TabsTrigger value="postmortem">Post-Mortem</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="premortem">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="bg-muted rounded-xl p-6">
+                  <p className="text-xs uppercase font-semibold text-muted-foreground mb-4">THE DECISION</p>
+                  <p className="text-foreground">
+                    I'm considering leaving my PM role to join an early-stage AI startup as co-founder. 8% equity, no salary for 6 months.
+                  </p>
+                </div>
+                <div className="bg-card border border-border rounded-xl p-6">
+                  <p className="text-xs uppercase font-semibold text-primary mb-4">DEEP SNAG ANALYSIS</p>
+                  <div className="space-y-4">
+                    <div>
+                      <span className="text-xs uppercase font-semibold text-secondary">BLIND SPOTS</span>
+                      <p className="text-sm text-muted-foreground mt-1">You're assuming 8% is fair without seeing the cap table...</p>
+                    </div>
+                    <div>
+                      <span className="text-xs uppercase font-semibold text-secondary">FAILURE MODE #1</span>
+                      <p className="text-sm text-muted-foreground mt-1">Co-founder conflict at month 9 when...</p>
+                    </div>
+                    <div>
+                      <span className="text-xs uppercase font-semibold text-warning">WARNING SIGNAL</span>
+                      <p className="text-sm text-muted-foreground mt-1">If founders are vague about equity split...</p>
+                    </div>
+                    <div>
+                      <span className="text-xs uppercase font-semibold text-destructive">KILL CRITERIA</span>
+                      <p className="text-sm text-muted-foreground mt-1">If salary doesn't materialize by month 6...</p>
+                    </div>
+                  </div>
+                  <button className="text-sm text-primary font-medium mt-4 inline-flex items-center gap-1 hover:underline">
+                    Generate visual framework <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="postmortem">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="bg-muted rounded-xl p-6">
+                  <p className="text-xs uppercase font-semibold text-muted-foreground mb-4">WHAT HAPPENED</p>
+                  <p className="text-foreground">
+                    We launched the feature 2 weeks late. It got good user feedback but we missed the quarterly goal. Team was exhausted.
+                  </p>
+                </div>
+                <div className="bg-card border border-border rounded-xl p-6">
+                  <p className="text-xs uppercase font-semibold text-[hsl(271,81%,56%)] mb-4">POST-MORTEM ANALYSIS</p>
+                  <div className="space-y-4">
+                    <div>
+                      <span className="text-xs uppercase font-semibold text-warning">OUTCOME</span>
+                      <p className="text-sm text-muted-foreground mt-1">Partial success (7/10)</p>
+                    </div>
+                    <div>
+                      <span className="text-xs uppercase font-semibold text-[hsl(271,81%,56%)]">ROOT CAUSE</span>
+                      <p className="text-sm text-muted-foreground mt-1">Scope creep in week 3 without deadline adjustment...</p>
+                    </div>
+                    <div>
+                      <span className="text-xs uppercase font-semibold text-success">WHAT WORKED</span>
+                      <p className="text-sm text-muted-foreground mt-1">Cross-team collaboration, testing process...</p>
+                    </div>
+                    <div>
+                      <span className="text-xs uppercase font-semibold text-destructive">WHAT DIDN'T</span>
+                      <p className="text-sm text-muted-foreground mt-1">Deadline negotiation, scope management...</p>
+                    </div>
+                  </div>
+                  <button className="text-sm text-primary font-medium mt-4 inline-flex items-center gap-1 hover:underline">
+                    Generate visual framework <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </section>
+
+      {/* Visual Frameworks Showcase */}
+      <section className="py-16 md:py-20 bg-muted">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            <span className="gradient-text">Professional frameworks. Instant export.</span>
+          </h2>
+          <p className="text-muted-foreground mb-12 max-w-xl mx-auto">
+            Export as PNG or PDF. Share with your team. Include in presentations.
+          </p>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl mx-auto mb-8">
+            {[
+              { name: "Risk Matrix", label: "Pre-Mortem" },
+              { name: "Decision Tree", label: "Pre-Mortem" },
+              { name: "Fishbone Diagram", label: "Post-Mortem" },
+              { name: "Five Whys Ladder", label: "Post-Mortem" },
+              { name: "Porter's Five Forces", label: "Business" },
+              { name: "MEDDPICC Scorecard", label: "Sales" }
+            ].map((fw, i) => (
+              <div key={i} className="bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-shadow group cursor-pointer relative">
+                <span className="absolute top-3 right-3 text-[10px] font-medium px-2 py-1 rounded-full bg-primary/10 text-primary">
+                  {fw.label}
+                </span>
+                <div className="h-16 flex items-center justify-center mb-3">
+                  <BarChart3 className="w-10 h-10 text-muted-foreground group-hover:text-primary transition-colors" />
+                </div>
+                <p className="text-sm font-medium">{fw.name}</p>
+              </div>
+            ))}
+          </div>
+
+          <Button onClick={handleGetStarted} variant="default">
+            Try it free →
+          </Button>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section id="pricing" className="py-16 md:py-20">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
+            <span className="gradient-text">Simple pricing. Powerful features.</span>
+          </h2>
+          <p className="text-lg text-muted-foreground text-center mb-8">
+            Start free. Upgrade when Snag becomes essential.
           </p>
 
           {/* Billing Toggle */}
           <div className="flex items-center justify-center gap-3 mb-10">
-            <span className={`text-[14px] font-medium transition-colors ${!isAnnual ? 'text-foreground' : 'text-muted-foreground'}`}>
+            <span className={`text-sm font-medium transition-colors ${!isAnnual ? 'text-foreground' : 'text-muted-foreground'}`}>
               Monthly
             </span>
-            <Switch
-              checked={isAnnual}
-              onCheckedChange={setIsAnnual}
-              className="data-[state=checked]:bg-cobalt"
-            />
-            <span className={`text-[14px] font-medium transition-colors ${isAnnual ? 'text-foreground' : 'text-muted-foreground'}`}>
+            <Switch checked={isAnnual} onCheckedChange={setIsAnnual} className="data-[state=checked]:bg-primary" />
+            <span className={`text-sm font-medium transition-colors ${isAnnual ? 'text-foreground' : 'text-muted-foreground'}`}>
               Annual
             </span>
-            <span className="bg-emerald-600 text-white text-[11px] font-medium px-2 py-1 rounded-xl ml-1">
+            <span className="bg-success text-success-foreground text-xs font-medium px-2 py-1 rounded-full ml-1">
               Save 25%
             </span>
           </div>
@@ -272,244 +552,234 @@ export default function Landing() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
             {/* Free Plan */}
             <div className="bg-muted rounded-2xl p-6 border border-border flex flex-col">
-              <h3 className="text-[20px] font-semibold text-foreground mb-2">Free</h3>
+              <h3 className="text-xl font-semibold mb-2">Free</h3>
               <div className="mb-4">
-                <span className="text-[48px] font-bold text-foreground">$0</span>
-                <span className="text-[14px] text-muted-foreground ml-1">forever</span>
+                <span className="text-5xl font-bold">$0</span>
+                <span className="text-sm text-muted-foreground ml-1">forever</span>
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">Get started with daily journaling and try every feature once.</p>
+              
+              <div className="space-y-4 mb-6 flex-1">
+                <div>
+                  <p className="text-xs font-semibold text-primary uppercase mb-2">CAPTURE</p>
+                  <ul className="space-y-1.5">
+                    {["3 journal entries per day", "3 decision captures per day", "Mood tracking", "3 habits"].map((f, i) => (
+                      <li key={i} className="flex items-center gap-2 text-sm"><Check className="w-4 h-4 text-success flex-shrink-0" />{f}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-secondary uppercase mb-2">ANALYZE</p>
+                  <ul className="space-y-1.5">
+                    {["1 Deep Snag (Pre-Mortem) — try it", "1 Post-Mortem — try it", "2 Business frameworks — try it"].map((f, i) => (
+                      <li key={i} className="flex items-center gap-2 text-sm"><Check className="w-4 h-4 text-success flex-shrink-0" />{f}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">LIMITS</p>
+                  <ul className="space-y-1.5 text-sm text-muted-foreground">
+                    <li>30-day history</li>
+                    <li>No visual exports</li>
+                    <li>No document uploads</li>
+                  </ul>
+                </div>
               </div>
               
-              <ul className="space-y-2.5 mb-4 flex-1">
-                {[
-                  "3 analyses (lifetime)",
-                  "Basic pre-mortem output",
-                  "Copy & share results"
-                ].map((feature, i) => (
-                  <li key={i} className="flex items-start gap-2 text-[14px] text-foreground">
-                    <Check className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-
-              <div className="space-y-2 mb-5 pt-3 border-t border-border">
-                {[
-                  "No document uploads",
-                  "No history saved"
-                ].map((limit, i) => (
-                  <p key={i} className="flex items-start gap-2 text-[13px] text-muted-foreground">
-                    <XCircle className="w-4 h-4 flex-shrink-0 mt-0.5 opacity-50" />
-                    {limit}
-                  </p>
-                ))}
-              </div>
-              
-              <Button 
-                variant="outline"
-                className="w-full border-2 border-cobalt text-cobalt hover:bg-cobalt hover:text-white font-semibold text-[14px]"
-                onClick={handleAnalyze}
-              >
-                Get Started
+              <Button variant="outline" className="w-full border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground" onClick={handleGetStarted}>
+                Start Free
               </Button>
-              <p className="text-[12px] text-muted-foreground text-center mt-2">No credit card required</p>
+              <p className="text-xs text-muted-foreground text-center mt-2">No credit card required</p>
             </div>
 
             {/* Pro Plan */}
-            <div className="bg-card rounded-2xl p-6 border border-border flex flex-col">
-              <h3 className="text-[20px] font-semibold text-foreground mb-2">Pro</h3>
-              <div className="mb-1 transition-all duration-300">
-                {isAnnual && (
-                  <span className="text-[16px] text-muted-foreground line-through mr-2">$9</span>
-                )}
-                <span className="text-[48px] font-bold text-foreground">
-                  {isAnnual ? '$6.75' : '$9'}
-                </span>
-                <span className="text-[14px] text-muted-foreground ml-1">/month</span>
-              </div>
-              {isAnnual && (
-                <p className="text-[12px] text-muted-foreground mb-4">billed annually</p>
-              )}
-              {!isAnnual && <div className="mb-4" />}
-              
-              <ul className="space-y-2.5 mb-5 flex-1">
-                {[
-                  "100 analyses/month",
-                  "15 document uploads/month",
-                  "500 MB storage",
-                  "PDF, DOCX, image analysis",
-                  "Deep Snag wizard",
-                  "Analysis history",
-                  "Social sharing cards",
-                  "PDF export",
-                  "Email support"
-                ].map((feature, i) => (
-                  <li key={i} className="flex items-start gap-2 text-[14px] text-foreground">
-                    <Check className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-              
-              <Button 
-                className="w-full bg-crimson hover:bg-crimson-hover text-white font-semibold text-[14px]"
-              >
-                Upgrade to Pro
-              </Button>
-              <p className="text-[12px] text-muted-foreground text-center mt-2">Cancel anytime</p>
-            </div>
-
-            {/* Team Plan - Highlighted */}
-            <div className="bg-card rounded-2xl p-6 border-2 border-crimson relative shadow-lg shadow-crimson/15 flex flex-col">
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-crimson text-white text-[10px] font-semibold uppercase px-3 py-1 rounded-lg tracking-wide whitespace-nowrap">
+            <div className="bg-card rounded-2xl p-6 border-2 border-secondary relative shadow-lg flex flex-col">
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-secondary text-secondary-foreground text-xs font-semibold uppercase px-3 py-1 rounded-full">
                 MOST POPULAR
               </span>
               
-              <h3 className="text-[20px] font-semibold text-foreground mb-2">Team</h3>
-              <div className="mb-1 transition-all duration-300">
-                {isAnnual && (
-                  <span className="text-[16px] text-muted-foreground line-through mr-2">$49</span>
-                )}
-                <span className="text-[48px] font-bold text-foreground">
-                  {isAnnual ? '$36.75' : '$49'}
-                </span>
-                <span className="text-[14px] text-muted-foreground ml-1">/month</span>
+              <h3 className="text-xl font-semibold mb-2">Pro</h3>
+              <div className="mb-1">
+                {isAnnual && <span className="text-base text-muted-foreground line-through mr-2">$12</span>}
+                <span className="text-5xl font-bold">{isAnnual ? '$9' : '$12'}</span>
+                <span className="text-sm text-muted-foreground ml-1">/month</span>
               </div>
-              {isAnnual && (
-                <p className="text-[12px] text-muted-foreground mb-1">billed annually</p>
-              )}
+              {isAnnual && <p className="text-xs text-muted-foreground mb-4">billed annually</p>}
+              {!isAnnual && <div className="mb-4" />}
+              <p className="text-sm text-muted-foreground mb-4">For individuals who want to think better every day.</p>
+              
+              <div className="space-y-4 mb-6 flex-1">
+                <div>
+                  <p className="text-xs font-semibold text-primary uppercase mb-2">CAPTURE</p>
+                  <ul className="space-y-1.5">
+                    {["Unlimited journal entries", "Unlimited decision captures", "Full mood & habit tracking", "10 habits", "Manifestation & gratitude"].map((f, i) => (
+                      <li key={i} className="flex items-center gap-2 text-sm"><Check className="w-4 h-4 text-success flex-shrink-0" />{f}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-secondary uppercase mb-2">ANALYZE</p>
+                  <ul className="space-y-1.5">
+                    {["50 Deep Snags per month", "25 Post-Mortems per month", "Unlimited business frameworks", "10 document uploads per month"].map((f, i) => (
+                      <li key={i} className="flex items-center gap-2 text-sm"><Check className="w-4 h-4 text-success flex-shrink-0" />{f}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-success uppercase mb-2">LEARN</p>
+                  <ul className="space-y-1.5">
+                    {["Unlimited visual exports", "Outcome tracking", "Monthly pattern reports", "Personal insights", "Forever history"].map((f, i) => (
+                      <li key={i} className="flex items-center gap-2 text-sm"><Check className="w-4 h-4 text-success flex-shrink-0" />{f}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+              
+              <Button className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground">
+                Start Pro
+              </Button>
+              <p className="text-xs text-muted-foreground text-center mt-2">2-day free trial, then ${isAnnual ? '9' : '12'}/month</p>
+            </div>
+
+            {/* Team Plan */}
+            <div className="bg-muted rounded-2xl p-6 border border-border flex flex-col">
+              <h3 className="text-xl font-semibold mb-2">Team</h3>
+              <div className="mb-1">
+                {isAnnual && <span className="text-base text-muted-foreground line-through mr-2">$59</span>}
+                <span className="text-5xl font-bold">{isAnnual ? '$44' : '$59'}</span>
+                <span className="text-sm text-muted-foreground ml-1">/month</span>
+              </div>
+              {isAnnual && <p className="text-xs text-muted-foreground mb-1">billed annually</p>}
               {!isAnnual && <div className="mb-1" />}
-              <p className="text-[13px] text-muted-foreground mb-4">Up to 5 team members</p>
+              <p className="text-sm text-muted-foreground mb-4">Up to 5 members</p>
+              <p className="text-sm text-muted-foreground mb-4">For teams that want to think together.</p>
               
-              <ul className="space-y-2.5 mb-5 flex-1">
-                <li className="text-[14px] font-medium text-foreground mb-1">Everything in Pro, plus:</li>
-                {[
-                  "500 analyses/month (team pool)",
-                  "75 document uploads/month",
-                  "5 GB team storage",
-                  "10 MB max file size",
-                  "XLSX, PPTX analysis",
-                  "Shared team workspace",
-                  "Comments & @mentions",
-                  "Team analytics dashboard",
-                  "Admin controls",
-                  "Priority support"
-                ].map((feature, i) => (
-                  <li key={i} className="flex items-start gap-2 text-[14px] text-foreground">
-                    <Check className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
+              <div className="space-y-4 mb-6 flex-1">
+                <div>
+                  <p className="text-xs font-semibold text-primary uppercase mb-2">EVERYTHING IN PRO, PLUS:</p>
+                  <ul className="space-y-1.5">
+                    {["200 Deep Snags per month (team pool)", "100 Post-Mortems per month (team pool)", "50 document uploads per month", "5 GB team storage"].map((f, i) => (
+                      <li key={i} className="flex items-center gap-2 text-sm"><Check className="w-4 h-4 text-success flex-shrink-0" />{f}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-[hsl(271,81%,56%)] uppercase mb-2">COLLABORATION</p>
+                  <ul className="space-y-1.5">
+                    {["Shared team workspace", "Team retrospectives", "Collaborative frameworks", "Comment & @mention", "Team analytics dashboard"].map((f, i) => (
+                      <li key={i} className="flex items-center gap-2 text-sm"><Check className="w-4 h-4 text-success flex-shrink-0" />{f}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase mb-2">ADMIN</p>
+                  <ul className="space-y-1.5">
+                    {["Member management", "Team patterns", "Priority support"].map((f, i) => (
+                      <li key={i} className="flex items-center gap-2 text-sm"><Check className="w-4 h-4 text-success flex-shrink-0" />{f}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
               
-              <Button 
-                className="w-full bg-cobalt hover:bg-cobalt/90 text-white font-semibold text-[14px]"
-              >
+              <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
                 Start Team Trial
               </Button>
-              <p className="text-[12px] text-muted-foreground text-center mt-2">14-day free trial</p>
+              <p className="text-xs text-muted-foreground text-center mt-2">2-day trial, then ${isAnnual ? '44' : '59'}/month</p>
             </div>
 
             {/* Business Plan */}
             <div className="bg-muted rounded-2xl p-6 border border-border flex flex-col">
-              <h3 className="text-[20px] font-semibold text-foreground mb-2">Business</h3>
-              <div className="mb-1 transition-all duration-300">
-                {isAnnual && (
-                  <span className="text-[16px] text-muted-foreground line-through mr-2">$149</span>
-                )}
-                <span className="text-[48px] font-bold text-foreground">
-                  {isAnnual ? '$111.75' : '$149'}
-                </span>
-                <span className="text-[14px] text-muted-foreground ml-1">/month</span>
+              <h3 className="text-xl font-semibold mb-2">Business</h3>
+              <div className="mb-1">
+                {isAnnual && <span className="text-base text-muted-foreground line-through mr-2">$199</span>}
+                <span className="text-5xl font-bold">{isAnnual ? '$149' : '$199'}</span>
+                <span className="text-sm text-muted-foreground ml-1">/month</span>
               </div>
-              {isAnnual && (
-                <p className="text-[12px] text-muted-foreground mb-1">billed annually</p>
-              )}
+              {isAnnual && <p className="text-xs text-muted-foreground mb-1">billed annually</p>}
               {!isAnnual && <div className="mb-1" />}
-              <p className="text-[13px] text-muted-foreground mb-4">Up to 20 team members</p>
+              <p className="text-sm text-muted-foreground mb-4">Up to 20 members</p>
+              <p className="text-sm text-muted-foreground mb-4">For organizations serious about decision quality.</p>
               
-              <ul className="space-y-2.5 mb-5 flex-1">
-                <li className="text-[14px] font-medium text-foreground mb-1">Everything in Team, plus:</li>
-                {[
-                  "2,000 analyses/month",
-                  "300 document uploads/month",
-                  "25 GB storage",
-                  "25 MB max file size",
-                  "Bulk document upload",
-                  "Branded PDF reports",
-                  "Audit log",
-                  "API access (add-on)"
-                ].map((feature, i) => (
-                  <li key={i} className="flex items-start gap-2 text-[14px] text-foreground">
-                    <Check className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
+              <div className="space-y-4 mb-6 flex-1">
+                <div>
+                  <p className="text-xs font-semibold text-primary uppercase mb-2">EVERYTHING IN TEAM, PLUS:</p>
+                  <ul className="space-y-1.5">
+                    {["1,000 Deep Snags per month", "500 Post-Mortems per month", "200 document uploads per month", "25 GB storage"].map((f, i) => (
+                      <li key={i} className="flex items-center gap-2 text-sm"><Check className="w-4 h-4 text-success flex-shrink-0" />{f}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-foreground uppercase mb-2">ENTERPRISE FEATURES</p>
+                  <ul className="space-y-1.5">
+                    {["Branded PDF exports", "Custom visual templates", "Audit log", "API access (add-on)", "SSO (SAML)", "Dedicated onboarding"].map((f, i) => (
+                      <li key={i} className="flex items-center gap-2 text-sm"><Check className="w-4 h-4 text-success flex-shrink-0" />{f}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
               
-              <Button 
-                variant="outline"
-                className="w-full border-2 border-cobalt text-cobalt hover:bg-cobalt hover:text-white font-semibold text-[14px]"
-              >
+              <Button variant="outline" className="w-full border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground">
                 Contact Sales
               </Button>
-              <p className="text-[12px] text-muted-foreground text-center mt-2">Custom onboarding included</p>
             </div>
           </div>
 
           {/* Enterprise Callout */}
-          <div className="max-w-4xl mx-auto mt-8 bg-gradient-to-r from-muted to-muted/50 rounded-xl p-6 flex flex-col sm:flex-row items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-cobalt/10 flex items-center justify-center flex-shrink-0">
-              <Building className="w-6 h-6 text-cobalt" />
+          <div className="max-w-4xl mx-auto mt-8 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-xl p-6 flex flex-col sm:flex-row items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <Building className="w-6 h-6 text-primary" />
             </div>
             <div className="flex-1 text-center sm:text-left">
-              <p className="text-[15px] text-foreground font-medium">
-                Need unlimited analyses, SSO, custom integrations, or 20+ seats?
+              <p className="font-medium">
+                Need unlimited seats, custom integrations, or dedicated support?
               </p>
             </div>
-            <button className="text-[14px] font-semibold text-cobalt hover:underline whitespace-nowrap flex items-center gap-1">
+            <button className="text-sm font-semibold text-primary hover:underline whitespace-nowrap flex items-center gap-1">
               Talk to Enterprise Sales <ArrowRight className="w-4 h-4" />
             </button>
           </div>
 
           {/* Compare Features Collapsible */}
           <Collapsible className="max-w-4xl mx-auto mt-8">
-            <CollapsibleTrigger className="flex items-center justify-center gap-2 text-[14px] font-medium text-cobalt hover:underline mx-auto">
+            <CollapsibleTrigger className="flex items-center justify-center gap-2 text-sm font-medium text-primary hover:underline mx-auto">
               Compare all features <ChevronDown className="w-4 h-4" />
             </CollapsibleTrigger>
             <CollapsibleContent className="mt-6">
               <div className="overflow-x-auto">
-                <table className="w-full text-[13px] border-collapse">
+                <table className="w-full text-sm border-collapse">
                   <thead>
                     <tr className="border-b border-border">
-                      <th className="text-left py-3 px-2 font-semibold text-foreground">Feature</th>
-                      <th className="text-center py-3 px-2 font-semibold text-foreground">Free</th>
-                      <th className="text-center py-3 px-2 font-semibold text-foreground">Pro</th>
-                      <th className="text-center py-3 px-2 font-semibold text-crimson">Team</th>
-                      <th className="text-center py-3 px-2 font-semibold text-foreground">Business</th>
+                      <th className="text-left py-3 px-2 font-semibold">Feature</th>
+                      <th className="text-center py-3 px-2 font-semibold">Free</th>
+                      <th className="text-center py-3 px-2 font-semibold text-secondary">Pro</th>
+                      <th className="text-center py-3 px-2 font-semibold">Team</th>
+                      <th className="text-center py-3 px-2 font-semibold">Business</th>
                     </tr>
                   </thead>
                   <tbody>
                     {[
-                      { feature: "Analyses/month", free: "3 lifetime", pro: "100", team: "500", business: "2,000" },
-                      { feature: "Document uploads", free: "—", pro: "15/mo", team: "75/mo", business: "300/mo" },
-                      { feature: "Storage", free: "—", pro: "500 MB", team: "5 GB", business: "25 GB" },
-                      { feature: "Max file size", free: "—", pro: "5 MB", team: "10 MB", business: "25 MB" },
-                      { feature: "Team members", free: "1", pro: "1", team: "5", business: "20" },
-                      { feature: "Analysis history", free: "—", pro: "✓", team: "✓", business: "✓" },
-                      { feature: "Deep Snag wizard", free: "—", pro: "✓", team: "✓", business: "✓" },
-                      { feature: "PDF, DOCX, Images", free: "—", pro: "✓", team: "✓", business: "✓" },
-                      { feature: "XLSX, PPTX", free: "—", pro: "—", team: "✓", business: "✓" },
+                      { feature: "Daily journal entries", free: "3/day", pro: "∞", team: "∞", business: "∞" },
+                      { feature: "Decision captures", free: "3/day", pro: "∞", team: "∞", business: "∞" },
+                      { feature: "Habits", free: "3", pro: "10", team: "∞", business: "∞" },
+                      { feature: "Deep Snags", free: "1 total", pro: "50/mo", team: "200/mo", business: "1,000/mo" },
+                      { feature: "Post-Mortems", free: "1 total", pro: "25/mo", team: "100/mo", business: "500/mo" },
+                      { feature: "Business frameworks", free: "2 total", pro: "∞", team: "∞", business: "∞" },
+                      { feature: "Visual exports", free: "—", pro: "✓", team: "✓", business: "✓" },
+                      { feature: "Document uploads", free: "—", pro: "10/mo", team: "50/mo", business: "200/mo" },
+                      { feature: "History", free: "30 days", pro: "Forever", team: "Forever", business: "Forever" },
                       { feature: "Team workspace", free: "—", pro: "—", team: "✓", business: "✓" },
-                      { feature: "Comments & mentions", free: "—", pro: "—", team: "✓", business: "✓" },
-                      { feature: "Branded reports", free: "—", pro: "—", team: "—", business: "✓" },
-                      { feature: "Audit log", free: "—", pro: "—", team: "—", business: "✓" },
-                      { feature: "API access", free: "—", pro: "—", team: "—", business: "Add-on" },
+                      { feature: "Team analytics", free: "—", pro: "—", team: "✓", business: "✓" },
+                      { feature: "Branded exports", free: "—", pro: "—", team: "—", business: "✓" },
+                      { feature: "SSO (SAML)", free: "—", pro: "—", team: "—", business: "✓" },
+                      { feature: "API access", free: "—", pro: "—", team: "—", business: "Add-on" }
                     ].map((row, i) => (
                       <tr key={i} className="border-b border-border/50">
-                        <td className="py-2.5 px-2 text-foreground">{row.feature}</td>
+                        <td className="py-2.5 px-2">{row.feature}</td>
                         <td className="py-2.5 px-2 text-center text-muted-foreground">{row.free}</td>
-                        <td className="py-2.5 px-2 text-center text-foreground">{row.pro}</td>
-                        <td className="py-2.5 px-2 text-center text-foreground font-medium">{row.team}</td>
-                        <td className="py-2.5 px-2 text-center text-foreground">{row.business}</td>
+                        <td className="py-2.5 px-2 text-center font-medium">{row.pro}</td>
+                        <td className="py-2.5 px-2 text-center">{row.team}</td>
+                        <td className="py-2.5 px-2 text-center">{row.business}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -518,129 +788,111 @@ export default function Landing() {
             </CollapsibleContent>
           </Collapsible>
 
-          {/* Usage Limits Note */}
-          <p className="text-[12px] text-muted-foreground text-center mt-6 max-w-2xl mx-auto">
+          <p className="text-xs text-muted-foreground text-center mt-6 max-w-2xl mx-auto">
             All plans include fair usage limits. Need more? Top-up packs available or upgrade anytime.{" "}
-            <button 
-              onClick={() => setLimitsModalOpen(true)}
-              className="text-cobalt hover:underline"
-            >
+            <button onClick={() => setLimitsModalOpen(true)} className="text-primary hover:underline">
               See full limits →
             </button>
           </p>
         </div>
       </section>
 
-      {/* Usage Limits Modal */}
       <UsageLimitsModal open={limitsModalOpen} onOpenChange={setLimitsModalOpen} />
 
-      {/* FAQ */}
-      <section className="section-padding">
-        <div className="container mx-auto px-4 max-w-2xl">
-          <h2 className="text-h1 text-center mb-4">
-            <span className="gradient-text">Questions about pricing?</span>
+      {/* FAQ Section */}
+      <section className="py-16 md:py-20 bg-muted">
+        <div className="container mx-auto px-4 max-w-3xl">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+            <span className="gradient-text">Frequently asked questions</span>
           </h2>
-          <p className="text-body text-muted-foreground text-center mb-12">
-            Everything you need to know about our plans
-          </p>
 
           <div className="space-y-0">
             {[
-              {
-                q: "What counts as an analysis?",
-                a: "Each time you submit a plan for stress-testing, that's one analysis. Viewing past analyses doesn't count."
-              },
-              {
-                q: "What happens if I hit my limit?",
-                a: "You'll be prompted to wait until next month, buy a top-up pack ($5 for 25 analyses), or upgrade your plan."
-              },
-              {
-                q: "Can I add more team members?",
-                a: "Team includes 5 members. Business includes 20. Need more? Contact us for Enterprise pricing."
-              },
-              {
-                q: "What file types can I upload?",
-                a: "Pro: PDF, DOCX, TXT, JPG, PNG. Team adds XLSX, PPTX. Enterprise supports custom formats."
-              },
-              {
-                q: "Is there a file size limit?",
-                a: "Pro: 5MB, 10K words. Team: 10MB, 25K words. Business: 25MB, 50K words. Enterprise: Custom."
-              },
-              {
-                q: "Do unused analyses roll over?",
-                a: "No. Monthly limits reset on your billing date. Use them or lose them — this keeps our costs predictable."
-              },
-              {
-                q: "Is Snag replacing my judgment?",
-                a: "No. Snag surfaces what you might miss — blind spots, failure modes, warning signs. You still decide. Think of it as a second opinion that's seen a thousand plans fail."
-              },
-              {
-                q: "How is this different from ChatGPT?",
-                a: "Snag uses a tuned pre-mortem framework. Structured, consistent, optimized for surfacing what you'd miss."
-              }
+              { q: "What makes Snag different from other journaling apps?", a: "Most journaling apps are just text storage. Snag connects your daily thoughts to decision analysis. Journal an intention, then stress-test it. Reflect on an outcome, then extract lessons. Your journal becomes actionable." },
+              { q: "What's a Deep Snag (Pre-Mortem)?", a: "A pre-mortem is the opposite of a post-mortem. Instead of analyzing what went wrong after, you imagine failure before you commit and work backward to find the causes. Deep Snag runs this analysis in under 2 minutes — surfacing blind spots, failure modes, warning signals, and the question you should be asking." },
+              { q: "What's a Post-Mortem?", a: "A structured analysis of something that already happened — a project, decision, or experience. Snag helps you find root causes (5 Whys), identify what worked and didn't, extract lessons, and generate visual frameworks to capture and share your insights." },
+              { q: "Can I analyze my journal entries?", a: "Yes. Any journal entry can be turned into a Pre-Mortem or Post-Mortem with one tap. Writing about a goal? Stress-test it. Reflecting on a project? Extract the lessons. Your journaling becomes fuel for deeper thinking." },
+              { q: "What are the business frameworks?", a: "Pre-built templates for professional analysis: Porter's Five Forces, SWOT, PESTLE for strategy. MEDDPICC, BANT, SPIN for sales. Decision matrices, priority grids, and more. Guided inputs, AI enhancement, visual outputs." },
+              { q: "Why not just use ChatGPT for this?", a: "ChatGPT can run a pre-mortem prompt. But it forgets everything after each session. It won't ping you in 90 days to check outcomes. It can't tell you that 73% of your career decisions succeed while only 48% of your business decisions do. Snag builds a personal decision intelligence layer that compounds over time." },
+              { q: "How does outcome tracking work?", a: "When you log a decision, you set an outcome check date (30/60/90 days). Snag prompts you to record what happened. Over time, you see patterns — which types of decisions you get right, which you don't, and why." },
+              { q: "What visual frameworks can I export?", a: "Risk matrices, decision trees, fishbone diagrams, Five Whys ladders, Porter's pentagon, MEDDPICC scorecards, and more. Export as PNG or PDF. Include in presentations. Share with your team." },
+              { q: "How does the free trial work?", a: "2 days of full Pro access, capped at 5 Deep Snags and 3 Post-Mortems. After the trial, you fall back to the Free tier. Your data is preserved — upgrade anytime to unlock it." },
+              { q: "Can I use Snag with my team?", a: "Yes. Team plan ($59/month) includes shared workspace, collaborative frameworks, team retrospectives, and analytics. Business plan ($199/month) adds branded exports, audit logs, and SSO." },
+              { q: "Is my data private?", a: "Yes. Your journals, decisions, and analyses are private to you (or your team, if shared). We don't sell data. We don't train AI on your content. Delete anytime." }
             ].map((faq, i) => (
-              <div key={i} className="border-b border-divider">
-                <button 
-                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full flex items-center justify-between py-5 text-left"
-                >
-                  <span className="text-body-lg font-semibold text-foreground pr-4">{faq.q}</span>
-                  {openFaq === i ? (
-                    <Minus className="w-5 h-5 text-cobalt flex-shrink-0" />
-                  ) : (
-                    <Plus className="w-5 h-5 text-cobalt flex-shrink-0" />
-                  )}
+              <div key={i} className="border-b border-border">
+                <button onClick={() => setOpenFaq(openFaq === i ? null : i)} className="w-full flex items-center justify-between py-5 text-left">
+                  <span className="text-base font-semibold pr-4">{faq.q}</span>
+                  {openFaq === i ? <Minus className="w-5 h-5 text-primary flex-shrink-0" /> : <Plus className="w-5 h-5 text-primary flex-shrink-0" />}
                 </button>
-                {openFaq === i && (
-                  <p className="text-body text-muted-foreground pb-5 pr-10">{faq.a}</p>
-                )}
+                {openFaq === i && <p className="text-muted-foreground pb-5 pr-10">{faq.a}</p>}
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Final CTA */}
+      {/* Final CTA Section */}
       <section className="gradient-premium py-16 md:py-24">
         <div className="container mx-auto px-4 max-w-xl text-center">
-          <h2 className="text-h1 text-white mb-8">
-            What's the plan you've been avoiding stress-testing?
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            Your best thinking starts today.
           </h2>
+          <p className="text-white/80 text-lg mb-8">
+            Free forever. Upgrade when you're ready.
+          </p>
           
-          <div className="space-y-4">
-            <textarea
-              placeholder="Describe your plan..."
-              rows={3}
-              className="w-full bg-white rounded-lg px-4 py-4 text-body text-foreground placeholder:text-muted-foreground focus:outline-none resize-none"
-              onChange={(e) => setPlanText(e.target.value)}
-            />
-            
-            <Button 
-              onClick={handleAnalyze}
-              className="w-full bg-white text-cobalt hover:bg-gray-100 font-semibold py-4"
-            >
-              Analyze Free
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+            <Button onClick={handleGetStarted} className="bg-white text-primary hover:bg-white/90 px-8 py-6 text-base font-semibold">
+              Start Free — No card required
             </Button>
-            
-            <p className="text-small text-white/80">No signup required</p>
+            <button onClick={() => scrollToSection("pricing")} className="text-white border border-white/50 px-6 py-3 rounded-lg hover:bg-white/10 transition-colors text-sm font-medium">
+              See pricing →
+            </button>
           </div>
+
+          <p className="text-white/60 text-sm">
+            Join 10,000+ people thinking more clearly
+          </p>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#1A1A1A] py-12">
+      <footer className="bg-[hsl(0,0%,10%)] py-12">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
-            <span className="text-xl font-bold text-white">Snag</span>
-            
-            <div className="flex items-center gap-6">
-              <a href="/privacy" className="text-small text-[#666666] hover:text-white transition-colors">Privacy</a>
-              <a href="/terms" className="text-small text-[#666666] hover:text-white transition-colors">Terms</a>
-              <a href="/disclaimer" className="text-small text-[#666666] hover:text-white transition-colors">Disclaimer</a>
+          <div className="grid md:grid-cols-4 gap-8 mb-8">
+            <div>
+              <span className="text-xl font-bold text-white">Snag</span>
+              <p className="text-[hsl(0,0%,40%)] text-sm mt-2">Think better. Decide better.</p>
+            </div>
+            <div>
+              <p className="text-[hsl(0,0%,60%)] text-xs uppercase font-medium mb-3">Product</p>
+              <ul className="space-y-2">
+                {["Features", "Pricing", "Changelog", "Roadmap"].map((link, i) => (
+                  <li key={i}><a href="#" className="text-[hsl(0,0%,40%)] hover:text-white text-sm transition-colors">{link}</a></li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <p className="text-[hsl(0,0%,60%)] text-xs uppercase font-medium mb-3">Resources</p>
+              <ul className="space-y-2">
+                {["Help Center", "Blog", "API Docs", "Status"].map((link, i) => (
+                  <li key={i}><a href="#" className="text-[hsl(0,0%,40%)] hover:text-white text-sm transition-colors">{link}</a></li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <p className="text-[hsl(0,0%,60%)] text-xs uppercase font-medium mb-3">Company</p>
+              <ul className="space-y-2">
+                <li><a href="#" className="text-[hsl(0,0%,40%)] hover:text-white text-sm transition-colors">About</a></li>
+                <li><a href="#" className="text-[hsl(0,0%,40%)] hover:text-white text-sm transition-colors">Contact</a></li>
+                <li><a href="/privacy" className="text-[hsl(0,0%,40%)] hover:text-white text-sm transition-colors">Privacy</a></li>
+                <li><a href="/terms" className="text-[hsl(0,0%,40%)] hover:text-white text-sm transition-colors">Terms</a></li>
+              </ul>
             </div>
           </div>
           
-          <p className="text-small text-[#666666] text-center">
+          <p className="text-[hsl(0,0%,40%)] text-sm text-center border-t border-[hsl(0,0%,20%)] pt-8">
             © 2026 Roarr Consulting Group. All rights reserved.
           </p>
         </div>
