@@ -21,14 +21,17 @@ import JournalPage from "./pages/JournalPage";
 import JournalNewPage from "./pages/JournalNewPage";
 import DecisionsPage from "./pages/DecisionsPage";
 import DecisionNewPage from "./pages/DecisionNewPage";
+import DecisionDetailPage from "./pages/DecisionDetailPage";
 import PostMortemPage from "./pages/PostMortemPage";
 import PostMortemNewPage from "./pages/PostMortemNewPage";
+import PostMortemDetailPage from "./pages/PostMortemDetailPage";
 import QuickRetroPage from "./pages/QuickRetroPage";
 import HabitsPage from "./pages/HabitsPage";
 import FrameworksPage from "./pages/FrameworksPage";
 import SwotAnalysisPage from "./pages/SwotAnalysisPage";
 import PorterAnalysisPage from "./pages/PorterAnalysisPage";
 import PremortemAnalysisPage from "./pages/PremortemAnalysisPage";
+import JournalDetailPage from "./pages/JournalDetailPage";
 
 const queryClient = new QueryClient();
 
@@ -60,10 +63,13 @@ const App = () => {
                 <Route path="/analysis/:id" element={<AnalysisDetail />} />
                 <Route path="/journal" element={<JournalPage />} />
                 <Route path="/journal/new" element={<JournalNewPage />} />
+                <Route path="/journal/:id" element={<JournalDetailPage />} />
                 <Route path="/decisions" element={<DecisionsPage />} />
                 <Route path="/decisions/new" element={<DecisionNewPage />} />
+                <Route path="/decisions/:id" element={<DecisionDetailPage />} />
                 <Route path="/post-mortem" element={<PostMortemPage />} />
                 <Route path="/post-mortem/new" element={<PostMortemNewPage />} />
+                <Route path="/post-mortem/:id" element={<PostMortemDetailPage />} />
                 <Route path="/quick-retro" element={<QuickRetroPage />} />
                 <Route path="/habits" element={<HabitsPage />} />
                 <Route path="/frameworks" element={<FrameworksPage />} />
