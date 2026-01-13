@@ -32,15 +32,38 @@ export default function Analyze() {
   const [showOptions, setShowOptions] = useState(false);
 
   useEffect(() => {
-    // Check for prefilled content from journal analysis
-    const state = location.state as { prefillContent?: string; sourceJournalId?: string } | null;
+    // Check for prefilled content from journal or decision
+    const state = location.state as { 
+      prefillContent?: string; 
+      sourceJournalId?: string;
+      sourceDecisionId?: string;
+      autoAnalyze?: boolean;
+      category?: string;
+      stakes?: string;
+    } | null;
+    
     if (state?.prefillContent) {
       setInput(state.prefillContent);
+      
       if (state.sourceJournalId) {
         setSourceJournalId(state.sourceJournalId);
       }
+      
+      // Pre-fill category and stakes if provided
+      if (state.category) {
+        setCategory(state.category);
+      }
+      if (state.stakes) {
+        setStakes(state.stakes);
+      }
+      
       // Clear location state
       window.history.replaceState({}, document.title);
+      
+      // Auto-analyze if requested (from decision or journal)
+      if (state.autoAnalyze) {
+        handleAnalyze(state.prefillContent);
+      }
     }
     
     // Check for stored input from landing page

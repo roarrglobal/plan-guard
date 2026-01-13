@@ -152,10 +152,40 @@ export default function DecisionDetailPage() {
 
   const handleDeepSnag = () => {
     if (!decision) return;
+    
+    // Build comprehensive analysis input from decision details
+    const options = decision.options as Array<{ text: string }> | null;
+    const optionsList = options?.map((o, i) => `${i + 1}. ${o.text}`).join("\n") || "";
+    
+    let analysisContent = `Decision: ${decision.decision_text}`;
+    
+    if (decision.stakes) {
+      analysisContent += `\n\nStakes: ${decision.stakes}`;
+    }
+    
+    if (decision.category) {
+      analysisContent += `\nCategory: ${decision.category}`;
+    }
+    
+    if (optionsList) {
+      analysisContent += `\n\nOptions I'm considering:\n${optionsList}`;
+    }
+    
+    if (decision.chosen_option) {
+      analysisContent += `\n\nI'm leaning towards: ${decision.chosen_option}`;
+    }
+    
+    if (decision.deadline) {
+      analysisContent += `\n\nDeadline: ${format(new Date(decision.deadline), "MMM d, yyyy")}`;
+    }
+    
     navigate("/analyze", { 
       state: { 
-        prefillContent: decision.decision_text,
-        sourceDecisionId: decision.id 
+        prefillContent: analysisContent,
+        sourceDecisionId: decision.id,
+        autoAnalyze: true,
+        category: decision.category || "other",
+        stakes: decision.stakes || "medium"
       } 
     });
   };
