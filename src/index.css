@@ -6,25 +6,31 @@
 
 @layer base {
   :root {
-    --background: 220 20% 97%;
-    --foreground: 220 20% 10%;
+    /* TRC Brand - Light Mode (Primary) */
+    --background: 0 0% 100%;
+    --background-alt: 0 0% 97%;
+    --foreground: 0 0% 10%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 220 20% 10%;
+    --card: 0 0% 95%;
+    --card-foreground: 0 0% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 10%;
+    --popover-foreground: 0 0% 10%;
 
-    --primary: 174 84% 32%;
+    /* Cobalt Blue */
+    --primary: 217 100% 34%;
     --primary-foreground: 0 0% 100%;
+    --primary-hover: 217 100% 25%;
 
-    --secondary: 220 15% 90%;
-    --secondary-foreground: 220 20% 10%;
+    /* Crimson */
+    --secondary: 349 57% 47%;
+    --secondary-foreground: 0 0% 100%;
+    --secondary-hover: 349 57% 40%;
 
-    --muted: 220 15% 92%;
-    --muted-foreground: 220 10% 45%;
+    --muted: 0 0% 97%;
+    --muted-foreground: 0 0% 40%;
 
-    --accent: 174 70% 40%;
+    --accent: 349 57% 47%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
@@ -36,43 +42,49 @@
     --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
 
-    --border: 220 15% 88%;
-    --input: 220 15% 88%;
-    --ring: 174 84% 32%;
+    --border: 0 0% 88%;
+    --divider: 0 0% 90%;
+    --input: 0 0% 88%;
+    --ring: 217 100% 34%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
-    --sidebar-background: 220 20% 97%;
-    --sidebar-foreground: 220 20% 10%;
-    --sidebar-primary: 174 84% 32%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 10%;
+    --sidebar-primary: 217 100% 34%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 15% 92%;
-    --sidebar-accent-foreground: 220 20% 10%;
-    --sidebar-border: 220 15% 88%;
-    --sidebar-ring: 174 84% 32%;
+    --sidebar-accent: 0 0% 97%;
+    --sidebar-accent-foreground: 0 0% 10%;
+    --sidebar-border: 0 0% 88%;
+    --sidebar-ring: 217 100% 34%;
   }
 
   .dark {
-    --background: 220 20% 8%;
-    --foreground: 220 15% 95%;
+    --background: 0 0% 7%;
+    --background-alt: 0 0% 10%;
+    --foreground: 0 0% 95%;
 
-    --card: 220 18% 12%;
-    --card-foreground: 220 15% 95%;
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 220 18% 12%;
-    --popover-foreground: 220 15% 95%;
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 174 84% 42%;
-    --primary-foreground: 220 20% 8%;
+    /* Cobalt Blue - slightly brighter for dark mode */
+    --primary: 217 100% 45%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 217 100% 38%;
 
-    --secondary: 220 15% 18%;
-    --secondary-foreground: 220 15% 90%;
+    /* Crimson */
+    --secondary: 349 57% 52%;
+    --secondary-foreground: 0 0% 100%;
+    --secondary-hover: 349 57% 45%;
 
-    --muted: 220 15% 15%;
-    --muted-foreground: 220 10% 55%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 60%;
 
-    --accent: 174 70% 45%;
-    --accent-foreground: 220 20% 8%;
+    --accent: 349 57% 52%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 65% 50%;
     --destructive-foreground: 0 0% 100%;
@@ -83,18 +95,19 @@
     --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
 
-    --border: 220 15% 20%;
-    --input: 220 15% 20%;
-    --ring: 174 84% 42%;
+    --border: 0 0% 20%;
+    --divider: 0 0% 18%;
+    --input: 0 0% 20%;
+    --ring: 217 100% 45%;
 
-    --sidebar-background: 220 20% 10%;
-    --sidebar-foreground: 220 15% 95%;
-    --sidebar-primary: 174 84% 42%;
-    --sidebar-primary-foreground: 220 20% 8%;
-    --sidebar-accent: 220 15% 18%;
-    --sidebar-accent-foreground: 220 15% 90%;
-    --sidebar-border: 220 15% 20%;
-    --sidebar-ring: 174 84% 42%;
+    --sidebar-background: 0 0% 10%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 217 100% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 0 0% 20%;
+    --sidebar-ring: 217 100% 45%;
   }
 }
 
@@ -105,6 +118,7 @@
 
   html {
     font-family: 'Inter', system-ui, sans-serif;
+    scroll-behavior: smooth;
   }
 
   body {
@@ -117,12 +131,21 @@
     text-wrap: balance;
   }
 
+  /* TRC Brand Gradient Text */
   .gradient-text {
-    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+    background: linear-gradient(90deg, #0047AB 0%, #BE3455 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Premium CTA Gradient Background */
+  .gradient-premium {
+    background: linear-gradient(135deg, #0047AB 0%, #BE3455 50%, #121212 100%);
   }
 
   .card-elevated {
-    @apply bg-card border border-border rounded-xl shadow-lg;
+    @apply bg-card border border-border rounded-xl shadow-card;
   }
 
   .touch-target {
@@ -136,23 +159,31 @@
   .safe-top {
     padding-top: env(safe-area-inset-top, 0);
   }
+
+  .section-padding {
+    @apply py-12 md:py-20;
+  }
+
+  .bg-alt {
+    @apply bg-muted;
+  }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-primary text-primary-foreground font-semibold rounded-lg px-6 py-3 touch-target transition-all duration-200 hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply bg-secondary text-secondary-foreground font-semibold rounded-lg px-8 py-4 touch-target transition-all duration-200 hover:bg-secondary/90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-secondary {
-    @apply bg-secondary text-secondary-foreground font-medium rounded-lg px-6 py-3 touch-target transition-all duration-200 hover:bg-muted active:scale-[0.98];
+    @apply bg-transparent text-primary border-2 border-primary font-medium rounded-lg px-6 py-3 touch-target transition-all duration-200 hover:bg-primary hover:text-primary-foreground active:scale-[0.98];
   }
 
   .btn-ghost {
-    @apply text-muted-foreground font-medium rounded-lg px-4 py-2 transition-all duration-200 hover:text-foreground hover:bg-muted/50 active:scale-[0.98];
+    @apply text-muted-foreground font-medium rounded-lg px-4 py-2 transition-all duration-200 hover:text-foreground active:scale-[0.98];
   }
 
   .input-field {
-    @apply w-full bg-muted/50 border border-border rounded-xl px-4 py-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200;
+    @apply w-full bg-background border border-border rounded-lg px-4 py-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200;
   }
 
   .analysis-card {
@@ -170,25 +201,34 @@
   .likelihood-low {
     @apply bg-success/20 text-success border border-success/30;
   }
+
+  /* TRC Card Styles */
+  .trc-card {
+    @apply bg-card rounded-xl p-6 md:p-8 shadow-card transition-all duration-300 hover:shadow-card-hover;
+  }
+
+  .trc-card-bordered {
+    @apply bg-background border border-border rounded-xl p-6 md:p-8 transition-all duration-300 hover:shadow-card;
+  }
 }
 
-/* Custom scrollbar for dark mode */
-.dark ::-webkit-scrollbar {
+/* Custom scrollbar */
+::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
-.dark ::-webkit-scrollbar-track {
+::-webkit-scrollbar-track {
   background: hsl(var(--muted));
   border-radius: 3px;
 }
 
-.dark ::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb {
   background: hsl(var(--border));
   border-radius: 3px;
 }
 
-.dark ::-webkit-scrollbar-thumb:hover {
+::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground));
 }
 
