@@ -49,34 +49,58 @@ export type Database = {
       }
       profiles: {
         Row: {
+          allow_connections: boolean | null
           avatar_url: string | null
           bio: string | null
           created_at: string
+          discoverable: boolean | null
           display_name: string | null
+          focus_areas: string[] | null
           id: string
+          linkedin_url: string | null
+          location: string | null
           preferences: Json | null
+          role: string | null
+          show_snags: boolean | null
           updated_at: string
           user_id: string
+          visibility: string | null
         }
         Insert: {
+          allow_connections?: boolean | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          discoverable?: boolean | null
           display_name?: string | null
+          focus_areas?: string[] | null
           id?: string
+          linkedin_url?: string | null
+          location?: string | null
           preferences?: Json | null
+          role?: string | null
+          show_snags?: boolean | null
           updated_at?: string
           user_id: string
+          visibility?: string | null
         }
         Update: {
+          allow_connections?: boolean | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          discoverable?: boolean | null
           display_name?: string | null
+          focus_areas?: string[] | null
           id?: string
+          linkedin_url?: string | null
+          location?: string | null
           preferences?: Json | null
+          role?: string | null
+          show_snags?: boolean | null
           updated_at?: string
           user_id?: string
+          visibility?: string | null
         }
         Relationships: []
       }
