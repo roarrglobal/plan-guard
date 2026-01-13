@@ -4,24 +4,23 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { DocumentUploadModal } from "@/components/upload/DocumentUploadModal";
 import { UpgradePromptModal } from "@/components/upload/UpgradePromptModal";
+import LimitReachedModal from "@/components/usage/LimitReachedModal";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-
-// TODO: Replace with actual subscription check
-const useIsPro = () => {
-  // For now, always return true to allow testing
-  // In production, check user's subscription status
-  return true;
-};
+import { useUsage } from "@/hooks/useUsage";
 
 export function DashboardQuickActionsEnhanced() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
-  const isPro = useIsPro();
+  const { tier, canUseFeatureSync, canUploadFile, refetch: refetchUsage } = useUsage();
+  
+  const isPro = tier !== "free";
   
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
+  const [limitModalOpen, setLimitModalOpen] = useState(false);
+  const [limitType, setLimitType] = useState<"analysis" | "document" | "storage">("document");
   const [isUploading, setIsUploading] = useState(false);
 
   const handleProFeature = (feature: string) => {
@@ -32,11 +31,19 @@ export function DashboardQuickActionsEnhanced() {
   };
 
   const handleUploadClick = () => {
-    if (isPro) {
-      setUploadModalOpen(true);
-    } else {
+    if (!isPro) {
       setUpgradeModalOpen(true);
+      return;
     }
+    
+    // Check document upload limit
+    if (!canUseFeatureSync("document_upload")) {
+      setLimitType("document");
+      setLimitModalOpen(true);
+      return;
+    }
+    
+    setUploadModalOpen(true);
   };
 
   const handleDocumentUpload = async (file: File, context: string) => {
@@ -46,6 +53,14 @@ export function DashboardQuickActionsEnhanced() {
         description: "Please sign in to upload documents.",
         variant: "destructive",
       });
+      return;
+    }
+
+    // Check storage limit
+    if (!canUploadFile(file.size)) {
+      setLimitType("storage");
+      setLimitModalOpen(true);
+      setUploadModalOpen(false);
       return;
     }
 
@@ -78,27 +93,19 @@ export function DashboardQuickActionsEnhanced() {
 
       // Handle different file types
       if (file.type.startsWith("image/")) {
-        // Convert image to base64 for vision analysis
         const reader = new FileReader();
         imageBase64 = await new Promise((resolve, reject) => {
           reader.onload = () => {
             const result = reader.result as string;
-            // Remove the data URL prefix
             resolve(result.split(",")[1]);
           };
           reader.onerror = reject;
           reader.readAsDataURL(file);
         });
       } else if (file.type === "text/plain") {
-        // Read text file directly
         extractedText = await file.text();
       } else {
-        // For PDF and DOCX, we'll send to the edge function
-        // In a production app, you'd use pdf-parse or mammoth
-        // For now, we'll note this limitation
-        extractedText = `[Document: ${file.name}]\n\nNote: Full text extraction for PDF/DOCX files requires additional processing. The AI will analyze based on available context.`;
-        
-        // If context is provided, use that as the primary content
+        extractedText = `[Document: ${file.name}]\n\nNote: Full text extraction for PDF/DOCX files requires additional processing.`;
         if (context) {
           extractedText = `Document uploaded: ${file.name}\n\nUser's description: ${context}`;
         }
@@ -139,6 +146,9 @@ export function DashboardQuickActionsEnhanced() {
         console.error("Failed to save analysis:", saveError);
       }
 
+      // Refetch usage to update counts
+      refetchUsage();
+
       setUploadModalOpen(false);
       
       toast({
@@ -146,7 +156,6 @@ export function DashboardQuickActionsEnhanced() {
         description: "Your document has been analyzed.",
       });
 
-      // Navigate to dashboard to see the new analysis
       navigate("/dashboard");
       
     } catch (error) {
@@ -223,6 +232,13 @@ export function DashboardQuickActionsEnhanced() {
       <UpgradePromptModal
         open={upgradeModalOpen}
         onOpenChange={setUpgradeModalOpen}
+      />
+
+      <LimitReachedModal
+        open={limitModalOpen}
+        onOpenChange={setLimitModalOpen}
+        limitType={limitType}
+        currentTier={tier}
       />
     </>
   );
