@@ -1,14 +1,17 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
 import { AnalysisInput } from "@/components/AnalysisInput";
 import { AnalysisLoading } from "@/components/analysis/AnalysisLoading";
 import { AnalysisResults, type AnalysisResult } from "@/components/analysis/AnalysisResults";
+import { AnalysisInputSelectors } from "@/components/analysis/AnalysisInputSelectors";
+import { UsageWarningBanner } from "@/components/usage/UsageWarningBanner";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useUsage } from "@/hooks/useUsage";
 import LimitReachedModal from "@/components/usage/LimitReachedModal";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 export default function Analyze() {
   const navigate = useNavigate();
@@ -21,6 +24,12 @@ export default function Analyze() {
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [limitModalOpen, setLimitModalOpen] = useState(false);
   const [sourceJournalId, setSourceJournalId] = useState<string | null>(null);
+  
+  // New selector states
+  const [category, setCategory] = useState("other");
+  const [stakes, setStakes] = useState("medium");
+  const [timeline, setTimeline] = useState("short");
+  const [showOptions, setShowOptions] = useState(false);
 
   useEffect(() => {
     // Check for prefilled content from journal analysis
@@ -119,15 +128,15 @@ export default function Analyze() {
     if (!result) return;
 
     try {
-      // Extract category from the analysis result (auto-detected by AI)
-      const category = (result as any).category || "other";
+      // Use user-selected category or AI-detected category
+      const selectedCategory = category || (result as any).category || "other";
       
       const { error } = await supabase.from("analyses").insert([{
         user_id: user.id,
         original_input: input,
         result: JSON.parse(JSON.stringify(result)),
         title: input.slice(0, 100),
-        category: category,
+        category: selectedCategory,
       }]);
 
       if (error) {
@@ -178,17 +187,48 @@ export default function Analyze() {
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <span className="text-[18px] font-bold text-cobalt">Snag</span>
+          <span className="text-[18px] font-bold text-primary">Snag</span>
           <div className="w-9" />
         </header>
 
         {/* Input area */}
         <main className="flex-1 flex flex-col p-4">
-          <div className="flex-1 flex flex-col justify-center max-w-lg mx-auto w-full">
-            <h2 className="text-[20px] font-semibold text-[#1A1A1A] mb-6 text-center">
+          <div className="flex-1 flex flex-col max-w-lg mx-auto w-full">
+            {/* Usage Warning */}
+            <UsageWarningBanner onUpgrade={() => navigate("/settings")} />
+            
+            <h2 className="text-[20px] font-semibold text-foreground mb-4 text-center">
               What's your plan?
             </h2>
+            
             <AnalysisInput onSubmit={handleAnalyze} />
+            
+            {/* Collapsible Options */}
+            <Collapsible open={showOptions} onOpenChange={setShowOptions} className="mt-4">
+              <CollapsibleTrigger className="flex items-center justify-center gap-2 w-full py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                {showOptions ? (
+                  <>
+                    <ChevronUp className="w-4 h-4" />
+                    Hide options
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="w-4 h-4" />
+                    Add context (category, stakes, timeline)
+                  </>
+                )}
+              </CollapsibleTrigger>
+              <CollapsibleContent className="mt-4">
+                <AnalysisInputSelectors
+                  category={category}
+                  onCategoryChange={setCategory}
+                  stakes={stakes}
+                  onStakesChange={setStakes}
+                  timeline={timeline}
+                  onTimelineChange={setTimeline}
+                />
+              </CollapsibleContent>
+            </Collapsible>
           </div>
         </main>
       </div>

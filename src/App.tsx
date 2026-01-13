@@ -1,9 +1,10 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import Landing from "./pages/Landing";
@@ -11,6 +12,7 @@ import Analyze from "./pages/Analyze";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import AnalysisDetail from "./pages/AnalysisDetail";
+import AnalysisHistoryPage from "./pages/AnalysisHistoryPage";
 import SettingsPage from "./pages/SettingsPage";
 import ProfileSettings from "./pages/ProfileSettings";
 import Terms from "./pages/Terms";
@@ -36,12 +38,8 @@ import JournalDetailPage from "./pages/JournalDetailPage";
 const queryClient = new QueryClient();
 
 const App = () => {
-  // Use light mode for TRC brand (remove dark mode default)
-  useEffect(() => {
-    document.documentElement.classList.remove("dark");
-  }, []);
-
   return (
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <TooltipProvider>
@@ -60,6 +58,7 @@ const App = () => {
               <Route element={<AppLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/analyze" element={<Analyze />} />
+                <Route path="/analyses" element={<AnalysisHistoryPage />} />
                 <Route path="/analysis/:id" element={<AnalysisDetail />} />
                 <Route path="/journal" element={<JournalPage />} />
                 <Route path="/journal/new" element={<JournalNewPage />} />
@@ -86,6 +85,7 @@ const App = () => {
         </TooltipProvider>
       </AuthProvider>
     </QueryClientProvider>
+    </ThemeProvider>
   );
 };
 
