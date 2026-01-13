@@ -246,6 +246,8 @@ export type Database = {
           created_at: string
           entry_type: string
           id: string
+          linked_analysis_id: string | null
+          linked_post_mortem_id: string | null
           mood: string | null
           updated_at: string
           user_id: string
@@ -256,6 +258,8 @@ export type Database = {
           created_at?: string
           entry_type: string
           id?: string
+          linked_analysis_id?: string | null
+          linked_post_mortem_id?: string | null
           mood?: string | null
           updated_at?: string
           user_id: string
@@ -266,12 +270,29 @@ export type Database = {
           created_at?: string
           entry_type?: string
           id?: string
+          linked_analysis_id?: string | null
+          linked_post_mortem_id?: string | null
           mood?: string | null
           updated_at?: string
           user_id?: string
           word_count?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "journal_entries_linked_analysis_id_fkey"
+            columns: ["linked_analysis_id"]
+            isOneToOne: false
+            referencedRelation: "analyses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_entries_linked_post_mortem_id_fkey"
+            columns: ["linked_post_mortem_id"]
+            isOneToOne: false
+            referencedRelation: "post_mortems"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       post_mortems: {
         Row: {
@@ -283,6 +304,7 @@ export type Database = {
           outcome_rating: number | null
           outcome_status: string | null
           post_mortem_type: string
+          source_journal_id: string | null
           timeframe_end: string | null
           timeframe_start: string | null
           title: string | null
@@ -299,6 +321,7 @@ export type Database = {
           outcome_rating?: number | null
           outcome_status?: string | null
           post_mortem_type: string
+          source_journal_id?: string | null
           timeframe_end?: string | null
           timeframe_start?: string | null
           title?: string | null
@@ -315,6 +338,7 @@ export type Database = {
           outcome_rating?: number | null
           outcome_status?: string | null
           post_mortem_type?: string
+          source_journal_id?: string | null
           timeframe_end?: string | null
           timeframe_start?: string | null
           title?: string | null
@@ -328,6 +352,13 @@ export type Database = {
             columns: ["linked_decision_id"]
             isOneToOne: false
             referencedRelation: "decisions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_mortems_source_journal_id_fkey"
+            columns: ["source_journal_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
             referencedColumns: ["id"]
           },
         ]

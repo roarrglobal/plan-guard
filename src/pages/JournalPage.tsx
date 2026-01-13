@@ -14,13 +14,25 @@ import {
   Moon,
   Sun,
   FileText,
-  Filter
+  Filter,
+  Target,
+  MoreVertical,
+  Trash2,
+  Edit
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { JournalAnalyzeModal } from "@/components/journal/JournalAnalyzeModal";
 
 interface JournalEntry {
   id: string;
@@ -29,6 +41,8 @@ interface JournalEntry {
   mood: string | null;
   word_count: number;
   created_at: string;
+  linked_analysis_id: string | null;
+  linked_post_mortem_id: string | null;
 }
 
 const ENTRY_TYPES = [
@@ -66,6 +80,10 @@ export default function JournalPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [showCalendar, setShowCalendar] = useState(false);
+  
+  // Analysis modal state
+  const [analyzeModalOpen, setAnalyzeModalOpen] = useState(false);
+  const [selectedEntry, setSelectedEntry] = useState<JournalEntry | null>(null);
   
   const activeType = searchParams.get("type") || "all";
 
@@ -253,30 +271,44 @@ export default function JournalPage() {
         ) : (
           <div className="space-y-3">
             {filteredEntries.map((entry) => (
-              <button
+              <div
                 key={entry.id}
-                onClick={() => navigate(`/journal/${entry.id}`)}
-                className="w-full bg-white border border-border rounded-xl p-4 text-left hover:border-primary/30 hover:shadow-sm transition-all"
+                className="w-full bg-white border border-border rounded-xl p-4 hover:border-primary/30 hover:shadow-sm transition-all"
               >
                 <div className="flex items-start gap-3">
                   {/* Mood indicator */}
                   {entry.mood && (
-                    <div
+                    <button
+                      onClick={() => navigate(`/journal/${entry.id}`)}
                       className="w-10 h-10 rounded-full flex items-center justify-center text-lg flex-shrink-0"
                       style={{ backgroundColor: `${MOOD_COLORS[entry.mood]}20` }}
                     >
                       {MOOD_EMOJIS[entry.mood]}
-                    </div>
+                    </button>
                   )}
                   
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
+                  <button 
+                    onClick={() => navigate(`/journal/${entry.id}`)}
+                    className="flex-1 min-w-0 text-left"
+                  >
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <Badge variant="secondary" className="text-xs capitalize">
                         {entry.entry_type.replace("_", " ")}
                       </Badge>
                       <span className="text-xs text-muted-foreground">
                         {format(new Date(entry.created_at), "MMM d, yyyy • h:mm a")}
                       </span>
+                      {/* Linked analysis badges */}
+                      {entry.linked_analysis_id && (
+                        <Badge variant="outline" className="text-xs bg-primary/5 text-primary border-primary/20">
+                          🎯 Pre-Mortem
+                        </Badge>
+                      )}
+                      {entry.linked_post_mortem_id && (
+                        <Badge variant="outline" className="text-xs bg-amber-50 text-amber-700 border-amber-200">
+                          🔍 Post-Mortem
+                        </Badge>
+                      )}
                     </div>
                     
                     <p className="text-sm text-foreground line-clamp-2">
@@ -286,13 +318,78 @@ export default function JournalPage() {
                     <p className="text-xs text-muted-foreground mt-2">
                       {entry.word_count} words
                     </p>
-                  </div>
+                  </button>
+                  
+                  {/* Actions menu */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0">
+                        <MoreVertical className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem 
+                        onClick={() => {
+                          setSelectedEntry(entry);
+                          setAnalyzeModalOpen(true);
+                        }}
+                        className="gap-2"
+                      >
+                        <Target className="w-4 h-4" />
+                        Analyze Entry
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        onClick={() => navigate(`/journal/${entry.id}`)}
+                        className="gap-2"
+                      >
+                        <Edit className="w-4 h-4" />
+                        View / Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem 
+                        className="gap-2 text-destructive focus:text-destructive"
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          if (confirm("Delete this journal entry?")) {
+                            const { error } = await supabase
+                              .from("journal_entries")
+                              .delete()
+                              .eq("id", entry.id);
+                            if (error) {
+                              toast({
+                                title: "Error deleting entry",
+                                description: error.message,
+                                variant: "destructive"
+                              });
+                            } else {
+                              setEntries(prev => prev.filter(e => e.id !== entry.id));
+                              toast({ title: "Entry deleted" });
+                            }
+                          }
+                        }}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
-              </button>
+              </div>
             ))}
           </div>
         )}
       </div>
+      
+      {/* Analysis Modal */}
+      {selectedEntry && (
+        <JournalAnalyzeModal
+          open={analyzeModalOpen}
+          onOpenChange={setAnalyzeModalOpen}
+          entryId={selectedEntry.id}
+          entryType={selectedEntry.entry_type}
+          entryContent={selectedEntry.content as Record<string, unknown>}
+        />
+      )}
     </div>
   );
 }

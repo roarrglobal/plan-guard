@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { AnalysisInput } from "@/components/AnalysisInput";
 import { AnalysisLoading } from "@/components/analysis/AnalysisLoading";
@@ -12,6 +12,7 @@ import LimitReachedModal from "@/components/usage/LimitReachedModal";
 
 export default function Analyze() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const { user } = useAuth();
   const { canUseFeature, tier, refetch: refetchUsage } = useUsage();
@@ -19,17 +20,29 @@ export default function Analyze() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [limitModalOpen, setLimitModalOpen] = useState(false);
+  const [sourceJournalId, setSourceJournalId] = useState<string | null>(null);
 
   useEffect(() => {
+    // Check for prefilled content from journal analysis
+    const state = location.state as { prefillContent?: string; sourceJournalId?: string } | null;
+    if (state?.prefillContent) {
+      setInput(state.prefillContent);
+      if (state.sourceJournalId) {
+        setSourceJournalId(state.sourceJournalId);
+      }
+      // Clear location state
+      window.history.replaceState({}, document.title);
+    }
+    
     // Check for stored input from landing page
     const storedInput = sessionStorage.getItem("snag_input");
-    if (storedInput) {
+    if (storedInput && !state?.prefillContent) {
       setInput(storedInput);
       sessionStorage.removeItem("snag_input");
       // Auto-start analysis
       handleAnalyze(storedInput);
     }
-  }, []);
+  }, [location]);
 
   const handleAnalyze = async (text: string) => {
     // Check usage limit before proceeding

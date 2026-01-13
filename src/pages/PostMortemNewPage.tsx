@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -30,7 +30,7 @@ import { cn } from "@/lib/utils";
 import { FeatureUpgradeModal } from "@/components/subscription/FeatureUpgradeModal";
 import type { Json } from "@/integrations/supabase/types";
 
-type PostMortemType = "decision" | "project" | "event" | "failure" | "success" | "other";
+type PostMortemType = "decision" | "project" | "event" | "failure" | "success" | "journal" | "other";
 type OutcomeStatus = "success" | "partial" | "failure" | "mixed" | "pivot";
 type Step = "context" | "outcome" | "expectations" | "analysis" | "deep_dive" | "ai_results";
 
@@ -40,6 +40,7 @@ const TYPE_OPTIONS = [
   { id: "event" as PostMortemType, label: "Event", description: "Something that happened" },
   { id: "failure" as PostMortemType, label: "Failure", description: "Something that didn't work" },
   { id: "success" as PostMortemType, label: "Success", description: "Something that went well" },
+  { id: "journal" as PostMortemType, label: "Journal Entry", description: "From a reflection" },
   { id: "other" as PostMortemType, label: "Other", description: "Something else" },
 ];
 
@@ -62,6 +63,7 @@ const STEPS: { id: Step; label: string; number: number }[] = [
 
 export default function PostMortemNewPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, profile } = useAuth();
   const { toast } = useToast();
   const { access, isLoading: accessLoading } = useFeatureAccess("post_mortem");
@@ -71,13 +73,30 @@ export default function PostMortemNewPage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   
+  // Source journal entry tracking
+  const [sourceJournalId, setSourceJournalId] = useState<string | null>(null);
+  
   // Form data
   const [description, setDescription] = useState("");
   const [title, setTitle] = useState("");
   const [postMortemType, setPostMortemType] = useState<PostMortemType | null>(null);
   const [outcomeStatus, setOutcomeStatus] = useState<OutcomeStatus | null>(null);
   const [outcomeRating, setOutcomeRating] = useState([5]);
-  
+
+  // Check for prefilled content from journal
+  useEffect(() => {
+    const state = location.state as { prefillContent?: string; sourceJournalId?: string } | null;
+    if (state?.prefillContent) {
+      setDescription(state.prefillContent);
+      setPostMortemType("journal");
+      if (state.sourceJournalId) {
+        setSourceJournalId(state.sourceJournalId);
+      }
+      // Clear location state
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
+
   const [expectations, setExpectations] = useState({
     what_expected: "",
     what_actually_happened: "",
@@ -199,7 +218,7 @@ export default function PostMortemNewPage() {
 
     setIsSaving(true);
     
-    const { error } = await supabase
+    const { data: insertedData, error } = await supabase
       .from("post_mortems")
       .insert([{
         user_id: user.id,
@@ -210,7 +229,18 @@ export default function PostMortemNewPage() {
         outcome_rating: outcomeRating[0],
         user_inputs: { ...userInputs, ...expectations, ...deepDive } as unknown as Json,
         ai_analysis: aiAnalysis as Json | null,
-      }]);
+        source_journal_id: sourceJournalId,
+      }])
+      .select("id")
+      .single();
+
+    // If linked from journal, update the journal entry
+    if (!error && insertedData && sourceJournalId) {
+      await supabase
+        .from("journal_entries")
+        .update({ linked_post_mortem_id: insertedData.id })
+        .eq("id", sourceJournalId);
+    }
 
     if (error) {
       toast({
