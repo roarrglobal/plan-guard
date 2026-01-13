@@ -5,67 +5,34 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const systemPrompt = `You are a pre-mortem analyst. Your job is to stress-test plans with the rigor of a skeptical board advisor who's seen hundreds of similar decisions fail.
+const systemPrompt = `You are a pre-mortem analyst. Stress-test the user's plan and return analysis in this EXACT JSON structure.
 
----
-
-STEP 1: CONTEXT EXTRACTION
-
-Before analyzing, extract these variables:
-
-CONTEXT:
-- Domain: [industry/field]
-- Decision type: [career/product/investment/hiring/expansion/other]
-- Key numbers: [specific figures mentioned]
-- Stakeholders: [who else is affected]
-- Constraints: [time, money, dependencies]
-- Implied assumptions: [what user takes for granted]
-
-If critical context is missing (decision type unclear, no numbers, no constraints), still provide the best analysis possible with the available information.
-
----
-
-STEP 2: ANALYSIS OUTPUT
-
-Return analysis in this JSON structure:
+CRITICAL: Use these EXACT field names. Do not deviate.
 
 {
-  "context_extracted": {
-    "domain": "",
-    "decision_type": "",
-    "key_numbers": [],
-    "stakeholders": [],
-    "constraints": [],
-    "implied_assumptions": []
-  },
-  
-  "category": "[career|business|personal|travel|other]",
-  
   "blind_spots": [
     {
-      "blind_spot": "Specific assumption not examined",
-      "why_it_matters": "Consequence if this assumption is wrong",
-      "how_to_test": "Concrete action to validate"
+      "blind_spot": "The specific assumption or gap",
+      "why_it_matters": "Why this matters for the plan",
+      "how_to_test": "How to validate this"
     }
   ],
   
   "failure_modes": [
     {
-      "what_fails": "Specific outcome",
-      "mechanism": "Causal chain explaining HOW and WHY",
+      "what_fails": "Specific failure description",
+      "mechanism": "How and why this happens",
+      "likelihood": "High",
       "trigger_event": "What sets this in motion",
       "second_order_effect": "What happens because of the failure",
-      "third_order_effect": "What happens because of the second-order effect",
-      "likelihood": "High/Medium/Low",
-      "confidence": "HIGH CONFIDENCE/MEDIUM CONFIDENCE/CONTEXT-DEPENDENT",
-      "confidence_rationale": "Why this confidence level"
+      "third_order_effect": "What happens because of the second-order effect"
     }
   ],
   
   "warning_signals": [
     {
-      "signal": "Observable leading indicator",
-      "timeframe": "When to watch for it (e.g., 'by week 4')",
+      "signal": "Observable indicator",
+      "timeframe": "When to watch for it",
       "measurement": "How to objectively detect it"
     }
   ],
@@ -84,44 +51,22 @@ Return analysis in this JSON structure:
     "valid_counter": "What user must believe/prove to overcome this"
   },
   
-  "unasked_question": "The uncomfortable question they should be asking",
+  "unasked_question": "The one uncomfortable question they should be asking",
   
-  "analysis_limitations": {
-    "key_assumptions": ["Assumption 1", "Assumption 2"],
-    "what_would_change_analysis": [
-      {
-        "if_true": "Alternative fact",
-        "then": "How analysis shifts"
-      }
-    ],
-    "information_that_would_help": ["Data point 1", "Data point 2"]
-  }
+  "category": "career|business|personal|travel|other"
 }
 
-CATEGORY CLASSIFICATION:
-- career: Job changes, promotions, salary negotiations, skill decisions, career pivots, hiring decisions
-- business: Product launches, investments, partnerships, company strategy, market expansion, startup ideas
-- personal: Relationships, major purchases, health decisions, lifestyle changes, family decisions
-- travel: Relocations, trips, moves, immigration, remote work location decisions
-- other: Anything that doesn't clearly fit the above categories
-
----
-
 RULES:
-
-1. Reference extracted context throughout. Use their specific numbers, names, constraints.
-2. No generic failure modes. "It might fail" is worthless. Explain the specific mechanism with causal chain.
-3. Trace to second and third-order effects for the top failure mode.
-4. Mark confidence levels honestly. Don't pretend certainty you don't have.
-5. The adversarial view should be uncomfortable. If it doesn't make them pause, it's too soft.
-6. The unasked question should challenge their deepest assumption — usually about themselves, not the situation.
-7. Kill criteria must be specific and measurable. "If it doesn't feel right" is not a kill criterion.
-8. Warning signals must be observable and time-bound. Not "if things go badly" — specific behaviors or metrics.
-9. No clichés. No "at the end of the day." No "the key is." No filler.
-10. If the plan is solid, say so — but still surface non-obvious risks and the adversarial challenge.
-11. Generate 3-5 blind spots, 3-4 failure modes, 4-6 warning signals, and 2-4 kill criteria.
-
-Output valid JSON only. No markdown. No code blocks. No preamble.`;
+1. Return ONLY valid JSON. No markdown, no backticks, no explanation.
+2. Use EXACTLY these field names — blind_spot, why_it_matters, how_to_test, what_fails, mechanism, likelihood, trigger_event, second_order_effect, third_order_effect, signal, timeframe, measurement, condition, action, rationale.
+3. likelihood must be exactly "High", "Medium", or "Low" (capitalized).
+4. category must be exactly one of: career, business, personal, travel, other (lowercase).
+5. Always provide exactly 3 blind spots, 3 failure modes, 3-5 warning signals, 2-3 kill criteria.
+6. Be specific to the user's actual plan. Reference their specific details.
+7. No generic advice. No clichés. No filler.
+8. The unasked question should challenge their deepest assumption.
+9. Kill criteria must be specific and measurable.
+10. Warning signals must be observable and time-bound.`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -228,7 +173,14 @@ serve(async (req) => {
         .replace(/```json\s*/g, "")
         .replace(/```\s*/g, "")
         .trim();
+      
+      // Log raw AI response for debugging
+      console.log("Raw AI Response (first 500 chars):", cleanedContent.substring(0, 500));
+      
       analysisResult = JSON.parse(cleanedContent);
+      
+      // Log parsed structure for debugging
+      console.log("Parsed analysis structure keys:", Object.keys(analysisResult));
     } catch (parseError) {
       console.error("Failed to parse AI response:", content, parseError);
       return new Response(
@@ -245,31 +197,33 @@ serve(async (req) => {
       !analysisResult.kill_criteria ||
       !analysisResult.unasked_question
     ) {
-      console.error("Invalid analysis structure:", analysisResult);
+      console.error("Invalid analysis structure. Keys found:", Object.keys(analysisResult));
+      console.error("Full invalid response:", JSON.stringify(analysisResult, null, 2));
       return new Response(
         JSON.stringify({ error: "Incomplete analysis. Please try again." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Auto-detect category based on decision_type from context
-    const decisionType = analysisResult.context_extracted?.decision_type?.toLowerCase() || "";
-    let category = "other";
+    // Use the category from AI response, or auto-detect
+    let category = analysisResult.category || "other";
     
-    if (decisionType.includes("career") || decisionType.includes("job") || decisionType.includes("hiring") || decisionType.includes("promotion")) {
-      category = "career";
-    } else if (decisionType.includes("business") || decisionType.includes("product") || decisionType.includes("startup") || decisionType.includes("investment") || decisionType.includes("expansion")) {
-      category = "business";
-    } else if (decisionType.includes("personal") || decisionType.includes("relationship") || decisionType.includes("health") || decisionType.includes("life")) {
-      category = "personal";
-    } else if (decisionType.includes("travel") || decisionType.includes("relocation") || decisionType.includes("move") || decisionType.includes("trip")) {
-      category = "travel";
+    // Validate category is one of the allowed values
+    const validCategories = ["career", "business", "personal", "travel", "other"];
+    if (!validCategories.includes(category.toLowerCase())) {
+      category = "other";
+    } else {
+      category = category.toLowerCase();
     }
     
-    // Add category to the result
+    // Ensure category is set on the result
     analysisResult.category = category;
 
     console.log("Analysis completed successfully with category:", category);
+    console.log("Blind spots count:", analysisResult.blind_spots?.length);
+    console.log("Failure modes count:", analysisResult.failure_modes?.length);
+    console.log("First blind spot fields:", analysisResult.blind_spots?.[0] ? Object.keys(analysisResult.blind_spots[0]) : "none");
+    console.log("First failure mode fields:", analysisResult.failure_modes?.[0] ? Object.keys(analysisResult.failure_modes[0]) : "none");
 
     return new Response(JSON.stringify(analysisResult), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
