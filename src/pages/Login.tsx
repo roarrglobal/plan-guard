@@ -161,10 +161,22 @@ export default function Login() {
               </div>
             </div>
 
+            {!isSignUp && (
+              <div className="text-right">
+                <button
+                  type="button"
+                  onClick={() => navigate("/forgot-password")}
+                  className="text-[13px] text-primary hover:underline"
+                >
+                  Forgot password?
+                </button>
+              </div>
+            )}
+
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-[#0047AB] hover:bg-[#003A8C] text-white font-semibold py-3 rounded-lg mt-6"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 rounded-lg mt-6"
             >
               {isLoading
                 ? "Please wait..."
