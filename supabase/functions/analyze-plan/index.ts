@@ -41,7 +41,26 @@ serve(async (req) => {
   }
 
   try {
-    const body = await req.json();
+    // Handle empty body gracefully
+    let body;
+    try {
+      const text = await req.text();
+      if (!text || text.trim() === '') {
+        console.log("Empty request body received");
+        return new Response(
+          JSON.stringify({ error: "Request body is empty" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      body = JSON.parse(text);
+    } catch (parseErr) {
+      console.error("Failed to parse request body:", parseErr);
+      return new Response(
+        JSON.stringify({ error: "Invalid request body" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    
     const plan = body?.plan;
     
     console.log("Received request body:", JSON.stringify(body));
