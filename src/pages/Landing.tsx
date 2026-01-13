@@ -10,6 +10,7 @@ import { Switch } from "@/components/ui/switch";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import UsageLimitsModal from "@/components/landing/UsageLimitsModal";
+import LiveStatsCounter from "@/components/landing/LiveStatsCounter";
 import { useAuth } from "@/contexts/AuthContext";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
@@ -252,6 +253,9 @@ export default function Landing() {
           </motion.p>
         </div>
       </section>
+
+      {/* Live Stats Counter Section */}
+      <LiveStatsCounter />
 
       {/* What is Snag? Section */}
       <section className="py-16 md:py-20 bg-muted">
