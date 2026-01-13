@@ -11,7 +11,8 @@ import {
   CheckCircle2,
   AlertCircle,
   Lightbulb,
-  Target
+  Target,
+  FileText
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +32,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { exportPostMortemPDF, type PostMortemData } from "@/lib/pdfExport";
 
 interface PostMortem {
   id: string;
@@ -63,7 +65,7 @@ const OUTCOME_COLORS: Record<string, { bg: string; text: string }> = {
 export default function PostMortemDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, profile } = useAuth();
   const { toast } = useToast();
   
   const [postMortem, setPostMortem] = useState<PostMortem | null>(null);
@@ -126,6 +128,33 @@ export default function PostMortemDetailPage() {
     }
   };
 
+  const handleExportPDF = () => {
+    if (!postMortem) return;
+
+    const pdfData: PostMortemData = {
+      title: postMortem.title || "Post-Mortem Analysis",
+      description: postMortem.description,
+      postMortemType: postMortem.post_mortem_type,
+      outcomeStatus: postMortem.outcome_status || undefined,
+      outcomeRating: postMortem.outcome_rating || undefined,
+      analysis: postMortem.ai_analysis || undefined,
+    };
+
+    try {
+      exportPostMortemPDF(pdfData, profile?.display_name || undefined);
+      toast({
+        title: "Report exported",
+        description: "Your PDF has been downloaded.",
+      });
+    } catch (error) {
+      toast({
+        title: "Export failed",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (authLoading || isLoading) {
     return (
       <div className="min-h-screen bg-muted flex items-center justify-center">
@@ -160,6 +189,11 @@ export default function PostMortemDetailPage() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleExportPDF}>
+                <FileText className="w-4 h-4 mr-2" />
+                Export PDF
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem 
                 onClick={() => setShowDeleteDialog(true)}
                 className="text-destructive"

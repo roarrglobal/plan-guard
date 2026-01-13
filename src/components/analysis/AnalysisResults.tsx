@@ -1,4 +1,4 @@
-import { ArrowLeft, Copy, Plus, Check, Share2 } from "lucide-react";
+import { ArrowLeft, Copy, Plus, Check, Share2, FileText } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { AnalysisSection } from "./AnalysisSection";
@@ -6,6 +6,8 @@ import { FailureModeItem } from "./FailureModeItem";
 import { AnalysisDisclaimer } from "./AnalysisDisclaimer";
 import { FirstUseAcknowledgment, useFirstUseAcknowledgment } from "./FirstUseAcknowledgment";
 import { ShareModal } from "@/components/sharing/ShareModal";
+import { exportPreMortemPDF, type PreMortemData } from "@/lib/pdfExport";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Simplified analysis result types matching the AI output
 export interface BlindSpot {
@@ -81,6 +83,43 @@ export function AnalysisResults({
   const [showShareModal, setShowShareModal] = useState(false);
   const { toast } = useToast();
   const { hasAcknowledged, setHasAcknowledged } = useFirstUseAcknowledgment();
+  const { profile } = useAuth();
+
+  const handleExportPDF = () => {
+    const pdfData: PreMortemData = {
+      originalInput,
+      blindSpots: result.blind_spots.map(spot => 
+        isEnhancedBlindSpot(spot) ? spot : { blind_spot: spot }
+      ),
+      failureModes: result.failure_modes.map(mode => 
+        isEnhancedFailureMode(mode) 
+          ? mode 
+          : { what_fails: mode.what, mechanism: mode.mechanism, likelihood: mode.likelihood, impact: (mode as any).impact }
+      ),
+      warningSignals: result.warning_signals.map(signal =>
+        isEnhancedWarningSignal(signal) ? signal : { signal }
+      ),
+      killCriteria: result.kill_criteria.map(criteria =>
+        isEnhancedKillCriterion(criteria) ? criteria : { condition: criteria, action: "Review and reassess" }
+      ),
+      unaskedQuestion: result.unasked_question,
+      category: result.category,
+    };
+
+    try {
+      exportPreMortemPDF(pdfData, profile?.display_name || undefined);
+      toast({
+        title: "Report exported",
+        description: "Your PDF has been downloaded.",
+      });
+    } catch (error) {
+      toast({
+        title: "Export failed",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const formatForCopy = () => {
     let text = `PRE-MORTEM ANALYSIS\n\n`;
@@ -340,6 +379,14 @@ export function AnalysisResults({
                 Copy
               </>
             )}
+          </button>
+
+          <button
+            onClick={handleExportPDF}
+            className="flex-1 flex items-center justify-center gap-2 bg-[#F2F2F2] text-[#333333] border border-[#E0E0E0] rounded-lg py-3 min-h-[48px] text-[14px] font-medium transition-colors hover:bg-[#E8E8E8]"
+          >
+            <FileText className="w-4 h-4" />
+            PDF
           </button>
 
           <button
