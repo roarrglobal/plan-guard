@@ -369,6 +369,8 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           created_at: string
+          deep_snags_used: number | null
+          discount_code: string | null
           discoverable: boolean | null
           display_name: string | null
           focus_areas: string[] | null
@@ -379,21 +381,28 @@ export type Database = {
           linkedin_url: string | null
           location: string | null
           preferences: Json | null
+          retros_used: number | null
           role: string | null
           show_snags: boolean | null
           subscription_ends_at: string | null
           subscription_status: string | null
           subscription_tier: string | null
           trial_ends_at: string | null
+          trial_expired: boolean | null
+          trial_start_date: string | null
           updated_at: string
           user_id: string
           visibility: string | null
+          waitlist_joined: boolean | null
+          waitlist_joined_at: string | null
         }
         Insert: {
           allow_connections?: boolean | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          deep_snags_used?: number | null
+          discount_code?: string | null
           discoverable?: boolean | null
           display_name?: string | null
           focus_areas?: string[] | null
@@ -404,21 +413,28 @@ export type Database = {
           linkedin_url?: string | null
           location?: string | null
           preferences?: Json | null
+          retros_used?: number | null
           role?: string | null
           show_snags?: boolean | null
           subscription_ends_at?: string | null
           subscription_status?: string | null
           subscription_tier?: string | null
           trial_ends_at?: string | null
+          trial_expired?: boolean | null
+          trial_start_date?: string | null
           updated_at?: string
           user_id: string
           visibility?: string | null
+          waitlist_joined?: boolean | null
+          waitlist_joined_at?: string | null
         }
         Update: {
           allow_connections?: boolean | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
+          deep_snags_used?: number | null
+          discount_code?: string | null
           discoverable?: boolean | null
           display_name?: string | null
           focus_areas?: string[] | null
@@ -429,15 +445,20 @@ export type Database = {
           linkedin_url?: string | null
           location?: string | null
           preferences?: Json | null
+          retros_used?: number | null
           role?: string | null
           show_snags?: boolean | null
           subscription_ends_at?: string | null
           subscription_status?: string | null
           subscription_tier?: string | null
           trial_ends_at?: string | null
+          trial_expired?: boolean | null
+          trial_start_date?: string | null
           updated_at?: string
           user_id?: string
           visibility?: string | null
+          waitlist_joined?: boolean | null
+          waitlist_joined_at?: string | null
         }
         Relationships: []
       }
@@ -680,6 +701,33 @@ export type Database = {
         }
         Relationships: []
       }
+      waitlist: {
+        Row: {
+          created_at: string
+          discount_code: string | null
+          email: string
+          id: string
+          source: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          discount_code?: string | null
+          email: string
+          id?: string
+          source?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          discount_code?: string | null
+          email?: string
+          id?: string
+          source?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       scorecard_stats: {
@@ -736,6 +784,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      increment_deep_snags_used: {
+        Args: { p_user_id: string }
+        Returns: number
+      }
       increment_document_usage: {
         Args: { p_file_size: number; p_user_id: string }
         Returns: boolean
@@ -752,6 +804,8 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: undefined
       }
+      increment_retros_used: { Args: { p_user_id: string }; Returns: number }
+      is_trial_expired: { Args: { p_user_id: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
