@@ -80,9 +80,49 @@ export type Database = {
         }
         Relationships: []
       }
+      shares: {
+        Row: {
+          analysis_id: string | null
+          created_at: string | null
+          id: string
+          platform: string
+        }
+        Insert: {
+          analysis_id?: string | null
+          created_at?: string | null
+          id?: string
+          platform: string
+        }
+        Update: {
+          analysis_id?: string | null
+          created_at?: string | null
+          id?: string
+          platform?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shares_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
+            referencedRelation: "analyses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      scorecard_stats: {
+        Row: {
+          business_count: number | null
+          career_count: number | null
+          last_hour: number | null
+          other_count: number | null
+          personal_count: number | null
+          total_analyses: number | null
+          travel_count: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
