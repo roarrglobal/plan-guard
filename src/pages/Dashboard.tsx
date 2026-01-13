@@ -17,6 +17,7 @@ import { DashboardInsightsCard } from "@/components/dashboard/DashboardInsightsC
 import { DashboardNetworkTeaser } from "@/components/dashboard/DashboardNetworkTeaser";
 import { DashboardEmptyState } from "@/components/dashboard/DashboardEmptyState";
 import { MonthlyRecapModal, useMonthlyRecap } from "@/components/dashboard/MonthlyRecapModal";
+import UsageIndicator from "@/components/dashboard/UsageIndicator";
 
 interface SavedAnalysis {
   id: string;
@@ -346,6 +347,11 @@ export default function Dashboard() {
                       )}
                     </div>
                   )}
+
+                  {/* Usage Indicator */}
+                  <div className="mb-6">
+                    <UsageIndicator />
+                  </div>
 
                   {/* Insights Card (after 5+ analyses) */}
                   <DashboardInsightsCard analyses={analyses} />

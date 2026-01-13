@@ -68,6 +68,7 @@ export type Database = {
           preferences: Json | null
           role: string | null
           show_snags: boolean | null
+          subscription_tier: string | null
           updated_at: string
           user_id: string
           visibility: string | null
@@ -86,6 +87,7 @@ export type Database = {
           preferences?: Json | null
           role?: string | null
           show_snags?: boolean | null
+          subscription_tier?: string | null
           updated_at?: string
           user_id: string
           visibility?: string | null
@@ -104,6 +106,7 @@ export type Database = {
           preferences?: Json | null
           role?: string | null
           show_snags?: boolean | null
+          subscription_tier?: string | null
           updated_at?: string
           user_id?: string
           visibility?: string | null
@@ -139,6 +142,78 @@ export type Database = {
           },
         ]
       }
+      tier_limits: {
+        Row: {
+          analyses_monthly: number
+          documents_monthly: number
+          max_file_bytes: number
+          max_words: number
+          storage_bytes: number
+          tier: string
+        }
+        Insert: {
+          analyses_monthly: number
+          documents_monthly: number
+          max_file_bytes: number
+          max_words: number
+          storage_bytes: number
+          tier: string
+        }
+        Update: {
+          analyses_monthly?: number
+          documents_monthly?: number
+          max_file_bytes?: number
+          max_words?: number
+          storage_bytes?: number
+          tier?: string
+        }
+        Relationships: []
+      }
+      usage: {
+        Row: {
+          analyses_limit: number
+          analyses_used: number | null
+          created_at: string | null
+          documents_limit: number
+          documents_used: number | null
+          id: string
+          period_end: string
+          period_start: string
+          storage_limit_bytes: number
+          storage_used_bytes: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          analyses_limit: number
+          analyses_used?: number | null
+          created_at?: string | null
+          documents_limit: number
+          documents_used?: number | null
+          id?: string
+          period_end: string
+          period_start: string
+          storage_limit_bytes: number
+          storage_used_bytes?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          analyses_limit?: number
+          analyses_used?: number | null
+          created_at?: string | null
+          documents_limit?: number
+          documents_used?: number | null
+          id?: string
+          period_end?: string
+          period_start?: string
+          storage_limit_bytes?: number
+          storage_used_bytes?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       scorecard_stats: {
@@ -155,7 +230,37 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      can_use_feature: {
+        Args: { p_feature: string; p_user_id: string }
+        Returns: boolean
+      }
+      get_or_create_usage: {
+        Args: { p_user_id: string }
+        Returns: {
+          analyses_limit: number
+          analyses_used: number | null
+          created_at: string | null
+          documents_limit: number
+          documents_used: number | null
+          id: string
+          period_end: string
+          period_start: string
+          storage_limit_bytes: number
+          storage_used_bytes: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "usage"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      increment_document_usage: {
+        Args: { p_file_size: number; p_user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
