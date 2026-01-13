@@ -21,6 +21,8 @@ export type Database = {
           id: string
           original_input: string
           result: Json
+          source_file_url: string | null
+          source_type: string | null
           title: string | null
           updated_at: string | null
           user_id: string
@@ -31,6 +33,8 @@ export type Database = {
           id?: string
           original_input: string
           result: Json
+          source_file_url?: string | null
+          source_type?: string | null
           title?: string | null
           updated_at?: string | null
           user_id: string
@@ -41,6 +45,8 @@ export type Database = {
           id?: string
           original_input?: string
           result?: Json
+          source_file_url?: string | null
+          source_type?: string | null
           title?: string | null
           updated_at?: string | null
           user_id?: string
