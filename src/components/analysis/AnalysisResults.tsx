@@ -7,7 +7,7 @@ import { AnalysisDisclaimer } from "./AnalysisDisclaimer";
 import { FirstUseAcknowledgment, useFirstUseAcknowledgment } from "./FirstUseAcknowledgment";
 import { ShareModal } from "@/components/sharing/ShareModal";
 
-// Enhanced analysis result types
+// Simplified analysis result types matching the AI output
 export interface BlindSpot {
   blind_spot: string;
   why_it_matters: string;
@@ -17,52 +17,29 @@ export interface BlindSpot {
 export interface FailureMode {
   what_fails: string;
   mechanism: string;
-  trigger_event?: string;
-  second_order_effect?: string;
-  third_order_effect?: string;
   likelihood: "High" | "Medium" | "Low";
-  confidence?: string;
-  confidence_rationale?: string;
+  impact: string;
+  mitigation: string;
 }
 
 export interface WarningSignal {
   signal: string;
-  timeframe?: string;
-  measurement?: string;
+  timeframe: string;
 }
 
 export interface KillCriterion {
   condition: string;
   action: string;
-  rationale?: string;
-}
-
-export interface AdversarialView {
-  challenge: string;
-  strongest_argument_against: string;
-  valid_counter: string;
+  threshold: string;
 }
 
 export interface AnalysisResult {
-  context_extracted?: {
-    domain?: string;
-    decision_type?: string;
-    key_numbers?: string[];
-    stakeholders?: string[];
-    constraints?: string[];
-    implied_assumptions?: string[];
-  };
   blind_spots: BlindSpot[] | string[];
   failure_modes: FailureMode[] | { what: string; mechanism: string; likelihood: string; impact: string }[];
   warning_signals: WarningSignal[] | string[];
   kill_criteria: KillCriterion[] | string[];
-  adversarial_view?: AdversarialView;
   unasked_question: string;
-  analysis_limitations?: {
-    key_assumptions?: string[];
-    what_would_change_analysis?: { if_true: string; then: string }[];
-    information_that_would_help?: string[];
-  };
+  category?: string;
 }
 
 interface AnalysisResultsProps {
@@ -127,10 +104,9 @@ export function AnalysisResults({
       if (isEnhancedFailureMode(mode)) {
         text += `${i + 1}. ${mode.what_fails}\n`;
         text += `   Mechanism: ${mode.mechanism}\n`;
-        if (mode.trigger_event) text += `   Trigger: ${mode.trigger_event}\n`;
         text += `   Likelihood: ${mode.likelihood}\n`;
-        if (mode.second_order_effect) text += `   2nd Order Effect: ${mode.second_order_effect}\n`;
-        if (mode.third_order_effect) text += `   3rd Order Effect: ${mode.third_order_effect}\n`;
+        text += `   Impact: ${mode.impact}\n`;
+        text += `   Mitigation: ${mode.mitigation}\n`;
       } else {
         text += `${i + 1}. ${mode.what || (mode as any).what_fails}\n`;
         text += `   Mechanism: ${mode.mechanism}\n`;
@@ -146,7 +122,6 @@ export function AnalysisResults({
         text += `• ${signal.signal}`;
         if (signal.timeframe) text += ` [${signal.timeframe}]`;
         text += `\n`;
-        if (signal.measurement) text += `  Measure: ${signal.measurement}\n`;
       } else {
         text += `• ${signal}\n`;
       }
@@ -157,19 +132,12 @@ export function AnalysisResults({
     result.kill_criteria.forEach((criteria) => {
       if (isEnhancedKillCriterion(criteria)) {
         text += `• ${criteria.condition} → ${criteria.action}\n`;
-        if (criteria.rationale) text += `  Rationale: ${criteria.rationale}\n`;
+        if (criteria.threshold) text += `  Threshold: ${criteria.threshold}\n`;
       } else {
         text += `• ${criteria}\n`;
       }
     });
     text += `\n`;
-
-    if (result.adversarial_view) {
-      text += `ADVERSARIAL VIEW\n`;
-      text += `Challenge: ${result.adversarial_view.challenge}\n`;
-      text += `Skeptic's argument: ${result.adversarial_view.strongest_argument_against}\n`;
-      text += `Counter: ${result.adversarial_view.valid_counter}\n\n`;
-    }
 
     text += `THE UNASKED QUESTION\n`;
     text += `"${result.unasked_question}"\n\n`;
@@ -274,11 +242,8 @@ export function AnalysisResults({
                   what: mode.what_fails,
                   mechanism: mode.mechanism,
                   likelihood: mode.likelihood,
-                  impact: mode.second_order_effect || '',
-                  trigger_event: mode.trigger_event,
-                  second_order_effect: mode.second_order_effect,
-                  third_order_effect: mode.third_order_effect,
-                  confidence: mode.confidence,
+                  impact: mode.impact,
+                  mitigation: mode.mitigation,
                 } : mode} 
                 index={i + 1} 
               />
@@ -292,21 +257,14 @@ export function AnalysisResults({
             {result.warning_signals.map((signal, i) => (
               <li key={i} className="border-b border-[#F0F0F0] pb-3 last:border-b-0 last:pb-0">
                 {isEnhancedWarningSignal(signal) ? (
-                  <div className="space-y-1">
-                    <div className="flex items-start gap-3">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#D97706] mt-2 flex-shrink-0" />
-                      <span className="text-[15px] text-[#333333]">
-                        {signal.signal}
-                        {signal.timeframe && (
-                          <span className="text-[13px] text-[#666666] ml-2">[{signal.timeframe}]</span>
-                        )}
-                      </span>
-                    </div>
-                    {signal.measurement && (
-                      <p className="text-[13px] text-[#666666] pl-5">
-                        <span className="font-semibold">Measure:</span> {signal.measurement}
-                      </p>
-                    )}
+                  <div className="flex items-start gap-3">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#D97706] mt-2 flex-shrink-0" />
+                    <span className="text-[15px] text-[#333333]">
+                      {signal.signal}
+                      {signal.timeframe && (
+                        <span className="text-[13px] text-[#666666] ml-2">[{signal.timeframe}]</span>
+                      )}
+                    </span>
                   </div>
                 ) : (
                   <div className="flex items-start gap-3 text-[15px] text-[#333333] leading-relaxed">
@@ -334,9 +292,9 @@ export function AnalysisResults({
                         <span className="font-medium">{criteria.condition}</span> → {criteria.action}
                       </span>
                     </div>
-                    {criteria.rationale && (
+                    {criteria.threshold && (
                       <p className="text-[13px] text-[#666666] pl-5">
-                        <span className="font-semibold">Why:</span> {criteria.rationale}
+                        <span className="font-semibold">Threshold:</span> {criteria.threshold}
                       </p>
                     )}
                   </div>
@@ -353,60 +311,12 @@ export function AnalysisResults({
           </ol>
         </AnalysisSection>
 
-        {/* Adversarial View */}
-        {result.adversarial_view && (
-          <AnalysisSection title="The Adversarial View" accentColor="gray">
-            <div className="space-y-4">
-              <div>
-                <p className="text-[13px] font-semibold text-[#666666] mb-1">Challenge:</p>
-                <p className="text-[15px] text-[#333333] italic">"{result.adversarial_view.challenge}"</p>
-              </div>
-              <div>
-                <p className="text-[13px] font-semibold text-[#666666] mb-1">Skeptic's Argument:</p>
-                <p className="text-[15px] text-[#333333]">{result.adversarial_view.strongest_argument_against}</p>
-              </div>
-              <div>
-                <p className="text-[13px] font-semibold text-[#666666] mb-1">To Overcome This:</p>
-                <p className="text-[15px] text-[#333333]">{result.adversarial_view.valid_counter}</p>
-              </div>
-            </div>
-          </AnalysisSection>
-        )}
-
         {/* The Unasked Question */}
         <AnalysisSection title="The Unasked Question" accentColor="cobalt">
           <p className="text-[16px] font-medium text-[#1A1A1A] italic leading-relaxed">
             "{result.unasked_question}"
           </p>
         </AnalysisSection>
-
-        {/* Analysis Limitations */}
-        {result.analysis_limitations && (
-          <AnalysisSection title="Analysis Limitations" accentColor="gray" defaultOpen={false}>
-            <div className="space-y-4 text-[13px] text-[#666666]">
-              {result.analysis_limitations.key_assumptions && result.analysis_limitations.key_assumptions.length > 0 && (
-                <div>
-                  <p className="font-semibold text-[#333333] mb-1">Key Assumptions:</p>
-                  <ul className="list-disc pl-4 space-y-1">
-                    {result.analysis_limitations.key_assumptions.map((assumption, i) => (
-                      <li key={i}>{assumption}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {result.analysis_limitations.information_that_would_help && result.analysis_limitations.information_that_would_help.length > 0 && (
-                <div>
-                  <p className="font-semibold text-[#333333] mb-1">Information That Would Help:</p>
-                  <ul className="list-disc pl-4 space-y-1">
-                    {result.analysis_limitations.information_that_would_help.map((info, i) => (
-                      <li key={i}>{info}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          </AnalysisSection>
-        )}
 
         {/* Disclaimer */}
         <AnalysisDisclaimer />
@@ -459,16 +369,16 @@ export function AnalysisResults({
           </button>
         )}
       </div>
+      </div>
 
       {/* Share Modal */}
       <ShareModal
         isOpen={showShareModal}
         onClose={() => setShowShareModal(false)}
-        planPreview={originalInput}
+        planPreview={originalInput.slice(0, 80)}
         blindSpotsCount={result.blind_spots.length}
         failureModesCount={result.failure_modes.length}
       />
-    </div>
     </>
   );
 }
