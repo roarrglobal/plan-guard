@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import type { Json } from "@/integrations/supabase/types";
 import { supabase } from "@/integrations/supabase/client";
+import { ShareModal } from "@/components/sharing/ShareModal";
 
 interface AnalysisResult {
   blind_spots?: Array<string | { title: string; description: string }>;
@@ -55,6 +56,7 @@ export default function AnalysisCardExpanded({
 }: AnalysisCardExpandedProps) {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   const [isEditingCategory, setIsEditingCategory] = useState(false);
   const [currentCategory, setCurrentCategory] = useState(analysis.category || "other");
   const [isSavingCategory, setIsSavingCategory] = useState(false);
@@ -163,17 +165,15 @@ export default function AnalysisCardExpanded({
   };
 
   const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: "Pre-Mortem Analysis",
-        text: formatForCopy(),
-      });
-    } else {
-      handleCopy();
-    }
+    setShowShareModal(true);
   };
 
+  // Get counts for share modal
+  const blindSpotsCount = result.blind_spots?.length || 0;
+  const failureModesCount = result.failure_modes?.length || 0;
+
   return (
+    <>
     <div className="bg-white border border-[#E5E5E5] rounded-lg overflow-hidden">
       {/* Header */}
       <div className="p-4 border-b border-[#E5E5E5]">
@@ -350,5 +350,15 @@ export default function AnalysisCardExpanded({
         </div>
       </div>
     </div>
+
+    {/* Share Modal */}
+    <ShareModal
+      isOpen={showShareModal}
+      onClose={() => setShowShareModal(false)}
+      planPreview={analysis.original_input}
+      blindSpotsCount={blindSpotsCount}
+      failureModesCount={failureModesCount}
+    />
+    </>
   );
 }

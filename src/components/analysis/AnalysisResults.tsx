@@ -1,10 +1,11 @@
-import { ArrowLeft, Copy, Plus, Check } from "lucide-react";
+import { ArrowLeft, Copy, Plus, Check, Share2 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { AnalysisSection } from "./AnalysisSection";
 import { FailureModeItem } from "./FailureModeItem";
 import { AnalysisDisclaimer } from "./AnalysisDisclaimer";
 import { FirstUseAcknowledgment, useFirstUseAcknowledgment } from "./FirstUseAcknowledgment";
+import { ShareModal } from "@/components/sharing/ShareModal";
 
 // Enhanced analysis result types
 export interface BlindSpot {
@@ -100,6 +101,7 @@ export function AnalysisResults({
   isLoggedIn = false,
 }: AnalysisResultsProps) {
   const [copied, setCopied] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
   const { toast } = useToast();
   const { hasAcknowledged, setHasAcknowledged } = useFirstUseAcknowledgment();
 
@@ -412,7 +414,7 @@ export function AnalysisResults({
 
       {/* Fixed Bottom Actions */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E5E5E5] px-4 py-3 safe-bottom">
-        <div className="flex gap-3 max-w-[680px] mx-auto">
+        <div className="flex gap-2 max-w-[680px] mx-auto">
           <button
             onClick={handleCopy}
             className="flex-1 flex items-center justify-center gap-2 bg-[#F2F2F2] text-[#333333] border border-[#E0E0E0] rounded-lg py-3 min-h-[48px] text-[14px] font-medium transition-colors hover:bg-[#E8E8E8]"
@@ -425,9 +427,17 @@ export function AnalysisResults({
             ) : (
               <>
                 <Copy className="w-4 h-4" />
-                Copy Analysis
+                Copy
               </>
             )}
+          </button>
+
+          <button
+            onClick={() => setShowShareModal(true)}
+            className="flex-1 flex items-center justify-center gap-2 bg-[#F2F2F2] text-[#333333] border border-[#E0E0E0] rounded-lg py-3 min-h-[48px] text-[14px] font-medium transition-colors hover:bg-[#E8E8E8]"
+          >
+            <Share2 className="w-4 h-4" />
+            Share
           </button>
 
           <button
@@ -435,7 +445,7 @@ export function AnalysisResults({
             className="flex-1 flex items-center justify-center gap-2 bg-[#0047AB] text-white rounded-lg py-3 min-h-[48px] text-[14px] font-medium transition-colors hover:bg-[#003A8C]"
           >
             <Plus className="w-4 h-4" />
-            New Analysis
+            New
           </button>
         </div>
 
@@ -448,6 +458,15 @@ export function AnalysisResults({
           </button>
         )}
       </div>
+
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        planPreview={originalInput}
+        blindSpotsCount={result.blind_spots.length}
+        failureModesCount={result.failure_modes.length}
+      />
     </div>
     </>
   );
