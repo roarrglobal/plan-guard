@@ -1,0 +1,17 @@
+{
+  "name": "Snag",
+  "short_name": "Snag",
+  "description": "AI-powered pre-mortem tool that stress-tests any plan in 2 minutes",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f1419",
+  "theme_color": "#0D9488",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    }
+  ]
+}
