@@ -18,18 +18,21 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Inter', 'SF Pro Display', 'system-ui', 'sans-serif'],
+        sans: ['Poppins', 'system-ui', 'sans-serif'],
       },
       fontSize: {
-        'display': ['48px', { lineHeight: '1.1', fontWeight: '700' }],
-        'display-mobile': ['36px', { lineHeight: '1.15', fontWeight: '700' }],
-        'h1': ['36px', { lineHeight: '1.2', fontWeight: '700' }],
-        'h2': ['28px', { lineHeight: '1.25', fontWeight: '600' }],
-        'h3': ['24px', { lineHeight: '1.3', fontWeight: '600' }],
-        'body-lg': ['18px', { lineHeight: '1.6', fontWeight: '400' }],
-        'body': ['16px', { lineHeight: '1.6', fontWeight: '400' }],
-        'small': ['14px', { lineHeight: '1.5', fontWeight: '400' }],
-        'micro': ['12px', { lineHeight: '1.4', fontWeight: '500' }],
+        // Snag Typography Scale
+        'display': ['48px', { lineHeight: '1.2', fontWeight: '700' }],
+        'display-mobile': ['36px', { lineHeight: '1.2', fontWeight: '700' }],
+        'h1': ['48px', { lineHeight: '1.2', fontWeight: '700' }],
+        'h2': ['32px', { lineHeight: '1.2', fontWeight: '600' }],
+        'h3': ['24px', { lineHeight: '1.2', fontWeight: '600' }],
+        'h4': ['20px', { lineHeight: '1.2', fontWeight: '500' }],
+        'body-lg': ['18px', { lineHeight: '1.5', fontWeight: '400' }],
+        'body': ['16px', { lineHeight: '1.5', fontWeight: '400' }],
+        'body-small': ['14px', { lineHeight: '1.5', fontWeight: '400' }],
+        'caption': ['12px', { lineHeight: '1.4', fontWeight: '500' }],
+        'button': ['14px', { lineHeight: '1', fontWeight: '600' }],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -38,14 +41,10 @@ export default {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        // TRC Brand Colors
-        cobalt: {
-          DEFAULT: "#0047AB",
-          hover: "#003380",
-        },
+        // Snag Brand Colors
         crimson: {
           DEFAULT: "#BE3455",
-          hover: "#A02D48",
+          hover: "#AB2F4D",
         },
         primary: {
           DEFAULT: "hsl(var(--primary))",
@@ -98,12 +97,12 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
-        xl: "calc(var(--radius) + 4px)",
-        "2xl": "calc(var(--radius) + 8px)",
+        xl: "12px",
+        "2xl": "16px",
       },
       boxShadow: {
-        'card': '0 2px 8px rgba(0, 0, 0, 0.06)',
-        'card-hover': '0 4px 16px rgba(0, 0, 0, 0.1)',
+        'card': '0 2px 8px rgba(0, 0, 0, 0.04)',
+        'card-hover': '0 4px 16px rgba(0, 0, 0, 0.08)',
         'glow': '0 0 40px -10px hsl(var(--primary) / 0.3)',
       },
       keyframes: {
