@@ -11,6 +11,69 @@ import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/component
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import UsageLimitsModal from "@/components/landing/UsageLimitsModal";
 import { useAuth } from "@/contexts/AuthContext";
+import { motion, useInView } from "framer-motion";
+import { useRef } from "react";
+
+// Animation variants
+const fadeInUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0 }
+};
+
+const fadeIn = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1 }
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 }
+  }
+};
+
+const scaleIn = {
+  hidden: { opacity: 0, scale: 0.9 },
+  visible: { opacity: 1, scale: 1 }
+};
+
+// Animated section wrapper
+function AnimatedSection({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  
+  return (
+    <motion.div
+      ref={ref}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+      variants={fadeInUp}
+      transition={{ duration: 0.6, delay, ease: "easeOut" }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+// Staggered grid wrapper
+function StaggeredGrid({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-50px" });
+  
+  return (
+    <motion.div
+      ref={ref}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+      variants={staggerContainer}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -34,33 +97,49 @@ export default function Landing() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-background border-b border-border">
+      <motion.nav 
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border"
+      >
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-2">
+            <motion.div 
+              className="flex items-center gap-2"
+              whileHover={{ scale: 1.02 }}
+            >
               <span className="text-2xl font-bold text-primary">Snag</span>
-            </div>
+            </motion.div>
 
             <div className="hidden md:flex items-center gap-6">
-              <button onClick={() => scrollToSection("features")} className="text-sm text-foreground hover:text-primary transition-colors">
-                Features
-              </button>
-              <button onClick={() => scrollToSection("how-it-works")} className="text-sm text-foreground hover:text-primary transition-colors">
-                How it Works
-              </button>
-              <button onClick={() => scrollToSection("pricing")} className="text-sm text-foreground hover:text-primary transition-colors">
-                Pricing
-              </button>
+              {["features", "how-it-works", "pricing"].map((section, i) => (
+                <motion.button
+                  key={section}
+                  onClick={() => scrollToSection(section)}
+                  className="text-sm text-foreground hover:text-primary transition-colors"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 * i }}
+                  whileHover={{ y: -2 }}
+                >
+                  {section === "how-it-works" ? "How it Works" : section.charAt(0).toUpperCase() + section.slice(1)}
+                </motion.button>
+              ))}
               {!authLoading && user ? (
-                <Button onClick={() => navigate("/dashboard")} variant="default" size="sm">
-                  Dashboard
-                </Button>
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
+                  <Button onClick={() => navigate("/dashboard")} variant="default" size="sm">
+                    Dashboard
+                  </Button>
+                </motion.div>
               ) : (
-                <Button onClick={() => navigate("/login")} variant="outline" size="sm">
-                  Login
-                </Button>
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
+                  <Button onClick={() => navigate("/login")} variant="outline" size="sm">
+                    Login
+                  </Button>
+                </motion.div>
               )}
             </div>
 
@@ -71,7 +150,12 @@ export default function Landing() {
         </div>
 
         {mobileMenuOpen && (
-          <div className="md:hidden bg-background border-t border-border py-4">
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden bg-background border-t border-border py-4"
+          >
             <div className="container mx-auto px-4 flex flex-col gap-4">
               <button onClick={() => scrollToSection("features")} className="text-left py-2">Features</button>
               <button onClick={() => scrollToSection("how-it-works")} className="text-left py-2">How it Works</button>
@@ -86,59 +170,99 @@ export default function Landing() {
                 </button>
               )}
             </div>
-          </div>
+          </motion.div>
         )}
-      </nav>
+      </motion.nav>
 
       {/* Hero Section */}
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4 max-w-3xl text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">
+          <motion.h1 
+            className="text-4xl md:text-5xl font-bold mb-6"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.2 }}
+          >
             <span className="gradient-text">Think better. Decide better. Learn from everything.</span>
-          </h1>
+          </motion.h1>
           
-          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+          <motion.p 
+            className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
             Snag is your decision journal — capture daily thoughts, stress-test big choices before you commit, extract wisdom from every outcome.
-          </p>
+          </motion.p>
 
           {/* Value proposition pills */}
-          <div className="flex flex-wrap justify-center gap-3 mb-8">
+          <motion.div 
+            className="flex flex-wrap justify-center gap-3 mb-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+          >
             {[
               { icon: "📓", label: "Daily Journaling" },
               { icon: "🎯", label: "Pre-Mortem Analysis" },
               { icon: "🔍", label: "Post-Mortem Learning" },
               { icon: "📊", label: "Visual Frameworks" }
             ].map((pill, i) => (
-              <span key={i} className="inline-flex items-center gap-2 bg-muted text-foreground text-sm px-4 py-2 rounded-full">
+              <motion.span 
+                key={i} 
+                className="inline-flex items-center gap-2 bg-muted text-foreground text-sm px-4 py-2 rounded-full"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4, delay: 0.7 + i * 0.1 }}
+                whileHover={{ scale: 1.05, y: -2 }}
+              >
                 <span>{pill.icon}</span>
                 <span>{pill.label}</span>
-              </span>
+              </motion.span>
             ))}
-          </div>
+          </motion.div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
-            <Button onClick={handleGetStarted} className="bg-secondary hover:bg-secondary/90 text-secondary-foreground px-8 py-6 text-base font-semibold">
-              Start Your Journal — Free
-            </Button>
-            <button onClick={() => scrollToSection("how-it-works")} className="text-primary font-medium hover:underline">
+          <motion.div 
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.9 }}
+          >
+            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+              <Button onClick={handleGetStarted} className="bg-secondary hover:bg-secondary/90 text-secondary-foreground px-8 py-6 text-base font-semibold">
+                Start Your Journal — Free
+              </Button>
+            </motion.div>
+            <motion.button 
+              onClick={() => scrollToSection("how-it-works")} 
+              className="text-primary font-medium hover:underline"
+              whileHover={{ x: 5 }}
+            >
               See how it works ↓
-            </button>
-          </div>
+            </motion.button>
+          </motion.div>
 
-          <p className="text-sm text-muted-foreground">
+          <motion.p 
+            className="text-sm text-muted-foreground"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.1 }}
+          >
             Join 10,000+ people thinking more clearly
-          </p>
+          </motion.p>
         </div>
       </section>
 
       {/* What is Snag? Section */}
       <section className="py-16 md:py-20 bg-muted">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
-            <span className="gradient-text">One place for all your thinking</span>
-          </h2>
+          <AnimatedSection className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold">
+              <span className="gradient-text">One place for all your thinking</span>
+            </h2>
+          </AnimatedSection>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <StaggeredGrid className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {[
               {
                 icon: BookOpen,
@@ -162,29 +286,41 @@ export default function Landing() {
                 description: "Track what actually happened. See your patterns. Build personal decision intelligence over time."
               }
             ].map((item, i) => (
-              <div key={i} className="text-center">
-                <div className={`w-16 h-16 ${item.bgColor} rounded-full flex items-center justify-center mx-auto mb-4`}>
+              <motion.div 
+                key={i} 
+                className="text-center"
+                variants={fadeInUp}
+                whileHover={{ y: -5 }}
+                transition={{ duration: 0.3 }}
+              >
+                <motion.div 
+                  className={`w-16 h-16 ${item.bgColor} rounded-full flex items-center justify-center mx-auto mb-4`}
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
                   <item.icon className={`w-8 h-8 ${item.color}`} />
-                </div>
+                </motion.div>
                 <h3 className="text-xl font-semibold mb-2">{item.title}</h3>
                 <p className="text-muted-foreground">{item.description}</p>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </StaggeredGrid>
         </div>
       </section>
 
       {/* Features Section */}
       <section id="features" className="py-16 md:py-20">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
-            <span className="gradient-text">Powerful alone. Unstoppable together.</span>
-          </h2>
-          <p className="text-lg text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
-            Everything you need to think better
-          </p>
+          <AnimatedSection className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <span className="gradient-text">Powerful alone. Unstoppable together.</span>
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Everything you need to think better
+            </p>
+          </AnimatedSection>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          <StaggeredGrid className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {[
               {
                 icon: BookOpen,
@@ -241,13 +377,21 @@ export default function Landing() {
                 badgeColor: "bg-primary/10 text-primary"
               }
             ].map((card, i) => (
-              <div key={i} className="bg-card border border-border rounded-2xl p-7 hover:shadow-lg transition-shadow relative">
+              <motion.div 
+                key={i} 
+                className="bg-card border border-border rounded-2xl p-7 hover:shadow-lg transition-shadow relative"
+                variants={scaleIn}
+                whileHover={{ y: -8, transition: { duration: 0.2 } }}
+              >
                 <span className={`absolute top-4 right-4 text-xs font-medium px-3 py-1 rounded-full ${card.badgeColor}`}>
                   {card.badge}
                 </span>
-                <div className={`w-12 h-12 ${card.color} rounded-xl flex items-center justify-center mb-4`}>
+                <motion.div 
+                  className={`w-12 h-12 ${card.color} rounded-xl flex items-center justify-center mb-4`}
+                  whileHover={{ rotate: 10 }}
+                >
                   <card.icon className="w-6 h-6 text-white" />
-                </div>
+                </motion.div>
                 <h3 className="text-lg font-semibold mb-1">{card.title}</h3>
                 <p className="text-sm text-muted-foreground mb-4">{card.subtitle}</p>
                 <ul className="space-y-2">
@@ -258,21 +402,23 @@ export default function Landing() {
                     </li>
                   ))}
                 </ul>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </StaggeredGrid>
         </div>
       </section>
 
       {/* How It Works Section */}
       <section id="how-it-works" className="py-16 md:py-20 bg-muted">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
-            <span className="gradient-text">How Snag works</span>
-          </h2>
+          <AnimatedSection className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold">
+              <span className="gradient-text">How Snag works</span>
+            </h2>
+          </AnimatedSection>
 
           <div className="max-w-4xl mx-auto">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <StaggeredGrid className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
                 { time: "Start your day", icon: Sun, color: "bg-warning", title: "Capture intentions", text: "Journal your thoughts. Set your mood. Review your habits. Capture any decisions on your mind." },
                 { time: "As decisions arise", icon: Zap, color: "bg-primary", title: "Log & reflect", text: "Quick-capture decisions in seconds. Get instant AI reflection. Tag stakes and deadlines." },
@@ -281,16 +427,25 @@ export default function Landing() {
                 { time: "Every week", icon: Calendar, color: "bg-primary", title: "Review & reflect", text: "See your patterns. Check pending outcomes. Understand your decision-making style." },
                 { time: "Month after month", icon: TrendingUp, color: "bg-success", title: "Build intelligence", text: "Your personal decision database grows. Snag learns your patterns. Outcomes teach you what actually works." }
               ].map((step, i) => (
-                <div key={i} className="bg-card rounded-xl p-6 border border-border">
+                <motion.div 
+                  key={i} 
+                  className="bg-card rounded-xl p-6 border border-border"
+                  variants={fadeInUp}
+                  whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
+                >
                   <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{step.time}</span>
-                  <div className={`w-10 h-10 ${step.color} rounded-lg flex items-center justify-center my-3`}>
+                  <motion.div 
+                    className={`w-10 h-10 ${step.color} rounded-lg flex items-center justify-center my-3`}
+                    whileHover={{ rotate: 360 }}
+                    transition={{ duration: 0.5 }}
+                  >
                     <step.icon className="w-5 h-5 text-white" />
-                  </div>
+                  </motion.div>
                   <h3 className="font-semibold mb-2">{step.title}</h3>
                   <p className="text-sm text-muted-foreground">{step.text}</p>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </StaggeredGrid>
           </div>
         </div>
       </section>
@@ -298,14 +453,16 @@ export default function Landing() {
       {/* The Difference Section */}
       <section className="py-16 md:py-20">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
-            <span className="gradient-text">The difference</span>
-          </h2>
-          <p className="text-lg text-muted-foreground text-center mb-12 max-w-xl mx-auto">
-            AI chatbots forget. Snag remembers — and learns.
-          </p>
+          <AnimatedSection className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <span className="gradient-text">The difference</span>
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-xl mx-auto">
+              AI chatbots forget. Snag remembers — and learns.
+            </p>
+          </AnimatedSection>
 
-          <div className="max-w-4xl mx-auto overflow-x-auto">
+          <AnimatedSection delay={0.2} className="max-w-4xl mx-auto overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border">
@@ -324,32 +481,46 @@ export default function Landing() {
                   { aspect: "Business tools", chatgpt: "Explain if asked", snag: "Pre-built guided templates" },
                   { aspect: "Accountability", chatgpt: "None", snag: "Streaks, habits, reminders" }
                 ].map((row, i) => (
-                  <tr key={i} className="border-b border-border/50">
+                  <motion.tr 
+                    key={i} 
+                    className="border-b border-border/50"
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.05 }}
+                  >
                     <td className="py-3 px-4 font-medium">{row.aspect}</td>
                     <td className="py-3 px-4 text-center text-muted-foreground bg-muted">{row.chatgpt}</td>
                     <td className="py-3 px-4 text-center border-l-4 border-primary">{row.snag}</td>
-                  </tr>
+                  </motion.tr>
                 ))}
               </tbody>
             </table>
-          </div>
+          </AnimatedSection>
 
-          <div className="max-w-3xl mx-auto mt-8 bg-primary/5 border-l-4 border-primary rounded-lg p-5">
-            <p className="text-foreground">
-              After 6 months with Snag, you have a personal decision intelligence system built on YOUR history, YOUR patterns, YOUR outcomes. That's not something you can export to ChatGPT.
-            </p>
-          </div>
+          <AnimatedSection delay={0.4} className="max-w-3xl mx-auto mt-8">
+            <motion.div 
+              className="bg-primary/5 border-l-4 border-primary rounded-lg p-5"
+              whileHover={{ x: 5 }}
+            >
+              <p className="text-foreground">
+                After 6 months with Snag, you have a personal decision intelligence system built on YOUR history, YOUR patterns, YOUR outcomes. That's not something you can export to ChatGPT.
+              </p>
+            </motion.div>
+          </AnimatedSection>
         </div>
       </section>
 
       {/* Use Cases Section */}
       <section className="py-16 md:py-20 bg-muted">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
-            <span className="gradient-text">Built for thinkers, makers, and leaders</span>
-          </h2>
+          <AnimatedSection className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold">
+              <span className="gradient-text">Built for thinkers, makers, and leaders</span>
+            </h2>
+          </AnimatedSection>
 
-          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          <StaggeredGrid className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {[
               {
                 icon: Users,
@@ -380,11 +551,19 @@ export default function Landing() {
                 attribution: "— Consultant"
               }
             ].map((card, i) => (
-              <div key={i} className="bg-card border border-border rounded-2xl p-7">
+              <motion.div 
+                key={i} 
+                className="bg-card border border-border rounded-2xl p-7"
+                variants={scaleIn}
+                whileHover={{ y: -5 }}
+              >
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                  <motion.div 
+                    className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center"
+                    whileHover={{ scale: 1.1 }}
+                  >
                     <card.icon className="w-5 h-5 text-primary" />
-                  </div>
+                  </motion.div>
                   <h3 className="text-lg font-semibold">{card.title}</h3>
                 </div>
                 <ul className="space-y-2 mb-4">
@@ -396,109 +575,131 @@ export default function Landing() {
                   <p className="text-sm italic text-foreground">"{card.quote}"</p>
                   <p className="text-xs text-muted-foreground mt-1">{card.attribution}</p>
                 </div>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </StaggeredGrid>
         </div>
       </section>
 
       {/* Sample Output Preview */}
       <section className="py-16 md:py-20">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
-            <span className="gradient-text">What you get</span>
-          </h2>
+          <AnimatedSection className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold">
+              <span className="gradient-text">What you get</span>
+            </h2>
+          </AnimatedSection>
 
-          <Tabs defaultValue="premortem" className="max-w-5xl mx-auto">
-            <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-8">
-              <TabsTrigger value="premortem">Pre-Mortem</TabsTrigger>
-              <TabsTrigger value="postmortem">Post-Mortem</TabsTrigger>
-            </TabsList>
+          <AnimatedSection delay={0.2}>
+            <Tabs defaultValue="premortem" className="max-w-5xl mx-auto">
+              <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-8">
+                <TabsTrigger value="premortem">Pre-Mortem</TabsTrigger>
+                <TabsTrigger value="postmortem">Post-Mortem</TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="premortem">
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="bg-muted rounded-xl p-6">
-                  <p className="text-xs uppercase font-semibold text-muted-foreground mb-4">THE DECISION</p>
-                  <p className="text-foreground">
-                    I'm considering leaving my PM role to join an early-stage AI startup as co-founder. 8% equity, no salary for 6 months.
-                  </p>
-                </div>
-                <div className="bg-card border border-border rounded-xl p-6">
-                  <p className="text-xs uppercase font-semibold text-primary mb-4">DEEP SNAG ANALYSIS</p>
-                  <div className="space-y-4">
-                    <div>
-                      <span className="text-xs uppercase font-semibold text-secondary">BLIND SPOTS</span>
-                      <p className="text-sm text-muted-foreground mt-1">You're assuming 8% is fair without seeing the cap table...</p>
-                    </div>
-                    <div>
-                      <span className="text-xs uppercase font-semibold text-secondary">FAILURE MODE #1</span>
-                      <p className="text-sm text-muted-foreground mt-1">Co-founder conflict at month 9 when...</p>
-                    </div>
-                    <div>
-                      <span className="text-xs uppercase font-semibold text-warning">WARNING SIGNAL</span>
-                      <p className="text-sm text-muted-foreground mt-1">If founders are vague about equity split...</p>
-                    </div>
-                    <div>
-                      <span className="text-xs uppercase font-semibold text-destructive">KILL CRITERIA</span>
-                      <p className="text-sm text-muted-foreground mt-1">If salary doesn't materialize by month 6...</p>
-                    </div>
+              <TabsContent value="premortem">
+                <motion.div 
+                  className="grid md:grid-cols-2 gap-6"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4 }}
+                >
+                  <div className="bg-muted rounded-xl p-6">
+                    <p className="text-xs uppercase font-semibold text-muted-foreground mb-4">THE DECISION</p>
+                    <p className="text-foreground">
+                      I'm considering leaving my PM role to join an early-stage AI startup as co-founder. 8% equity, no salary for 6 months.
+                    </p>
                   </div>
-                  <button className="text-sm text-primary font-medium mt-4 inline-flex items-center gap-1 hover:underline">
-                    Generate visual framework <ArrowRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="postmortem">
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="bg-muted rounded-xl p-6">
-                  <p className="text-xs uppercase font-semibold text-muted-foreground mb-4">WHAT HAPPENED</p>
-                  <p className="text-foreground">
-                    We launched the feature 2 weeks late. It got good user feedback but we missed the quarterly goal. Team was exhausted.
-                  </p>
-                </div>
-                <div className="bg-card border border-border rounded-xl p-6">
-                  <p className="text-xs uppercase font-semibold text-[hsl(271,81%,56%)] mb-4">POST-MORTEM ANALYSIS</p>
-                  <div className="space-y-4">
-                    <div>
-                      <span className="text-xs uppercase font-semibold text-warning">OUTCOME</span>
-                      <p className="text-sm text-muted-foreground mt-1">Partial success (7/10)</p>
+                  <div className="bg-card border border-border rounded-xl p-6">
+                    <p className="text-xs uppercase font-semibold text-primary mb-4">DEEP SNAG ANALYSIS</p>
+                    <div className="space-y-4">
+                      <div>
+                        <span className="text-xs uppercase font-semibold text-secondary">BLIND SPOTS</span>
+                        <p className="text-sm text-muted-foreground mt-1">You're assuming 8% is fair without seeing the cap table...</p>
+                      </div>
+                      <div>
+                        <span className="text-xs uppercase font-semibold text-secondary">FAILURE MODE #1</span>
+                        <p className="text-sm text-muted-foreground mt-1">Co-founder conflict at month 9 when...</p>
+                      </div>
+                      <div>
+                        <span className="text-xs uppercase font-semibold text-warning">WARNING SIGNAL</span>
+                        <p className="text-sm text-muted-foreground mt-1">If founders are vague about equity split...</p>
+                      </div>
+                      <div>
+                        <span className="text-xs uppercase font-semibold text-destructive">KILL CRITERIA</span>
+                        <p className="text-sm text-muted-foreground mt-1">If salary doesn't materialize by month 6...</p>
+                      </div>
                     </div>
-                    <div>
-                      <span className="text-xs uppercase font-semibold text-[hsl(271,81%,56%)]">ROOT CAUSE</span>
-                      <p className="text-sm text-muted-foreground mt-1">Scope creep in week 3 without deadline adjustment...</p>
-                    </div>
-                    <div>
-                      <span className="text-xs uppercase font-semibold text-success">WHAT WORKED</span>
-                      <p className="text-sm text-muted-foreground mt-1">Cross-team collaboration, testing process...</p>
-                    </div>
-                    <div>
-                      <span className="text-xs uppercase font-semibold text-destructive">WHAT DIDN'T</span>
-                      <p className="text-sm text-muted-foreground mt-1">Deadline negotiation, scope management...</p>
-                    </div>
+                    <motion.button 
+                      className="text-sm text-primary font-medium mt-4 inline-flex items-center gap-1 hover:underline"
+                      whileHover={{ x: 5 }}
+                    >
+                      Generate visual framework <ArrowRight className="w-4 h-4" />
+                    </motion.button>
                   </div>
-                  <button className="text-sm text-primary font-medium mt-4 inline-flex items-center gap-1 hover:underline">
-                    Generate visual framework <ArrowRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            </TabsContent>
-          </Tabs>
+                </motion.div>
+              </TabsContent>
+
+              <TabsContent value="postmortem">
+                <motion.div 
+                  className="grid md:grid-cols-2 gap-6"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4 }}
+                >
+                  <div className="bg-muted rounded-xl p-6">
+                    <p className="text-xs uppercase font-semibold text-muted-foreground mb-4">WHAT HAPPENED</p>
+                    <p className="text-foreground">
+                      We launched the feature 2 weeks late. It got good user feedback but we missed the quarterly goal. Team was exhausted.
+                    </p>
+                  </div>
+                  <div className="bg-card border border-border rounded-xl p-6">
+                    <p className="text-xs uppercase font-semibold text-[hsl(271,81%,56%)] mb-4">POST-MORTEM ANALYSIS</p>
+                    <div className="space-y-4">
+                      <div>
+                        <span className="text-xs uppercase font-semibold text-warning">OUTCOME</span>
+                        <p className="text-sm text-muted-foreground mt-1">Partial success (7/10)</p>
+                      </div>
+                      <div>
+                        <span className="text-xs uppercase font-semibold text-[hsl(271,81%,56%)]">ROOT CAUSE</span>
+                        <p className="text-sm text-muted-foreground mt-1">Scope creep in week 3 without deadline adjustment...</p>
+                      </div>
+                      <div>
+                        <span className="text-xs uppercase font-semibold text-success">WHAT WORKED</span>
+                        <p className="text-sm text-muted-foreground mt-1">Cross-team collaboration, testing process...</p>
+                      </div>
+                      <div>
+                        <span className="text-xs uppercase font-semibold text-destructive">WHAT DIDN'T</span>
+                        <p className="text-sm text-muted-foreground mt-1">Deadline negotiation, scope management...</p>
+                      </div>
+                    </div>
+                    <motion.button 
+                      className="text-sm text-primary font-medium mt-4 inline-flex items-center gap-1 hover:underline"
+                      whileHover={{ x: 5 }}
+                    >
+                      Generate visual framework <ArrowRight className="w-4 h-4" />
+                    </motion.button>
+                  </div>
+                </motion.div>
+              </TabsContent>
+            </Tabs>
+          </AnimatedSection>
         </div>
       </section>
 
       {/* Visual Frameworks Showcase */}
       <section className="py-16 md:py-20 bg-muted">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            <span className="gradient-text">Professional frameworks. Instant export.</span>
-          </h2>
-          <p className="text-muted-foreground mb-12 max-w-xl mx-auto">
-            Export as PNG or PDF. Share with your team. Include in presentations.
-          </p>
+          <AnimatedSection>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <span className="gradient-text">Professional frameworks. Instant export.</span>
+            </h2>
+            <p className="text-muted-foreground mb-12 max-w-xl mx-auto">
+              Export as PNG or PDF. Share with your team. Include in presentations.
+            </p>
+          </AnimatedSection>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl mx-auto mb-8">
+          <StaggeredGrid className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl mx-auto mb-8">
             {[
               { name: "Risk Matrix", label: "Pre-Mortem" },
               { name: "Decision Tree", label: "Pre-Mortem" },
@@ -507,36 +708,48 @@ export default function Landing() {
               { name: "Porter's Five Forces", label: "Business" },
               { name: "MEDDPICC Scorecard", label: "Sales" }
             ].map((fw, i) => (
-              <div key={i} className="bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-shadow group cursor-pointer relative">
+              <motion.div 
+                key={i} 
+                className="bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-shadow group cursor-pointer relative"
+                variants={scaleIn}
+                whileHover={{ y: -5, scale: 1.02 }}
+              >
                 <span className="absolute top-3 right-3 text-[10px] font-medium px-2 py-1 rounded-full bg-primary/10 text-primary">
                   {fw.label}
                 </span>
-                <div className="h-16 flex items-center justify-center mb-3">
+                <motion.div 
+                  className="h-16 flex items-center justify-center mb-3"
+                  whileHover={{ rotate: 5 }}
+                >
                   <BarChart3 className="w-10 h-10 text-muted-foreground group-hover:text-primary transition-colors" />
-                </div>
+                </motion.div>
                 <p className="text-sm font-medium">{fw.name}</p>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </StaggeredGrid>
 
-          <Button onClick={handleGetStarted} variant="default">
-            Try it free →
-          </Button>
+          <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+            <Button onClick={handleGetStarted} variant="default">
+              Try it free →
+            </Button>
+          </motion.div>
         </div>
       </section>
 
       {/* Pricing Section */}
       <section id="pricing" className="py-16 md:py-20">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
-            <span className="gradient-text">Simple pricing. Powerful features.</span>
-          </h2>
-          <p className="text-lg text-muted-foreground text-center mb-8">
-            Start free. Upgrade when Snag becomes essential.
-          </p>
+          <AnimatedSection className="text-center mb-8">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <span className="gradient-text">Simple pricing. Powerful features.</span>
+            </h2>
+            <p className="text-lg text-muted-foreground">
+              Start free. Upgrade when Snag becomes essential.
+            </p>
+          </AnimatedSection>
 
           {/* Billing Toggle */}
-          <div className="flex items-center justify-center gap-3 mb-10">
+          <AnimatedSection delay={0.1} className="flex items-center justify-center gap-3 mb-10">
             <span className={`text-sm font-medium transition-colors ${!isAnnual ? 'text-foreground' : 'text-muted-foreground'}`}>
               Monthly
             </span>
@@ -544,14 +757,22 @@ export default function Landing() {
             <span className={`text-sm font-medium transition-colors ${isAnnual ? 'text-foreground' : 'text-muted-foreground'}`}>
               Annual
             </span>
-            <span className="bg-success text-success-foreground text-xs font-medium px-2 py-1 rounded-full ml-1">
+            <motion.span 
+              className="bg-success text-success-foreground text-xs font-medium px-2 py-1 rounded-full ml-1"
+              animate={{ scale: isAnnual ? [1, 1.1, 1] : 1 }}
+              transition={{ duration: 0.3 }}
+            >
               Save 25%
-            </span>
-          </div>
+            </motion.span>
+          </AnimatedSection>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
+          <StaggeredGrid className="grid md:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
             {/* Free Plan */}
-            <div className="bg-muted rounded-2xl p-6 border border-border flex flex-col">
+            <motion.div 
+              className="bg-muted rounded-2xl p-6 border border-border flex flex-col"
+              variants={fadeInUp}
+              whileHover={{ y: -5 }}
+            >
               <h3 className="text-xl font-semibold mb-2">Free</h3>
               <div className="mb-4">
                 <span className="text-5xl font-bold">$0</span>
@@ -586,17 +807,27 @@ export default function Landing() {
                 </div>
               </div>
               
-              <Button variant="outline" className="w-full border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground" onClick={handleGetStarted}>
-                Start Free
-              </Button>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button variant="outline" className="w-full border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground" onClick={handleGetStarted}>
+                  Start Free
+                </Button>
+              </motion.div>
               <p className="text-xs text-muted-foreground text-center mt-2">No credit card required</p>
-            </div>
+            </motion.div>
 
             {/* Pro Plan */}
-            <div className="bg-card rounded-2xl p-6 border-2 border-secondary relative shadow-lg flex flex-col">
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-secondary text-secondary-foreground text-xs font-semibold uppercase px-3 py-1 rounded-full">
+            <motion.div 
+              className="bg-card rounded-2xl p-6 border-2 border-secondary relative shadow-lg flex flex-col"
+              variants={fadeInUp}
+              whileHover={{ y: -8, scale: 1.02 }}
+            >
+              <motion.span 
+                className="absolute -top-3 left-1/2 -translate-x-1/2 bg-secondary text-secondary-foreground text-xs font-semibold uppercase px-3 py-1 rounded-full"
+                animate={{ y: [0, -2, 0] }}
+                transition={{ repeat: Infinity, duration: 2 }}
+              >
                 MOST POPULAR
-              </span>
+              </motion.span>
               
               <h3 className="text-xl font-semibold mb-2">Pro</h3>
               <div className="mb-1">
@@ -635,14 +866,20 @@ export default function Landing() {
                 </div>
               </div>
               
-              <Button className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground">
-                Start Pro
-              </Button>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground">
+                  Start Pro
+                </Button>
+              </motion.div>
               <p className="text-xs text-muted-foreground text-center mt-2">2-day free trial, then ${isAnnual ? '9' : '12'}/month</p>
-            </div>
+            </motion.div>
 
             {/* Team Plan */}
-            <div className="bg-muted rounded-2xl p-6 border border-border flex flex-col">
+            <motion.div 
+              className="bg-muted rounded-2xl p-6 border border-border flex flex-col"
+              variants={fadeInUp}
+              whileHover={{ y: -5 }}
+            >
               <h3 className="text-xl font-semibold mb-2">Team</h3>
               <div className="mb-1">
                 {isAnnual && <span className="text-base text-muted-foreground line-through mr-2">$59</span>}
@@ -681,14 +918,20 @@ export default function Landing() {
                 </div>
               </div>
               
-              <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
-                Start Team Trial
-              </Button>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
+                  Start Team Trial
+                </Button>
+              </motion.div>
               <p className="text-xs text-muted-foreground text-center mt-2">2-day trial, then ${isAnnual ? '44' : '59'}/month</p>
-            </div>
+            </motion.div>
 
             {/* Business Plan */}
-            <div className="bg-muted rounded-2xl p-6 border border-border flex flex-col">
+            <motion.div 
+              className="bg-muted rounded-2xl p-6 border border-border flex flex-col"
+              variants={fadeInUp}
+              whileHover={{ y: -5 }}
+            >
               <h3 className="text-xl font-semibold mb-2">Business</h3>
               <div className="mb-1">
                 {isAnnual && <span className="text-base text-muted-foreground line-through mr-2">$199</span>}
@@ -719,26 +962,40 @@ export default function Landing() {
                 </div>
               </div>
               
-              <Button variant="outline" className="w-full border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground">
-                Contact Sales
-              </Button>
-            </div>
-          </div>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button variant="outline" className="w-full border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground">
+                  Contact Sales
+                </Button>
+              </motion.div>
+            </motion.div>
+          </StaggeredGrid>
 
           {/* Enterprise Callout */}
-          <div className="max-w-4xl mx-auto mt-8 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-xl p-6 flex flex-col sm:flex-row items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-              <Building className="w-6 h-6 text-primary" />
-            </div>
-            <div className="flex-1 text-center sm:text-left">
-              <p className="font-medium">
-                Need unlimited seats, custom integrations, or dedicated support?
-              </p>
-            </div>
-            <button className="text-sm font-semibold text-primary hover:underline whitespace-nowrap flex items-center gap-1">
-              Talk to Enterprise Sales <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
+          <AnimatedSection delay={0.3} className="max-w-4xl mx-auto mt-8">
+            <motion.div 
+              className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-xl p-6 flex flex-col sm:flex-row items-center gap-4"
+              whileHover={{ scale: 1.01 }}
+            >
+              <motion.div 
+                className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0"
+                whileHover={{ rotate: 360 }}
+                transition={{ duration: 0.5 }}
+              >
+                <Building className="w-6 h-6 text-primary" />
+              </motion.div>
+              <div className="flex-1 text-center sm:text-left">
+                <p className="font-medium">
+                  Need unlimited seats, custom integrations, or dedicated support?
+                </p>
+              </div>
+              <motion.button 
+                className="text-sm font-semibold text-primary hover:underline whitespace-nowrap flex items-center gap-1"
+                whileHover={{ x: 5 }}
+              >
+                Talk to Enterprise Sales <ArrowRight className="w-4 h-4" />
+              </motion.button>
+            </motion.div>
+          </AnimatedSection>
 
           {/* Compare Features Collapsible */}
           <Collapsible className="max-w-4xl mx-auto mt-8">
@@ -746,7 +1003,11 @@ export default function Landing() {
               Compare all features <ChevronDown className="w-4 h-4" />
             </CollapsibleTrigger>
             <CollapsibleContent className="mt-6">
-              <div className="overflow-x-auto">
+              <motion.div 
+                className="overflow-x-auto"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
                 <table className="w-full text-sm border-collapse">
                   <thead>
                     <tr className="border-b border-border">
@@ -784,7 +1045,7 @@ export default function Landing() {
                     ))}
                   </tbody>
                 </table>
-              </div>
+              </motion.div>
             </CollapsibleContent>
           </Collapsible>
 
@@ -802,9 +1063,11 @@ export default function Landing() {
       {/* FAQ Section */}
       <section className="py-16 md:py-20 bg-muted">
         <div className="container mx-auto px-4 max-w-3xl">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
-            <span className="gradient-text">Frequently asked questions</span>
-          </h2>
+          <AnimatedSection className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold">
+              <span className="gradient-text">Frequently asked questions</span>
+            </h2>
+          </AnimatedSection>
 
           <div className="space-y-0">
             {[
@@ -820,13 +1083,29 @@ export default function Landing() {
               { q: "Can I use Snag with my team?", a: "Yes. Team plan ($59/month) includes shared workspace, collaborative frameworks, team retrospectives, and analytics. Business plan ($199/month) adds branded exports, audit logs, and SSO." },
               { q: "Is my data private?", a: "Yes. Your journals, decisions, and analyses are private to you (or your team, if shared). We don't sell data. We don't train AI on your content. Delete anytime." }
             ].map((faq, i) => (
-              <div key={i} className="border-b border-border">
+              <motion.div 
+                key={i} 
+                className="border-b border-border"
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.03 }}
+              >
                 <button onClick={() => setOpenFaq(openFaq === i ? null : i)} className="w-full flex items-center justify-between py-5 text-left">
                   <span className="text-base font-semibold pr-4">{faq.q}</span>
-                  {openFaq === i ? <Minus className="w-5 h-5 text-primary flex-shrink-0" /> : <Plus className="w-5 h-5 text-primary flex-shrink-0" />}
+                  <motion.div animate={{ rotate: openFaq === i ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                    {openFaq === i ? <Minus className="w-5 h-5 text-primary flex-shrink-0" /> : <Plus className="w-5 h-5 text-primary flex-shrink-0" />}
+                  </motion.div>
                 </button>
-                {openFaq === i && <p className="text-muted-foreground pb-5 pr-10">{faq.a}</p>}
-              </div>
+                <motion.div
+                  initial={false}
+                  animate={{ height: openFaq === i ? "auto" : 0, opacity: openFaq === i ? 1 : 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden"
+                >
+                  <p className="text-muted-foreground pb-5 pr-10">{faq.a}</p>
+                </motion.div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -835,25 +1114,54 @@ export default function Landing() {
       {/* Final CTA Section */}
       <section className="gradient-premium py-16 md:py-24">
         <div className="container mx-auto px-4 max-w-xl text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+          <motion.h2 
+            className="text-3xl md:text-4xl font-bold text-white mb-4"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
             Your best thinking starts today.
-          </h2>
-          <p className="text-white/80 text-lg mb-8">
+          </motion.h2>
+          <motion.p 
+            className="text-white/80 text-lg mb-8"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+          >
             Free forever. Upgrade when you're ready.
-          </p>
+          </motion.p>
           
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
-            <Button onClick={handleGetStarted} className="bg-white text-primary hover:bg-white/90 px-8 py-6 text-base font-semibold">
-              Start Free — No card required
-            </Button>
-            <button onClick={() => scrollToSection("pricing")} className="text-white border border-white/50 px-6 py-3 rounded-lg hover:bg-white/10 transition-colors text-sm font-medium">
+          <motion.div 
+            className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+          >
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
+              <Button onClick={handleGetStarted} className="bg-white text-primary hover:bg-white/90 px-8 py-6 text-base font-semibold">
+                Start Free — No card required
+              </Button>
+            </motion.div>
+            <motion.button 
+              onClick={() => scrollToSection("pricing")} 
+              className="text-white border border-white/50 px-6 py-3 rounded-lg hover:bg-white/10 transition-colors text-sm font-medium"
+              whileHover={{ scale: 1.03 }}
+            >
               See pricing →
-            </button>
-          </div>
+            </motion.button>
+          </motion.div>
 
-          <p className="text-white/60 text-sm">
+          <motion.p 
+            className="text-white/60 text-sm"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.5 }}
+          >
             Join 10,000+ people thinking more clearly
-          </p>
+          </motion.p>
         </div>
       </section>
 
