@@ -1,0 +1,4 @@
+project_id = "xlmvxgotcodvmnlpobxh"
+
+[functions.analyze-plan]
+verify_jwt = false

@@ -7,8 +7,9 @@ import { AnalysisInput } from "@/components/AnalysisInput";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { ResultsView, type AnalysisResult } from "@/components/ResultsView";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
-// Mock analysis result for demo purposes
+// Fallback mock analysis for demo purposes
 const mockAnalysis: AnalysisResult = {
   blind_spots: [
     "You're assuming users will understand the value proposition without education",
@@ -73,16 +74,47 @@ export default function Analyze() {
     setInput(text);
     setIsLoading(true);
 
-    // Simulate API call - in production, this would call Claude API
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    try {
+      const { data, error } = await supabase.functions.invoke('analyze-plan', {
+        body: { plan: text }
+      });
 
-    // For demo, use mock result
-    setResult(mockAnalysis);
-    setIsLoading(false);
+      if (error) {
+        console.error('Analysis error:', error);
+        toast({
+          title: "Analysis failed",
+          description: error.message || "Something went wrong. Please try again.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
 
-    // Track usage
-    const usage = parseInt(localStorage.getItem("snag_usage") || "0");
-    localStorage.setItem("snag_usage", String(usage + 1));
+      if (data.error) {
+        toast({
+          title: "Analysis failed",
+          description: data.error,
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      setResult(data);
+      
+      // Track usage
+      const usage = parseInt(localStorage.getItem("snag_usage") || "0");
+      localStorage.setItem("snag_usage", String(usage + 1));
+    } catch (err) {
+      console.error('Unexpected error:', err);
+      toast({
+        title: "Something went wrong",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleNewAnalysis = () => {
