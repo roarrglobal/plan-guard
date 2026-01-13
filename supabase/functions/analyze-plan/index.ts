@@ -39,6 +39,8 @@ Return analysis in this JSON structure:
     "implied_assumptions": []
   },
   
+  "category": "[career|business|personal|travel|other]",
+  
   "blind_spots": [
     {
       "blind_spot": "Specific assumption not examined",
@@ -95,6 +97,13 @@ Return analysis in this JSON structure:
     "information_that_would_help": ["Data point 1", "Data point 2"]
   }
 }
+
+CATEGORY CLASSIFICATION:
+- career: Job changes, promotions, salary negotiations, skill decisions, career pivots, hiring decisions
+- business: Product launches, investments, partnerships, company strategy, market expansion, startup ideas
+- personal: Relationships, major purchases, health decisions, lifestyle changes, family decisions
+- travel: Relocations, trips, moves, immigration, remote work location decisions
+- other: Anything that doesn't clearly fit the above categories
 
 ---
 
