@@ -32,7 +32,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { JournalAnalyzeModal } from "@/components/journal/JournalAnalyzeModal";
+import { JournalAnalyzeSuggestModal } from "@/components/journal/JournalAnalyzeSuggestModal";
 
 interface JournalEntry {
   id: string;
@@ -380,9 +380,9 @@ export default function JournalPage() {
         )}
       </div>
       
-      {/* Analysis Modal */}
+      {/* Analysis Modal with AI Suggestion */}
       {selectedEntry && (
-        <JournalAnalyzeModal
+        <JournalAnalyzeSuggestModal
           open={analyzeModalOpen}
           onOpenChange={setAnalyzeModalOpen}
           entryId={selectedEntry.id}

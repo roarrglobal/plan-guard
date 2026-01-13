@@ -112,9 +112,174 @@ serve(async (req) => {
 
     const { content, entryType, mood, action, analysisType } = body;
 
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+
+    // Handle AI suggestion for analysis type
+    if (action === "suggest") {
+      if (!LOVABLE_API_KEY) {
+        return new Response(
+          JSON.stringify({ suggestion: "ask_user", reason: "Unable to determine, please choose manually." }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // First check entry type for strong signals
+      const entryTypeSignals: Record<string, string> = {
+        'manifestation': 'pre_mortem',
+        'morning': 'pre_mortem',
+        'evening': 'post_mortem',
+        'gratitude': 'post_mortem',
+        'reflection': 'neutral',
+        'free_write': 'neutral'
+      };
+      
+      const typeSignal = entryTypeSignals[entryType] || 'neutral';
+      
+      // If strong signal from entry type, use it
+      if (typeSignal !== 'neutral') {
+        const reasons: Record<string, Record<string, string>> = {
+          'pre_mortem': {
+            'manifestation': 'This is a vision you\'re calling in. A pre-mortem will help you stress-test the path to get there.',
+            'morning': 'These intentions deserve scrutiny. A pre-mortem surfaces what could go wrong.'
+          },
+          'post_mortem': {
+            'evening': 'This is a reflection on your day. Extract the lessons while they\'re fresh.',
+            'gratitude': 'You\'re grateful for something that happened. A post-mortem helps you understand WHY it worked.'
+          }
+        };
+        
+        return new Response(
+          JSON.stringify({ 
+            suggestion: typeSignal, 
+            confidence: 'high',
+            reason: reasons[typeSignal]?.[entryType] || 
+              (typeSignal === 'pre_mortem' 
+                ? 'This looks like a goal or intention worth stress-testing.'
+                : 'This looks like a past experience worth analyzing.')
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      
+      // Otherwise, analyze content with AI
+      try {
+        const suggestionPrompt = `Analyze this journal entry and determine if it's about:
+1. A FUTURE decision, plan, goal, or intention (suggest: pre_mortem)
+2. A PAST event, outcome, or experience (suggest: post_mortem)
+3. UNCLEAR or could be either (suggest: ask_user)
+
+Look for:
+- Future language: "considering", "thinking about", "planning to", "should I", "want to", "going to", "might", "debating", "opportunity"
+- Past language: "happened", "went", "was", "learned", "realized", "discovered", "turned out", "yesterday", "last week"
+
+Journal entry:
+${content}
+
+Return JSON only: {"suggestion": "pre_mortem" or "post_mortem" or "ask_user", "confidence": "high" or "medium", "reason": "brief explanation in 1-2 sentences"}`;
+
+        const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-3-flash-preview",
+            messages: [{ role: "user", content: suggestionPrompt }],
+          }),
+        });
+
+        if (!response.ok) {
+          console.error("AI suggestion failed:", response.status);
+          return new Response(
+            JSON.stringify({ suggestion: "ask_user", reason: "Please choose the analysis type that fits best." }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        const aiResponse = await response.json();
+        const aiContent = aiResponse.choices?.[0]?.message?.content?.trim() || "";
+        
+        try {
+          const cleanedContent = aiContent.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
+          const result = JSON.parse(cleanedContent);
+          return new Response(
+            JSON.stringify(result),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        } catch {
+          return new Response(
+            JSON.stringify({ suggestion: "ask_user", reason: "Please choose the analysis type that fits best." }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+      } catch (err) {
+        console.error("Suggestion error:", err);
+        return new Response(
+          JSON.stringify({ suggestion: "ask_user", reason: "Please choose the analysis type that fits best." }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
+    // Handle Quick Retro AI nudge
+    if (action === "quick_retro_nudge") {
+      if (!LOVABLE_API_KEY) {
+        return new Response(
+          JSON.stringify({ nudge: null }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const { description, whatWorked, whatDidnt, lesson, category } = body;
+      
+      const nudgePrompt = `Based on this quick retrospective, provide ONE insightful observation or question in under 30 words:
+
+What happened: ${description}
+Category: ${category}
+What worked: ${whatWorked || "Not specified"}
+What didn't work: ${whatDidnt || "Not specified"}  
+Lesson: ${lesson}
+
+Be specific to their content. Look for patterns or deeper questions. Return just the nudge text, no quotes or formatting.`;
+
+      try {
+        const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${LOVABLE_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-3-flash-preview",
+            messages: [{ role: "user", content: nudgePrompt }],
+          }),
+        });
+
+        if (!response.ok) {
+          return new Response(
+            JSON.stringify({ nudge: null }),
+            { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        const aiResponse = await response.json();
+        const nudge = aiResponse.choices?.[0]?.message?.content?.trim() || null;
+
+        return new Response(
+          JSON.stringify({ nudge }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      } catch {
+        return new Response(
+          JSON.stringify({ nudge: null }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
     // Handle extraction action for Pre-Mortem/Post-Mortem
     if (action === "extract") {
-      const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
       if (!LOVABLE_API_KEY) {
         return new Response(
           JSON.stringify({ extracted: content }),
@@ -216,7 +381,6 @@ Return ONLY the extracted outcome/event as a single paragraph. No JSON, no forma
       );
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
       console.error("LOVABLE_API_KEY is not configured");
       return new Response(
