@@ -72,9 +72,11 @@ const navItems: NavItem[] = [
     href: "/frameworks", 
     icon: <Target className="w-4 h-4" />,
     children: [
-      { label: "Pre-Mortem", href: "/analyze", icon: <Target className="w-4 h-4" /> },
+      { label: "Deep Snag", href: "/analyze", icon: <Target className="w-4 h-4" /> },
       { label: "Post-Mortem", href: "/post-mortem", icon: <Search className="w-4 h-4" /> },
-      { label: "Business Tools", href: "/frameworks", icon: <BarChart3 className="w-4 h-4" /> },
+      { label: "SWOT", href: "/frameworks/swot/new", icon: <BarChart3 className="w-4 h-4" /> },
+      { label: "Porter's 5 Forces", href: "/frameworks/porter/new", icon: <Target className="w-4 h-4" /> },
+      { label: "Pre-Mortem", href: "/frameworks/premortem/new", icon: <Lightbulb className="w-4 h-4" /> },
     ]
   },
   { label: "Patterns & Insights", href: "/patterns", icon: <Lightbulb className="w-4 h-4" /> },

@@ -24,6 +24,10 @@ import DecisionNewPage from "./pages/DecisionNewPage";
 import PostMortemPage from "./pages/PostMortemPage";
 import PostMortemNewPage from "./pages/PostMortemNewPage";
 import HabitsPage from "./pages/HabitsPage";
+import FrameworksPage from "./pages/FrameworksPage";
+import SwotAnalysisPage from "./pages/SwotAnalysisPage";
+import PorterAnalysisPage from "./pages/PorterAnalysisPage";
+import PremortemAnalysisPage from "./pages/PremortemAnalysisPage";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +64,10 @@ const App = () => {
                 <Route path="/post-mortem" element={<PostMortemPage />} />
                 <Route path="/post-mortem/new" element={<PostMortemNewPage />} />
                 <Route path="/habits" element={<HabitsPage />} />
+                <Route path="/frameworks" element={<FrameworksPage />} />
+                <Route path="/frameworks/swot/:id" element={<SwotAnalysisPage />} />
+                <Route path="/frameworks/porter/:id" element={<PorterAnalysisPage />} />
+                <Route path="/frameworks/premortem/:id" element={<PremortemAnalysisPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/profile" element={<ProfileSettings />} />
               </Route>
