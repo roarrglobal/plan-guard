@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -52,13 +52,18 @@ const MANIFESTATION_CATEGORIES = [
 
 export default function JournalNewPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { toast } = useToast();
   
-  const [step, setStep] = useState<"type" | "mood" | "write">("type");
+  const editId = searchParams.get("edit");
+  const isEditing = !!editId;
+  
+  const [step, setStep] = useState<"type" | "mood" | "write">(isEditing ? "write" : "type");
   const [entryType, setEntryType] = useState<EntryType | null>(null);
   const [mood, setMood] = useState<Mood | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(isEditing);
   
   // Form data
   const [freeWriteContent, setFreeWriteContent] = useState("");
@@ -106,6 +111,84 @@ export default function JournalNewPage() {
     setMood(selectedMood);
     setStep("write");
   };
+
+  // Load existing entry for editing
+  useEffect(() => {
+    if (!editId || !user) return;
+    
+    const fetchEntry = async () => {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from("journal_entries")
+        .select("*")
+        .eq("id", editId)
+        .single();
+      
+      if (error || !data) {
+        toast({
+          title: "Entry not found",
+          description: "Could not load the entry for editing.",
+          variant: "destructive",
+        });
+        navigate("/journal");
+        return;
+      }
+
+      // Set entry type and mood
+      setEntryType(data.entry_type as EntryType);
+      setMood(data.mood as Mood | null);
+      
+      // Pre-fill form data based on entry type
+      const content = data.content as Record<string, unknown>;
+      
+      if (data.entry_type === "free_write" || data.entry_type === "reflection") {
+        setFreeWriteContent(String(content.text || ""));
+      } else if (data.entry_type === "gratitude") {
+        setGratitudeData({
+          gratitude_1: String(content.gratitude_1 || ""),
+          gratitude_1_why: String(content.gratitude_1_why || ""),
+          gratitude_2: String(content.gratitude_2 || ""),
+          gratitude_2_why: String(content.gratitude_2_why || ""),
+          gratitude_3: String(content.gratitude_3 || ""),
+          gratitude_3_why: String(content.gratitude_3_why || ""),
+          person: String(content.person || ""),
+          appreciation_action: String(content.appreciation_action || ""),
+        });
+      } else if (data.entry_type === "manifestation") {
+        setManifestationData({
+          category: String(content.category || ""),
+          vision: String(content.vision || ""),
+          affirmations: Array.isArray(content.affirmations) ? content.affirmations.map(String) : [""],
+          daily_action: String(content.daily_action || ""),
+          success_indicator: String(content.success_indicator || ""),
+        });
+      } else if (data.entry_type === "morning") {
+        setMorningData({
+          sleep_rating: Number(content.sleep_rating) || 3,
+          sleep_notes: String(content.sleep_notes || ""),
+          intention: String(content.intention || ""),
+          looking_forward_to: String(content.looking_forward_to || ""),
+          nervous_about: String(content.nervous_about || ""),
+          letting_go_of: String(content.letting_go_of || ""),
+          additional_thoughts: String(content.additional_thoughts || ""),
+        });
+      } else if (data.entry_type === "evening") {
+        setEveningData({
+          day_rating: Number(content.day_rating) || 3,
+          went_well: String(content.went_well || ""),
+          could_be_better: String(content.could_be_better || ""),
+          learned: String(content.learned || ""),
+          tomorrow_will: String(content.tomorrow_will || ""),
+          gratitude: String(content.gratitude || ""),
+        });
+      }
+      
+      setStep("write");
+      setIsLoading(false);
+    };
+
+    fetchEntry();
+  }, [editId, user, navigate, toast]);
 
   const calculateWordCount = (): number => {
     let text = "";
@@ -158,28 +241,56 @@ export default function JournalNewPage() {
 
     setIsSaving(true);
     
-    const { error } = await supabase
-      .from("journal_entries")
-      .insert([{
-        user_id: user.id,
-        entry_type: entryType,
-        mood,
-        content: getContent() as Json,
-        word_count: calculateWordCount(),
-      }]);
+    if (isEditing && editId) {
+      // Update existing entry
+      const { error } = await supabase
+        .from("journal_entries")
+        .update({
+          entry_type: entryType,
+          mood,
+          content: getContent() as Json,
+          word_count: calculateWordCount(),
+        })
+        .eq("id", editId);
 
-    if (error) {
-      toast({
-        title: "Error saving entry",
-        description: error.message,
-        variant: "destructive",
-      });
+      if (error) {
+        toast({
+          title: "Error updating entry",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Entry updated",
+          description: "Your journal entry has been updated.",
+        });
+        navigate(`/journal/${editId}`);
+      }
     } else {
-      toast({
-        title: "Entry saved",
-        description: "Your journal entry has been saved.",
-      });
-      navigate("/journal");
+      // Create new entry
+      const { error } = await supabase
+        .from("journal_entries")
+        .insert([{
+          user_id: user.id,
+          entry_type: entryType,
+          mood,
+          content: getContent() as Json,
+          word_count: calculateWordCount(),
+        }]);
+
+      if (error) {
+        toast({
+          title: "Error saving entry",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Entry saved",
+          description: "Your journal entry has been saved.",
+        });
+        navigate("/journal");
+      }
     }
 
     setIsSaving(false);
@@ -508,6 +619,14 @@ export default function JournalNewPage() {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-muted flex items-center justify-center">
+        <div className="w-8 h-8 border-3 border-border border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-muted">
       <div className="max-w-2xl mx-auto px-4 py-6">
@@ -517,17 +636,25 @@ export default function JournalNewPage() {
             variant="ghost"
             size="icon"
             onClick={() => {
-              if (step === "write") setStep("mood");
-              else if (step === "mood") setStep("type");
-              else navigate("/journal");
+              if (isEditing) {
+                navigate(`/journal/${editId}`);
+              } else if (step === "write") {
+                setStep("mood");
+              } else if (step === "mood") {
+                setStep("type");
+              } else {
+                navigate("/journal");
+              }
             }}
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <h1 className="text-xl font-semibold text-foreground">
-            {step === "type" && "New Journal Entry"}
-            {step === "mood" && "How are you feeling?"}
-            {step === "write" && ENTRY_TYPE_OPTIONS.find(t => t.id === entryType)?.label}
+            {isEditing ? "Edit Entry" : (
+              step === "type" ? "New Journal Entry" :
+              step === "mood" ? "How are you feeling?" :
+              ENTRY_TYPE_OPTIONS.find(t => t.id === entryType)?.label
+            )}
           </h1>
         </div>
 
@@ -617,12 +744,12 @@ export default function JournalNewPage() {
                 {isSaving ? (
                   <span className="flex items-center gap-2">
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Saving...
+                    {isEditing ? "Updating..." : "Saving..."}
                   </span>
                 ) : (
                   <span className="flex items-center gap-2">
                     <Check className="w-4 h-4" />
-                    Save Entry
+                    {isEditing ? "Update Entry" : "Save Entry"}
                   </span>
                 )}
               </Button>
