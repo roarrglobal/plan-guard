@@ -15,7 +15,8 @@ import {
   Edit,
   Calendar,
   MoreVertical,
-  Lightbulb
+  Lightbulb,
+  FileText
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -44,6 +45,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { exportDecisionPDF, type DecisionData } from "@/lib/pdfExport";
 
 interface Decision {
   id: string;
@@ -79,7 +81,7 @@ const OUTCOME_OPTIONS = [
 export default function DecisionDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, profile } = useAuth();
   const { toast } = useToast();
   
   const [decision, setDecision] = useState<Decision | null>(null);
@@ -221,6 +223,38 @@ export default function DecisionDetailPage() {
     setIsSaving(false);
   };
 
+  const handleExportPDF = () => {
+    if (!decision) return;
+
+    const options = decision.options as Array<{ text: string }> | null;
+    
+    const pdfData: DecisionData = {
+      decisionText: decision.decision_text,
+      options: options || undefined,
+      stakes: decision.stakes || undefined,
+      category: decision.category || undefined,
+      chosenOption: decision.chosen_option || undefined,
+      confidence: decision.confidence || undefined,
+      aiNudge: decision.ai_nudge || undefined,
+      outcomeStatus: decision.outcome_status || undefined,
+      outcomeNotes: decision.outcome_notes || undefined,
+    };
+
+    try {
+      exportDecisionPDF(pdfData, profile?.display_name || undefined);
+      toast({
+        title: "Report exported",
+        description: "Your PDF has been downloaded.",
+      });
+    } catch (error) {
+      toast({
+        title: "Export failed",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (authLoading || isLoading) {
     return (
       <div className="min-h-screen bg-muted flex items-center justify-center">
@@ -259,6 +293,10 @@ export default function DecisionDetailPage() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleExportPDF}>
+                <FileText className="w-4 h-4 mr-2" />
+                Export PDF
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate(`/decisions/new?edit=${decision.id}`)}>
                 <Edit className="w-4 h-4 mr-2" />
                 Edit

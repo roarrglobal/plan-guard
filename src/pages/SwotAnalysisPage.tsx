@@ -9,10 +9,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { 
   ArrowLeft, Save, Sparkles, Plus, X, 
-  TrendingUp, TrendingDown, Target, AlertTriangle 
+  TrendingUp, TrendingDown, Target, AlertTriangle,
+  FileText
 } from "lucide-react";
 import { toast } from "sonner";
 import { Json } from "@/integrations/supabase/types";
+import { exportFrameworkPDF, type FrameworkData } from "@/lib/pdfExport";
 
 interface SwotData {
   strengths: string[];
@@ -29,7 +31,7 @@ interface AiEnhancement {
 export default function SwotAnalysisPage() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, profile } = useAuth();
   const isNew = id === "new";
 
   const [title, setTitle] = useState("");
@@ -182,6 +184,32 @@ export default function SwotAnalysisPage() {
     toast.success("AI analysis complete");
   };
 
+  const handleExportPDF = () => {
+    const cleanedData = {
+      strengths: data.strengths.filter((s) => s.trim()),
+      weaknesses: data.weaknesses.filter((s) => s.trim()),
+      opportunities: data.opportunities.filter((s) => s.trim()),
+      threats: data.threats.filter((s) => s.trim()),
+    };
+
+    const pdfData: FrameworkData = {
+      title: title || "SWOT Analysis",
+      frameworkType: "swot",
+      inputs: cleanedData,
+      aiEnhancement: aiEnhancement ? {
+        insights: aiEnhancement.insights,
+        recommendations: aiEnhancement.recommendations,
+      } : undefined,
+    };
+
+    try {
+      exportFrameworkPDF(pdfData, profile?.display_name || undefined);
+      toast.success("PDF exported successfully");
+    } catch (error) {
+      toast.error("Failed to export PDF");
+    }
+  };
+
   if (authLoading || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -215,6 +243,12 @@ export default function SwotAnalysisPage() {
           <Sparkles className="h-4 w-4 mr-2" />
           {isEnhancing ? "Analyzing..." : "AI Enhance"}
         </Button>
+        {!isNew && (
+          <Button variant="outline" onClick={handleExportPDF}>
+            <FileText className="h-4 w-4 mr-2" />
+            Export PDF
+          </Button>
+        )}
         <Button onClick={handleSave} disabled={isSaving}>
           <Save className="h-4 w-4 mr-2" />
           {isSaving ? "Saving..." : "Save"}
