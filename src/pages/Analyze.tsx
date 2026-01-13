@@ -1,16 +1,17 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { AnalysisInput } from "@/components/AnalysisInput";
 import { AnalysisLoading } from "@/components/analysis/AnalysisLoading";
 import { AnalysisResults, type AnalysisResult } from "@/components/analysis/AnalysisResults";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function Analyze() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
@@ -78,12 +79,45 @@ export default function Analyze() {
     setInput("");
   };
 
-  const handleSave = () => {
-    toast({
-      title: "Login required",
-      description: "Create an account to save your analyses",
-    });
-    navigate("/login");
+  const handleSave = async () => {
+    if (!user) {
+      toast({
+        title: "Login required",
+        description: "Create an account to save your analyses",
+      });
+      navigate("/login");
+      return;
+    }
+
+    if (!result) return;
+
+    try {
+      const { error } = await supabase.from("analyses").insert([{
+        user_id: user.id,
+        original_input: input,
+        result: JSON.parse(JSON.stringify(result)),
+        title: input.slice(0, 100),
+      }]);
+
+      if (error) {
+        toast({
+          title: "Failed to save",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Analysis saved",
+          description: "View it in your dashboard",
+        });
+      }
+    } catch (err) {
+      toast({
+        title: "Failed to save",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    }
   };
 
   if (isLoading) {
@@ -97,7 +131,7 @@ export default function Analyze() {
         originalInput={input}
         onNewAnalysis={handleNewAnalysis}
         onSave={handleSave}
-        isLoggedIn={false}
+        isLoggedIn={!!user}
       />
     );
   }
