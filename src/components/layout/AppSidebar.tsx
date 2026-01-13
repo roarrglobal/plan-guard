@@ -31,6 +31,7 @@ import { useUsage } from "@/hooks/useUsage";
 import { UsageBadge } from "@/components/subscription/UsageCounter";
 import { useState } from "react";
 import { FeatureUpgradeModal } from "@/components/subscription/FeatureUpgradeModal";
+import { SnagLogo } from "@/components/SnagLogo";
 
 interface AppSidebarProps {
   open: boolean;
@@ -137,7 +138,7 @@ export function AppSidebar({ open, onClose, collapsed, onToggleCollapse }: AppSi
       {/* Desktop Sidebar */}
       <aside
         className={cn(
-          "hidden md:flex flex-col bg-white border-r border-border h-full",
+          "hidden md:flex flex-col bg-background border-r border-border h-full",
           "transition-all duration-300",
           collapsed ? "w-16" : "w-64"
         )}
@@ -145,7 +146,7 @@ export function AppSidebar({ open, onClose, collapsed, onToggleCollapse }: AppSi
         {/* Quick Actions */}
         {!collapsed && (
           <div className="p-4 border-b border-border">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+            <p className="text-caption font-semibold text-muted-foreground uppercase tracking-wider mb-3">
               Quick Actions
             </p>
             <div className="space-y-1">
@@ -164,7 +165,7 @@ export function AppSidebar({ open, onClose, collapsed, onToggleCollapse }: AppSi
         {/* Navigation */}
         <nav className="flex-1 p-4 overflow-y-auto">
           {!collapsed && (
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+            <p className="text-caption font-semibold text-muted-foreground uppercase tracking-wider mb-3">
               Navigation
             </p>
           )}
@@ -206,14 +207,14 @@ export function AppSidebar({ open, onClose, collapsed, onToggleCollapse }: AppSi
       {/* Mobile Sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-border",
+          "fixed inset-y-0 left-0 z-50 w-72 bg-background border-r border-border",
           "transform transition-transform duration-300 md:hidden",
           open ? "translate-x-0" : "-translate-x-full"
         )}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border">
-          <span className="text-lg font-bold text-primary">Snag</span>
+          <SnagLogo size="sm" />
           <button
             onClick={onClose}
             className="p-2 rounded-lg hover:bg-muted transition-colors"
@@ -224,7 +225,7 @@ export function AppSidebar({ open, onClose, collapsed, onToggleCollapse }: AppSi
 
         {/* Quick Actions */}
         <div className="p-4 border-b border-border">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+          <p className="text-caption font-semibold text-muted-foreground uppercase tracking-wider mb-3">
             Quick Actions
           </p>
           <div className="space-y-1">
@@ -242,7 +243,7 @@ export function AppSidebar({ open, onClose, collapsed, onToggleCollapse }: AppSi
 
         {/* Navigation */}
         <nav className="flex-1 p-4 overflow-y-auto">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+          <p className="text-caption font-semibold text-muted-foreground uppercase tracking-wider mb-3">
             Navigation
           </p>
           <div className="space-y-1">

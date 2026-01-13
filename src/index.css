@@ -2,76 +2,78 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
 @layer base {
   :root {
-    /* TRC Brand - Light Mode (Primary) */
+    /* Snag Brand - Light Mode */
     --background: 0 0% 100%;
-    --background-alt: 0 0% 98%;
+    --background-alt: 0 0% 96%;
     --foreground: 0 0% 10%;
 
-    --card: 0 0% 95%;
+    --card: 0 0% 100%;
     --card-foreground: 0 0% 10%;
 
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 10%;
 
-    /* Cobalt Blue */
-    --primary: 217 100% 34%;
+    /* Crimson - Primary */
+    --primary: 349 57% 47%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 217 100% 25%;
+    --primary-hover: 349 57% 42%;
 
-    /* Crimson */
-    --secondary: 349 57% 47%;
-    --secondary-foreground: 0 0% 100%;
-    --secondary-hover: 349 57% 40%;
+    /* Light Gray - Secondary */
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 10%;
+    --secondary-hover: 0 0% 92%;
 
-    --muted: 0 0% 97%;
+    --muted: 0 0% 96%;
     --muted-foreground: 0 0% 40%;
 
     --accent: 349 57% 47%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 72% 51%;
+    /* Error state */
+    --destructive: 2 71% 55%;
     --destructive-foreground: 0 0% 100%;
 
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 10%;
 
-    --success: 142 71% 45%;
+    /* Success state */
+    --success: 160 84% 39%;
     --success-foreground: 0 0% 100%;
 
-    --border: 0 0% 88%;
+    --border: 0 0% 90%;
     --divider: 0 0% 90%;
-    --input: 0 0% 88%;
-    --ring: 217 100% 34%;
+    --input: 0 0% 96%;
+    --ring: 349 57% 47%;
 
     --radius: 0.5rem;
 
-    /* Analysis Output Colors - Simple, Readable */
-    --output-bg: 0 0% 98%;
+    /* Analysis Output Colors */
+    --output-bg: 0 0% 96%;
     --output-card: 0 0% 100%;
-    --output-text: 0 0% 20%;
+    --output-text: 0 0% 10%;
     --output-text-secondary: 0 0% 40%;
     --output-text-muted: 0 0% 60%;
     --output-border: 0 0% 90%;
-    --output-accent-blindspots: 217 100% 34%;
-    --output-accent-failures: 0 65% 55%;
-    --output-accent-warnings: 38 92% 45%;
+    --output-accent-blindspots: 349 57% 47%;
+    --output-accent-failures: 2 71% 55%;
+    --output-accent-warnings: 38 92% 50%;
     --output-accent-kill: 0 0% 40%;
-    --output-likelihood-high: 0 65% 55%;
-    --output-likelihood-medium: 38 92% 45%;
+    --output-likelihood-high: 2 71% 55%;
+    --output-likelihood-medium: 38 92% 50%;
     --output-likelihood-low: 0 0% 40%;
 
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 0 0% 10%;
-    --sidebar-primary: 217 100% 34%;
+    --sidebar-primary: 349 57% 47%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 97%;
-    --sidebar-accent-foreground: 0 0% 10%;
-    --sidebar-border: 0 0% 88%;
-    --sidebar-ring: 217 100% 34%;
+    --sidebar-accent: 349 57% 47%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 90%;
+    --sidebar-ring: 349 57% 47%;
   }
 
   .dark {
@@ -85,15 +87,15 @@
     --popover: 0 0% 12%;
     --popover-foreground: 0 0% 95%;
 
-    /* Cobalt Blue - slightly brighter for dark mode */
-    --primary: 217 100% 45%;
+    /* Crimson - slightly brighter for dark mode */
+    --primary: 349 57% 52%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 217 100% 38%;
+    --primary-hover: 349 57% 47%;
 
-    /* Crimson */
-    --secondary: 349 57% 52%;
-    --secondary-foreground: 0 0% 100%;
-    --secondary-hover: 349 57% 45%;
+    /* Dark Secondary */
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 95%;
+    --secondary-hover: 0 0% 20%;
 
     --muted: 0 0% 15%;
     --muted-foreground: 0 0% 60%;
@@ -101,28 +103,28 @@
     --accent: 349 57% 52%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 65% 50%;
+    --destructive: 2 71% 50%;
     --destructive-foreground: 0 0% 100%;
 
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 10%;
 
-    --success: 142 71% 45%;
+    --success: 160 84% 39%;
     --success-foreground: 0 0% 100%;
 
     --border: 0 0% 20%;
     --divider: 0 0% 18%;
     --input: 0 0% 20%;
-    --ring: 217 100% 45%;
+    --ring: 349 57% 52%;
 
     --sidebar-background: 0 0% 10%;
     --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 217 100% 45%;
+    --sidebar-primary: 349 57% 52%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 15%;
-    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-accent: 349 57% 52%;
+    --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 0 0% 20%;
-    --sidebar-ring: 217 100% 45%;
+    --sidebar-ring: 349 57% 52%;
   }
 }
 
@@ -132,12 +134,48 @@
   }
 
   html {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Poppins', system-ui, sans-serif;
     scroll-behavior: smooth;
   }
 
   body {
     @apply bg-background text-foreground antialiased;
+  }
+
+  /* Typography */
+  h1, .h1 {
+    @apply text-5xl font-bold leading-tight;
+    font-family: 'Poppins', system-ui, sans-serif;
+  }
+
+  h2, .h2 {
+    @apply text-3xl font-semibold leading-tight;
+    font-family: 'Poppins', system-ui, sans-serif;
+  }
+
+  h3, .h3 {
+    @apply text-2xl font-semibold leading-tight;
+    font-family: 'Poppins', system-ui, sans-serif;
+  }
+
+  h4, .h4 {
+    @apply text-xl font-medium leading-snug;
+    font-family: 'Poppins', system-ui, sans-serif;
+  }
+
+  p, .body {
+    @apply text-base font-normal leading-relaxed text-muted-foreground;
+    font-family: 'Poppins', system-ui, sans-serif;
+  }
+
+  .body-small {
+    @apply text-sm font-normal leading-relaxed text-muted-foreground;
+    font-family: 'Poppins', system-ui, sans-serif;
+  }
+
+  .caption {
+    @apply text-xs font-medium text-muted-foreground;
+    font-family: 'Poppins', system-ui, sans-serif;
   }
 }
 
@@ -146,17 +184,14 @@
     text-wrap: balance;
   }
 
-  /* TRC Brand Gradient Text */
+  /* Snag Brand - No more gradient text, use solid primary */
   .gradient-text {
-    background: linear-gradient(90deg, #0047AB 0%, #BE3455 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    @apply text-foreground;
   }
 
-  /* Premium CTA Gradient Background */
+  /* Premium CTA - Now solid crimson */
   .gradient-premium {
-    background: linear-gradient(135deg, #0047AB 0%, #BE3455 50%, #121212 100%);
+    @apply bg-foreground;
   }
 
   .card-elevated {
@@ -186,19 +221,19 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-secondary text-secondary-foreground font-semibold rounded-lg px-8 py-4 touch-target transition-all duration-200 hover:bg-secondary/90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply bg-primary text-primary-foreground font-semibold rounded-lg px-6 py-3 touch-target transition-all duration-200 hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-secondary {
-    @apply bg-transparent text-primary border-2 border-primary font-medium rounded-lg px-6 py-3 touch-target transition-all duration-200 hover:bg-primary hover:text-primary-foreground active:scale-[0.98];
+    @apply bg-secondary text-secondary-foreground font-medium rounded-lg px-6 py-3 touch-target transition-all duration-200 hover:bg-secondary/80 active:scale-[0.98];
   }
 
   .btn-ghost {
-    @apply text-muted-foreground font-medium rounded-lg px-4 py-2 transition-all duration-200 hover:text-foreground active:scale-[0.98];
+    @apply text-primary font-medium rounded-lg px-4 py-2 transition-all duration-200 hover:bg-primary/10 active:scale-[0.98];
   }
 
   .input-field {
-    @apply w-full bg-background border border-border rounded-lg px-4 py-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200;
+    @apply w-full bg-muted border border-border rounded-lg px-4 py-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200;
   }
 
   .analysis-card {
@@ -217,13 +252,23 @@
     @apply bg-success/20 text-success border border-success/30;
   }
 
-  /* TRC Card Styles */
-  .trc-card {
-    @apply bg-card rounded-xl p-6 md:p-8 shadow-card transition-all duration-300 hover:shadow-card-hover;
+  /* Snag Card Styles */
+  .snag-card {
+    @apply bg-card rounded-xl p-6 border border-border shadow-card transition-all duration-300 hover:shadow-card-hover;
   }
 
-  .trc-card-bordered {
-    @apply bg-background border border-border rounded-xl p-6 md:p-8 transition-all duration-300 hover:shadow-card;
+  .snag-card-bordered {
+    @apply bg-background border border-border rounded-xl p-6 transition-all duration-300 hover:shadow-card;
+  }
+
+  /* Section Header with Accent Border */
+  .section-header {
+    @apply text-foreground font-semibold border-l-4 border-primary pl-4;
+  }
+
+  /* Tags/Badges */
+  .tag-accent {
+    @apply bg-primary/10 text-primary rounded px-2 py-1 text-xs font-medium;
   }
 }
 

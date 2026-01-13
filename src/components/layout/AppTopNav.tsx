@@ -19,6 +19,7 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
+import { SnagLogo } from "@/components/SnagLogo";
 
 interface AppTopNavProps {
   onMenuClick: () => void;
@@ -55,7 +56,7 @@ export function AppTopNav({ onMenuClick, sidebarOpen }: AppTopNavProps) {
     : `${analysesUsed}/${analysesLimit} Deep Snags`;
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-border">
+    <header className="sticky top-0 z-50 bg-background border-b border-border">
       <div className="flex items-center justify-between h-14 px-4">
         {/* Left: Logo + Mobile Menu */}
         <div className="flex items-center gap-3">
@@ -74,7 +75,7 @@ export function AppTopNav({ onMenuClick, sidebarOpen }: AppTopNavProps) {
 
           {/* Logo */}
           <Link to="/dashboard" className="flex items-center gap-2">
-            <span className="text-xl font-bold text-primary">Snag</span>
+            <SnagLogo size="sm" />
           </Link>
         </div>
 
@@ -138,7 +139,7 @@ export function AppTopNav({ onMenuClick, sidebarOpen }: AppTopNavProps) {
                           to="/analyze"
                           className="block select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-muted focus:bg-muted"
                         >
-                          <div className="text-sm font-medium">🎯 Pre-Mortem (Deep Snag)</div>
+                          <div className="text-sm font-medium text-foreground">🎯 Pre-Mortem (Deep Snag)</div>
                           <p className="text-xs text-muted-foreground mt-1">
                             Stress-test a plan before you commit
                           </p>
@@ -151,7 +152,7 @@ export function AppTopNav({ onMenuClick, sidebarOpen }: AppTopNavProps) {
                           to="/post-mortem"
                           className="block select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-muted focus:bg-muted"
                         >
-                          <div className="text-sm font-medium">🔍 Post-Mortem</div>
+                          <div className="text-sm font-medium text-foreground">🔍 Post-Mortem</div>
                           <p className="text-xs text-muted-foreground mt-1">
                             Analyze what happened after
                           </p>
@@ -164,7 +165,7 @@ export function AppTopNav({ onMenuClick, sidebarOpen }: AppTopNavProps) {
                           to="/frameworks"
                           className="block select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-muted focus:bg-muted"
                         >
-                          <div className="text-sm font-medium">📊 Business Frameworks</div>
+                          <div className="text-sm font-medium text-foreground">📊 Business Frameworks</div>
                           <p className="text-xs text-muted-foreground mt-1">
                             SWOT, Porter's Five Forces, MEDDPICC, and more
                           </p>
@@ -202,7 +203,7 @@ export function AppTopNav({ onMenuClick, sidebarOpen }: AppTopNavProps) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <div className="px-2 py-1.5">
-                <p className="text-sm font-medium truncate">{displayName}</p>
+                <p className="text-sm font-medium truncate text-foreground">{displayName}</p>
                 <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
               </div>
               <DropdownMenuSeparator />

@@ -1,21 +1,24 @@
 import { cn } from "@/lib/utils";
+import snagLogo from "@/assets/snag-logo.svg";
 
 interface SnagLogoProps {
   className?: string;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
 }
 
 export function SnagLogo({ className, size = "md" }: SnagLogoProps) {
   const sizeClasses = {
-    sm: "text-xl",
-    md: "text-2xl",
-    lg: "text-4xl",
+    sm: "h-6",
+    md: "h-8",
+    lg: "h-10",
+    xl: "h-12",
   };
 
   return (
-    <span className={cn("font-bold tracking-tight", sizeClasses[size], className)}>
-      <span className="text-primary">S</span>
-      <span className="text-foreground">nag</span>
-    </span>
+    <img
+      src={snagLogo}
+      alt="Snag"
+      className={cn(sizeClasses[size], "w-auto", className)}
+    />
   );
 }

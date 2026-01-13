@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { SnagLogo } from "@/components/SnagLogo";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -66,26 +67,30 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-muted flex flex-col">
       {/* Header */}
-      <header className="flex items-center justify-between px-4 py-3 border-b border-[#E5E5E5]">
+      <header className="flex items-center justify-between px-4 py-3 bg-background border-b border-border">
         <button
           onClick={() => navigate("/")}
-          className="p-2 -ml-2 text-[#666666] hover:text-[#1A1A1A] transition-colors"
+          className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
         </button>
-        <span className="text-[18px] font-bold text-cobalt">Snag</span>
+        <SnagLogo size="sm" />
         <div className="w-9" />
       </header>
 
       {/* Form */}
       <main className="flex-1 flex flex-col items-center justify-center px-4 py-8">
-        <div className="w-full max-w-sm">
-          <h1 className="text-[28px] font-bold text-[#1A1A1A] text-center mb-2">
+        <div className="w-full max-w-sm bg-card rounded-xl p-6 border border-border shadow-card">
+          <div className="flex justify-center mb-6">
+            <SnagLogo size="lg" />
+          </div>
+          
+          <h1 className="text-h3 font-bold text-foreground text-center mb-2">
             {isSignUp ? "Create account" : "Welcome back"}
           </h1>
-          <p className="text-[15px] text-[#666666] text-center mb-8">
+          <p className="text-body-small text-muted-foreground text-center mb-8">
             {isSignUp
               ? "Start stress-testing your decisions"
               : "Sign in to access your analyses"}
@@ -96,7 +101,7 @@ export default function Login() {
               <div>
                 <label
                   htmlFor="displayName"
-                  className="block text-[13px] font-medium text-[#333333] mb-1.5"
+                  className="block text-caption font-medium text-foreground mb-1.5"
                 >
                   Display name
                 </label>
@@ -106,7 +111,7 @@ export default function Login() {
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   placeholder="Your name"
-                  className="w-full bg-white border border-[#E0E0E0] rounded-lg px-4 py-3 text-[15px] text-[#1A1A1A] placeholder:text-[#999999] focus:outline-none focus:border-[#0047AB] transition-colors"
+                  className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-body-small text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
                 />
               </div>
             )}
@@ -114,7 +119,7 @@ export default function Login() {
             <div>
               <label
                 htmlFor="email"
-                className="block text-[13px] font-medium text-[#333333] mb-1.5"
+                className="block text-caption font-medium text-foreground mb-1.5"
               >
                 Email
               </label>
@@ -125,14 +130,14 @@ export default function Login() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 required
-                className="w-full bg-white border border-[#E0E0E0] rounded-lg px-4 py-3 text-[15px] text-[#1A1A1A] placeholder:text-[#999999] focus:outline-none focus:border-[#0047AB] transition-colors"
+                className="w-full bg-muted border border-border rounded-lg px-4 py-3 text-body-small text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
               />
             </div>
 
             <div>
               <label
                 htmlFor="password"
-                className="block text-[13px] font-medium text-[#333333] mb-1.5"
+                className="block text-caption font-medium text-foreground mb-1.5"
               >
                 Password
               </label>
@@ -145,12 +150,12 @@ export default function Login() {
                   placeholder="••••••••"
                   required
                   minLength={6}
-                  className="w-full bg-white border border-[#E0E0E0] rounded-lg px-4 py-3 pr-12 text-[15px] text-[#1A1A1A] placeholder:text-[#999999] focus:outline-none focus:border-[#0047AB] transition-colors"
+                  className="w-full bg-muted border border-border rounded-lg px-4 py-3 pr-12 text-body-small text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#999999] hover:text-[#666666]"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
                   {showPassword ? (
                     <EyeOff className="w-5 h-5" />
@@ -166,7 +171,7 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={() => navigate("/forgot-password")}
-                  className="text-[13px] text-primary hover:underline"
+                  className="text-caption text-primary hover:underline"
                 >
                   Forgot password?
                 </button>
@@ -176,7 +181,7 @@ export default function Login() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 rounded-lg mt-6"
+              className="w-full mt-6"
             >
               {isLoading
                 ? "Please wait..."
@@ -186,11 +191,11 @@ export default function Login() {
             </Button>
           </form>
 
-          <p className="text-[14px] text-[#666666] text-center mt-6">
+          <p className="text-body-small text-muted-foreground text-center mt-6">
             {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
             <button
               onClick={() => setIsSignUp(!isSignUp)}
-              className="text-[#0047AB] font-medium hover:underline"
+              className="text-primary font-medium hover:underline"
             >
               {isSignUp ? "Sign in" : "Sign up"}
             </button>
