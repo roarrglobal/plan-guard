@@ -15,6 +15,16 @@ CRITICAL: Use these EXACT field names. Do not deviate.
       "blind_spot": "The specific assumption or gap",
       "why_it_matters": "Why this matters for the plan",
       "how_to_test": "How to validate this"
+    },
+    {
+      "blind_spot": "Second blind spot",
+      "why_it_matters": "Why this matters",
+      "how_to_test": "How to test"
+    },
+    {
+      "blind_spot": "Third blind spot",
+      "why_it_matters": "Why this matters",
+      "how_to_test": "How to test"
     }
   ],
   
@@ -23,17 +33,37 @@ CRITICAL: Use these EXACT field names. Do not deviate.
       "what_fails": "Specific failure description",
       "mechanism": "How and why this happens",
       "likelihood": "High",
-      "trigger_event": "What sets this in motion",
-      "second_order_effect": "What happens because of the failure",
-      "third_order_effect": "What happens because of the second-order effect"
+      "impact": "What damage occurs",
+      "mitigation": "How to prevent or reduce risk"
+    },
+    {
+      "what_fails": "Second failure",
+      "mechanism": "How it happens",
+      "likelihood": "Medium",
+      "impact": "The damage",
+      "mitigation": "Prevention"
+    },
+    {
+      "what_fails": "Third failure",
+      "mechanism": "How it happens",
+      "likelihood": "Low",
+      "impact": "The damage",
+      "mitigation": "Prevention"
     }
   ],
   
   "warning_signals": [
     {
       "signal": "Observable indicator",
-      "timeframe": "When to watch for it",
-      "measurement": "How to objectively detect it"
+      "timeframe": "When to watch for it"
+    },
+    {
+      "signal": "Second signal",
+      "timeframe": "Timeframe"
+    },
+    {
+      "signal": "Third signal",
+      "timeframe": "Timeframe"
     }
   ],
   
@@ -41,15 +71,14 @@ CRITICAL: Use these EXACT field names. Do not deviate.
     {
       "condition": "If X doesn't happen by Y",
       "action": "Then do Z",
-      "rationale": "Why this threshold matters"
+      "threshold": "Specific measurable threshold"
+    },
+    {
+      "condition": "Second condition",
+      "action": "Action to take",
+      "threshold": "Threshold"
     }
   ],
-  
-  "adversarial_view": {
-    "challenge": "Direct challenge to core assumption",
-    "strongest_argument_against": "What a skeptic would say",
-    "valid_counter": "What user must believe/prove to overcome this"
-  },
   
   "unasked_question": "The one uncomfortable question they should be asking",
   
@@ -58,15 +87,12 @@ CRITICAL: Use these EXACT field names. Do not deviate.
 
 RULES:
 1. Return ONLY valid JSON. No markdown, no backticks, no explanation.
-2. Use EXACTLY these field names — blind_spot, why_it_matters, how_to_test, what_fails, mechanism, likelihood, trigger_event, second_order_effect, third_order_effect, signal, timeframe, measurement, condition, action, rationale.
+2. Use EXACTLY these field names — blind_spot, why_it_matters, how_to_test, what_fails, mechanism, likelihood, impact, mitigation, signal, timeframe, condition, action, threshold.
 3. likelihood must be exactly "High", "Medium", or "Low" (capitalized).
 4. category must be exactly one of: career, business, personal, travel, other (lowercase).
 5. Always provide exactly 3 blind spots, 3 failure modes, 3-5 warning signals, 2-3 kill criteria.
 6. Be specific to the user's actual plan. Reference their specific details.
-7. No generic advice. No clichés. No filler.
-8. The unasked question should challenge their deepest assumption.
-9. Kill criteria must be specific and measurable.
-10. Warning signals must be observable and time-bound.`;
+7. No generic advice. No clichés.`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {

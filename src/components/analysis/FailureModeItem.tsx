@@ -3,12 +3,9 @@ import { cn } from "@/lib/utils";
 interface FailureMode {
   what: string;
   mechanism: string;
-  likelihood: "High" | "Medium" | "Low";
+  likelihood: "High" | "Medium" | "Low" | string;
   impact: string;
-  trigger_event?: string;
-  second_order_effect?: string;
-  third_order_effect?: string;
-  confidence?: string;
+  mitigation?: string;
 }
 
 interface FailureModeItemProps {
@@ -17,16 +14,10 @@ interface FailureModeItemProps {
 }
 
 export function FailureModeItem({ mode, index }: FailureModeItemProps) {
-  const likelihoodColors = {
+  const likelihoodColors: Record<string, string> = {
     High: "text-[#D64045]",
     Medium: "text-[#D97706]",
     Low: "text-[#666666]",
-  };
-
-  const confidenceColors: Record<string, string> = {
-    "HIGH CONFIDENCE": "text-[#D64045]",
-    "MEDIUM CONFIDENCE": "text-[#D97706]",
-    "CONTEXT-DEPENDENT": "text-[#666666]",
   };
 
   return (
@@ -41,15 +32,6 @@ export function FailureModeItem({ mode, index }: FailureModeItemProps) {
       </div>
 
       <div className="space-y-2 pl-5">
-        {mode.trigger_event && (
-          <div>
-            <span className="text-[13px] font-semibold text-[#666666]">
-              Trigger:{" "}
-            </span>
-            <span className="text-[15px] text-[#333333]">{mode.trigger_event}</span>
-          </div>
-        )}
-
         <div>
           <span className="text-[13px] font-semibold text-[#666666]">
             Mechanism:{" "}
@@ -57,62 +39,35 @@ export function FailureModeItem({ mode, index }: FailureModeItemProps) {
           <span className="text-[15px] text-[#333333]">{mode.mechanism}</span>
         </div>
 
-        <div className="flex flex-wrap gap-x-6 gap-y-1">
-          <div>
-            <span className="text-[13px] font-semibold text-[#666666]">
-              Likelihood:{" "}
-            </span>
-            <span
-              className={cn(
-                "text-[15px] font-medium",
-                likelihoodColors[mode.likelihood]
-              )}
-            >
-              {mode.likelihood}
-            </span>
-          </div>
-
-          {mode.confidence && (
-            <div>
-              <span className="text-[13px] font-semibold text-[#666666]">
-                Confidence:{" "}
-              </span>
-              <span
-                className={cn(
-                  "text-[13px] font-medium",
-                  confidenceColors[mode.confidence] || "text-[#666666]"
-                )}
-              >
-                {mode.confidence}
-              </span>
-            </div>
-          )}
+        <div>
+          <span className="text-[13px] font-semibold text-[#666666]">
+            Likelihood:{" "}
+          </span>
+          <span
+            className={cn(
+              "text-[15px] font-medium",
+              likelihoodColors[mode.likelihood] || "text-[#666666]"
+            )}
+          >
+            {mode.likelihood}
+          </span>
         </div>
 
-        {mode.second_order_effect && (
-          <div>
-            <span className="text-[13px] font-semibold text-[#666666]">
-              2nd Order Effect:{" "}
-            </span>
-            <span className="text-[15px] text-[#333333]">{mode.second_order_effect}</span>
-          </div>
-        )}
-
-        {mode.third_order_effect && (
-          <div>
-            <span className="text-[13px] font-semibold text-[#666666]">
-              3rd Order Effect:{" "}
-            </span>
-            <span className="text-[15px] text-[#333333]">{mode.third_order_effect}</span>
-          </div>
-        )}
-
-        {mode.impact && !mode.second_order_effect && (
+        {mode.impact && (
           <div>
             <span className="text-[13px] font-semibold text-[#666666]">
               Impact:{" "}
             </span>
             <span className="text-[15px] text-[#333333]">{mode.impact}</span>
+          </div>
+        )}
+
+        {mode.mitigation && (
+          <div>
+            <span className="text-[13px] font-semibold text-[#059669]">
+              Mitigation:{" "}
+            </span>
+            <span className="text-[15px] text-[#333333]">{mode.mitigation}</span>
           </div>
         )}
       </div>
