@@ -625,24 +625,162 @@ export default function PostMortemNewPage() {
               </div>
             ) : aiAnalysis ? (
               <>
-                {/* Summary */}
-                <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl p-5 border border-primary/20">
-                  <h3 className="font-semibold mb-2 flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-primary" />
-                    Summary
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {(aiAnalysis.outcome_assessment as any)?.summary || "Analysis complete"}
-                  </p>
-                </div>
-
-                {/* Root Cause */}
-                {(aiAnalysis.root_cause_analysis as any)?.primary_root_cause && (
-                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-                    <h3 className="font-semibold text-amber-800 mb-2">🎯 Primary Root Cause</h3>
-                    <p className="text-sm text-amber-900">
-                      {(aiAnalysis.root_cause_analysis as any).primary_root_cause}
+                {/* One Sentence Wisdom - Hero */}
+                {aiAnalysis.one_sentence_wisdom && (
+                  <div className="bg-gradient-to-br from-primary/10 to-primary/20 rounded-xl p-6 border border-primary/30 text-center">
+                    <Sparkles className="w-6 h-6 text-primary mx-auto mb-3" />
+                    <p className="text-lg font-semibold text-foreground italic">
+                      "{aiAnalysis.one_sentence_wisdom as string}"
                     </p>
+                  </div>
+                )}
+
+                {/* Summary */}
+                {aiAnalysis.summary && (
+                  <div className="bg-card rounded-xl p-5 border">
+                    <h3 className="font-semibold mb-2 text-sm text-muted-foreground uppercase tracking-wide">Summary</h3>
+                    <p className="text-sm text-foreground">
+                      {aiAnalysis.summary as string}
+                    </p>
+                  </div>
+                )}
+
+                {/* Outcome Assessment */}
+                {(aiAnalysis.outcome_assessment as any) && (
+                  <div className="bg-muted/50 rounded-xl p-4 border">
+                    <h3 className="font-semibold mb-3 flex items-center gap-2">
+                      <Target className="w-4 h-4 text-primary" />
+                      Outcome Assessment
+                    </h3>
+                    <div className="grid gap-3 text-sm">
+                      <div className="flex items-start gap-2">
+                        <span className="font-medium text-muted-foreground min-w-[100px]">Goal:</span>
+                        <span>{(aiAnalysis.outcome_assessment as any).original_goal}</span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <span className="font-medium text-muted-foreground min-w-[100px]">Outcome:</span>
+                        <span>{(aiAnalysis.outcome_assessment as any).actual_outcome}</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className={cn(
+                          "px-2 py-1 rounded-full text-xs font-medium capitalize",
+                          (aiAnalysis.outcome_assessment as any).outcome_category === "success" && "bg-green-100 text-green-700",
+                          (aiAnalysis.outcome_assessment as any).outcome_category === "partial" && "bg-yellow-100 text-yellow-700",
+                          (aiAnalysis.outcome_assessment as any).outcome_category === "failure" && "bg-red-100 text-red-700",
+                          (aiAnalysis.outcome_assessment as any).outcome_category === "mixed" && "bg-blue-100 text-blue-700",
+                          (aiAnalysis.outcome_assessment as any).outcome_category === "pivot" && "bg-purple-100 text-purple-700"
+                        )}>
+                          {(aiAnalysis.outcome_assessment as any).outcome_category}
+                        </span>
+                        {(aiAnalysis.outcome_assessment as any).satisfaction_score && (
+                          <span className="text-xs text-muted-foreground">
+                            Satisfaction: {(aiAnalysis.outcome_assessment as any).satisfaction_score}/10
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Expectation vs Reality */}
+                {(aiAnalysis.expectation_vs_reality as any[])?.length > 0 && (
+                  <div className="space-y-3">
+                    <h3 className="font-semibold flex items-center gap-2">
+                      <RefreshCw className="w-4 h-4 text-primary" />
+                      Expectations vs Reality
+                    </h3>
+                    <div className="space-y-2">
+                      {(aiAnalysis.expectation_vs_reality as any[]).map((item, idx) => (
+                        <div key={idx} className="bg-card border rounded-lg p-4">
+                          <div className="grid grid-cols-2 gap-3 mb-2">
+                            <div>
+                              <p className="text-xs font-medium text-muted-foreground mb-1">Expected</p>
+                              <p className="text-sm">{item.expected}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs font-medium text-muted-foreground mb-1">Actual</p>
+                              <p className="text-sm">{item.actual}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 mt-2 pt-2 border-t">
+                            <span className={cn(
+                              "px-2 py-0.5 rounded text-xs font-medium",
+                              item.accuracy === "accurate" && "bg-green-100 text-green-700",
+                              item.accuracy === "partially_accurate" && "bg-yellow-100 text-yellow-700",
+                              item.accuracy === "wrong" && "bg-red-100 text-red-700"
+                            )}>
+                              {item.accuracy?.replace("_", " ")}
+                            </span>
+                            {item.implication && (
+                              <p className="text-xs text-muted-foreground italic flex-1">
+                                → {item.implication}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Five Whys Root Cause */}
+                {(aiAnalysis.root_cause_analysis as any)?.five_whys && (
+                  <div className="bg-amber-50/50 border border-amber-200 rounded-xl p-4">
+                    <h3 className="font-semibold text-amber-800 mb-3 flex items-center gap-2">
+                      <AlertCircle className="w-4 h-4" />
+                      Five Whys Analysis
+                    </h3>
+                    <div className="space-y-2">
+                      <div className="bg-white/60 rounded-lg p-3 border-l-4 border-amber-300">
+                        <p className="text-xs font-medium text-amber-700">Problem</p>
+                        <p className="text-sm text-amber-900">{(aiAnalysis.root_cause_analysis as any).five_whys.problem}</p>
+                      </div>
+                      {[1, 2, 3, 4].map((n) => {
+                        const why = (aiAnalysis.root_cause_analysis as any).five_whys[`why_${n}`];
+                        return why ? (
+                          <div key={n} className="bg-white/40 rounded-lg p-2 pl-4 ml-2 border-l-2 border-amber-200">
+                            <p className="text-xs text-amber-600">Why {n}?</p>
+                            <p className="text-sm text-amber-800">{why}</p>
+                          </div>
+                        ) : null;
+                      })}
+                      <div className="bg-amber-100 rounded-lg p-3 border-l-4 border-amber-500 ml-4">
+                        <p className="text-xs font-bold text-amber-700">ROOT CAUSE</p>
+                        <p className="text-sm font-medium text-amber-900">
+                          {(aiAnalysis.root_cause_analysis as any).five_whys.why_5_root_cause}
+                        </p>
+                      </div>
+                    </div>
+                    {(aiAnalysis.root_cause_analysis as any).primary_root_cause && (
+                      <div className="mt-4 pt-3 border-t border-amber-200">
+                        <p className="text-xs font-semibold text-amber-700">🎯 Primary Root Cause</p>
+                        <p className="text-sm text-amber-900 mt-1">
+                          {(aiAnalysis.root_cause_analysis as any).primary_root_cause}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Contributing Factors */}
+                {(aiAnalysis.root_cause_analysis as any)?.contributing_factors && (
+                  <div className="grid grid-cols-2 gap-3">
+                    {["people", "process", "external", "decisions"].map((factor) => {
+                      const items = (aiAnalysis.root_cause_analysis as any).contributing_factors[factor];
+                      if (!items?.length) return null;
+                      return (
+                        <div key={factor} className="bg-card border rounded-lg p-3">
+                          <h4 className="text-xs font-semibold text-muted-foreground uppercase mb-2 capitalize">
+                            {factor} Factors
+                          </h4>
+                          <ul className="text-xs space-y-1">
+                            {items.map((item: string, idx: number) => (
+                              <li key={idx} className="text-foreground">• {item}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
 
@@ -658,6 +796,19 @@ export default function PostMortemNewPage() {
                         <div key={idx} className="bg-green-50 border border-green-100 rounded-lg p-3">
                           <p className="font-medium text-sm text-green-800">{item.factor}</p>
                           <p className="text-xs text-green-600 mt-1">{item.why_it_worked}</p>
+                          <div className="flex items-center gap-2 mt-2">
+                            <span className={cn(
+                              "px-1.5 py-0.5 rounded text-[10px] font-medium",
+                              item.replicability === "high" && "bg-green-200 text-green-800",
+                              item.replicability === "medium" && "bg-yellow-200 text-yellow-800",
+                              item.replicability === "low" && "bg-red-200 text-red-800"
+                            )}>
+                              {item.replicability} replicability
+                            </span>
+                          </div>
+                          {item.how_to_replicate && (
+                            <p className="text-xs text-green-700 mt-2 italic">→ {item.how_to_replicate}</p>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -673,6 +824,19 @@ export default function PostMortemNewPage() {
                         <div key={idx} className="bg-red-50 border border-red-100 rounded-lg p-3">
                           <p className="font-medium text-sm text-red-800">{item.factor}</p>
                           <p className="text-xs text-red-600 mt-1">{item.why_it_failed}</p>
+                          <div className="flex items-center gap-2 mt-2">
+                            <span className={cn(
+                              "px-1.5 py-0.5 rounded text-[10px] font-medium",
+                              item.avoidability === "high" && "bg-green-200 text-green-800",
+                              item.avoidability === "medium" && "bg-yellow-200 text-yellow-800",
+                              item.avoidability === "low" && "bg-red-200 text-red-800"
+                            )}>
+                              {item.avoidability} avoidability
+                            </span>
+                          </div>
+                          {item.how_to_avoid && (
+                            <p className="text-xs text-red-700 mt-2 italic">→ {item.how_to_avoid}</p>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -680,17 +844,25 @@ export default function PostMortemNewPage() {
                 </div>
 
                 {/* Lessons */}
-                {(aiAnalysis.lessons_extracted as any[])?.length > 0 && (
+                {(aiAnalysis.lessons as any[])?.length > 0 && (
                   <div>
                     <h3 className="font-semibold mb-3 flex items-center gap-2">
                       <Lightbulb className="w-4 h-4 text-primary" />
                       Key Lessons
                     </h3>
                     <div className="space-y-2">
-                      {(aiAnalysis.lessons_extracted as any[]).map((lesson, idx) => (
+                      {(aiAnalysis.lessons as any[]).map((lesson, idx) => (
                         <div key={idx} className="bg-card border rounded-lg p-4">
-                          <p className="font-medium text-sm">{lesson.lesson}</p>
-                          <p className="text-xs text-muted-foreground mt-1">→ {lesson.application}</p>
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="font-medium text-sm">{lesson.lesson}</p>
+                            <span className="px-2 py-0.5 bg-primary/10 text-primary text-[10px] rounded-full whitespace-nowrap">
+                              {lesson.category?.replace("_", " ")}
+                            </span>
+                          </div>
+                          {lesson.evidence && (
+                            <p className="text-xs text-muted-foreground mt-1">Evidence: {lesson.evidence}</p>
+                          )}
+                          <p className="text-xs text-primary mt-2 font-medium">→ {lesson.application}</p>
                         </div>
                       ))}
                     </div>
@@ -704,9 +876,14 @@ export default function PostMortemNewPage() {
                     <p className="text-sm text-amber-900 italic">
                       "{(aiAnalysis.uncomfortable_truth as any).truth}"
                     </p>
-                    {(aiAnalysis.uncomfortable_truth as any).what_changes && (
+                    {(aiAnalysis.uncomfortable_truth as any).why_hard_to_admit && (
                       <p className="text-xs text-amber-700 mt-2">
-                        What changes if you accept this: {(aiAnalysis.uncomfortable_truth as any).what_changes}
+                        <span className="font-medium">Why it's hard:</span> {(aiAnalysis.uncomfortable_truth as any).why_hard_to_admit}
+                      </p>
+                    )}
+                    {(aiAnalysis.uncomfortable_truth as any).what_changes && (
+                      <p className="text-xs text-amber-700 mt-1">
+                        <span className="font-medium">What changes if you accept it:</span> {(aiAnalysis.uncomfortable_truth as any).what_changes}
                       </p>
                     )}
                   </div>
@@ -716,7 +893,7 @@ export default function PostMortemNewPage() {
                 {(aiAnalysis.action_items as any) && (
                   <div className="grid grid-cols-3 gap-3">
                     <div className="bg-green-50 rounded-lg p-3">
-                      <h4 className="text-xs font-semibold text-green-800 mb-2">Start Doing</h4>
+                      <h4 className="text-xs font-semibold text-green-800 mb-2">✅ Start Doing</h4>
                       <ul className="text-xs text-green-700 space-y-1">
                         {(aiAnalysis.action_items as any).start_doing?.map((item: string, idx: number) => (
                           <li key={idx}>• {item}</li>
@@ -724,7 +901,7 @@ export default function PostMortemNewPage() {
                       </ul>
                     </div>
                     <div className="bg-red-50 rounded-lg p-3">
-                      <h4 className="text-xs font-semibold text-red-800 mb-2">Stop Doing</h4>
+                      <h4 className="text-xs font-semibold text-red-800 mb-2">🛑 Stop Doing</h4>
                       <ul className="text-xs text-red-700 space-y-1">
                         {(aiAnalysis.action_items as any).stop_doing?.map((item: string, idx: number) => (
                           <li key={idx}>• {item}</li>
@@ -732,7 +909,7 @@ export default function PostMortemNewPage() {
                       </ul>
                     </div>
                     <div className="bg-blue-50 rounded-lg p-3">
-                      <h4 className="text-xs font-semibold text-blue-800 mb-2">Continue Doing</h4>
+                      <h4 className="text-xs font-semibold text-blue-800 mb-2">🔄 Continue Doing</h4>
                       <ul className="text-xs text-blue-700 space-y-1">
                         {(aiAnalysis.action_items as any).continue_doing?.map((item: string, idx: number) => (
                           <li key={idx}>• {item}</li>
@@ -742,10 +919,12 @@ export default function PostMortemNewPage() {
                   </div>
                 )}
 
-                {/* One Sentence Lesson */}
-                {aiAnalysis.one_sentence_lesson && (
-                  <div className="bg-primary/5 border-l-4 border-primary rounded-r-lg p-4 text-center">
-                    <p className="text-sm font-medium italic">"{aiAnalysis.one_sentence_lesson as string}"</p>
+                {/* Category Badge */}
+                {aiAnalysis.category && (
+                  <div className="text-center">
+                    <span className="inline-block px-3 py-1 bg-muted text-muted-foreground text-xs rounded-full capitalize">
+                      Category: {aiAnalysis.category as string}
+                    </span>
                   </div>
                 )}
 
