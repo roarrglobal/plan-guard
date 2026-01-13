@@ -3,6 +3,8 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { AnalysisSection } from "./AnalysisSection";
 import { FailureModeItem } from "./FailureModeItem";
+import { AnalysisDisclaimer } from "./AnalysisDisclaimer";
+import { FirstUseAcknowledgment, useFirstUseAcknowledgment } from "./FirstUseAcknowledgment";
 
 // Enhanced analysis result types
 export interface BlindSpot {
@@ -99,6 +101,7 @@ export function AnalysisResults({
 }: AnalysisResultsProps) {
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
+  const { hasAcknowledged, setHasAcknowledged } = useFirstUseAcknowledgment();
 
   const formatForCopy = () => {
     let text = `PRE-MORTEM ANALYSIS\n\n`;
@@ -193,35 +196,40 @@ export function AnalysisResults({
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] flex flex-col">
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-white border-b border-[#E5E5E5]">
-        <div className="flex items-center justify-between px-4 py-3">
-          <button
-            onClick={onNewAnalysis}
-            className="p-2 -ml-2 text-[#666666] hover:text-[#1A1A1A] transition-colors"
-            aria-label="Back"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <span className="text-[18px] font-bold text-[#1A1A1A]">
-            SNAG ANALYSIS
-          </span>
-          <div className="w-9" />
-        </div>
-      </header>
+    <>
+      {!hasAcknowledged && (
+        <FirstUseAcknowledgment onAcknowledged={() => setHasAcknowledged(true)} />
+      )}
+      
+      <div className="min-h-screen bg-[#FAFAFA] flex flex-col">
+        {/* Header */}
+        <header className="sticky top-0 z-40 bg-white border-b border-[#E5E5E5]">
+          <div className="flex items-center justify-between px-4 py-3">
+            <button
+              onClick={onNewAnalysis}
+              className="p-2 -ml-2 text-[#666666] hover:text-[#1A1A1A] transition-colors"
+              aria-label="Back"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <span className="text-[18px] font-bold text-[#1A1A1A]">
+              SNAG ANALYSIS
+            </span>
+            <div className="w-9" />
+          </div>
+        </header>
 
-      {/* Content */}
-      <main className="flex-1 px-4 py-4 pb-28 max-w-[680px] mx-auto w-full">
-        {/* Plan Summary Card */}
-        <div className="bg-white border border-[#E5E5E5] rounded-lg p-4 mb-4">
-          <p className="text-[11px] font-semibold text-[#999999] uppercase tracking-wide mb-2">
-            YOUR PLAN
-          </p>
-          <p className="text-[15px] text-[#333333] leading-relaxed">
-            {originalInput}
-          </p>
-        </div>
+        {/* Content */}
+        <main className="flex-1 px-4 py-4 pb-28 max-w-[680px] mx-auto w-full">
+          {/* Plan Summary Card */}
+          <div className="bg-white border border-[#E5E5E5] rounded-lg p-4 mb-4">
+            <p className="text-[11px] font-semibold text-[#999999] uppercase tracking-wide mb-2">
+              YOUR PLAN
+            </p>
+            <p className="text-[15px] text-[#333333] leading-relaxed">
+              {originalInput}
+            </p>
+          </div>
 
         {/* Blind Spots */}
         <AnalysisSection title="Blind Spots" accentColor="cobalt">
@@ -397,6 +405,9 @@ export function AnalysisResults({
             </div>
           </AnalysisSection>
         )}
+
+        {/* Disclaimer */}
+        <AnalysisDisclaimer />
       </main>
 
       {/* Fixed Bottom Actions */}
@@ -433,10 +444,11 @@ export function AnalysisResults({
             onClick={onSave}
             className="w-full text-center text-[14px] font-medium text-[#0047AB] mt-2 py-2"
           >
-            Save this analysis
+          Save this analysis
           </button>
         )}
       </div>
     </div>
+    </>
   );
 }

@@ -31,7 +31,6 @@ export default function Landing() {
             {/* Logo */}
             <div className="flex items-center gap-2">
               <span className="text-2xl font-bold text-cobalt">Snag</span>
-              <span className="text-micro text-muted-foreground hidden sm:inline">by The Revenue Circle</span>
             </div>
 
             {/* Desktop Nav */}
@@ -376,15 +375,12 @@ export default function Landing() {
       <footer className="bg-[#1A1A1A] py-12">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
-            <div className="flex items-center gap-2">
-              <span className="text-xl font-bold text-white">Snag</span>
-              <span className="text-small text-[#666666]">by The Revenue Circle System™</span>
-            </div>
+            <span className="text-xl font-bold text-white">Snag</span>
             
             <div className="flex items-center gap-6">
-              <a href="#" className="text-small text-[#666666] hover:text-white transition-colors">Privacy</a>
-              <a href="#" className="text-small text-[#666666] hover:text-white transition-colors">Terms</a>
-              <a href="#" className="text-small text-[#666666] hover:text-white transition-colors">Contact</a>
+              <a href="/privacy" className="text-small text-[#666666] hover:text-white transition-colors">Privacy</a>
+              <a href="/terms" className="text-small text-[#666666] hover:text-white transition-colors">Terms</a>
+              <a href="/disclaimer" className="text-small text-[#666666] hover:text-white transition-colors">Disclaimer</a>
             </div>
           </div>
           
