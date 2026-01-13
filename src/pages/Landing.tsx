@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import AnimatedScorecard from "@/components/landing/AnimatedScorecard";
+import UsageLimitsModal from "@/components/landing/UsageLimitsModal";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function Landing() {
@@ -14,6 +15,7 @@ export default function Landing() {
   const [planText, setPlanText] = useState("");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [isAnnual, setIsAnnual] = useState(false);
+  const [limitsModalOpen, setLimitsModalOpen] = useState(false);
 
   const handleAnalyze = () => {
     if (planText.trim().length > 10) {
@@ -519,10 +521,18 @@ export default function Landing() {
           {/* Usage Limits Note */}
           <p className="text-[12px] text-muted-foreground text-center mt-6 max-w-2xl mx-auto">
             All plans include fair usage limits. Need more? Top-up packs available or upgrade anytime.{" "}
-            <button className="text-cobalt hover:underline">See full limits →</button>
+            <button 
+              onClick={() => setLimitsModalOpen(true)}
+              className="text-cobalt hover:underline"
+            >
+              See full limits →
+            </button>
           </p>
         </div>
       </section>
+
+      {/* Usage Limits Modal */}
+      <UsageLimitsModal open={limitsModalOpen} onOpenChange={setLimitsModalOpen} />
 
       {/* FAQ */}
       <section className="section-padding">
