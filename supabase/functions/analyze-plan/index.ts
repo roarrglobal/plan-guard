@@ -41,9 +41,14 @@ serve(async (req) => {
   }
 
   try {
-    const { plan } = await req.json();
+    const body = await req.json();
+    const plan = body?.plan;
+    
+    console.log("Received request body:", JSON.stringify(body));
+    console.log("Plan text (first 100 chars):", plan?.substring(0, 100));
 
     if (!plan || typeof plan !== "string" || plan.trim().length < 20) {
+      console.log("Validation failed - plan is invalid or too short");
       return new Response(
         JSON.stringify({ error: "Plan must be at least 20 characters" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
