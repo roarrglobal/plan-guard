@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Menu, X, FileText, Brain, Shield, Check, Plus, Minus, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import AnimatedScorecard from "@/components/landing/AnimatedScorecard";
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -109,6 +110,9 @@ export default function Landing() {
           </div>
         </div>
       </section>
+
+      {/* Animated Scorecard */}
+      <AnimatedScorecard />
 
       {/* Trust Bar */}
       <section className="bg-muted py-6">
