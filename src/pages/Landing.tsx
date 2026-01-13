@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Menu, X, FileText, Brain, Shield, Check, Plus, Minus, ArrowRight } from "lucide-react";
+import { Menu, X, FileText, Brain, Shield, Check, Plus, Minus, ArrowRight, Building } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import AnimatedScorecard from "@/components/landing/AnimatedScorecard";
 
 export default function Landing() {
@@ -9,6 +10,7 @@ export default function Landing() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [planText, setPlanText] = useState("");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [isAnnual, setIsAnnual] = useState(false);
 
   const handleAnalyze = () => {
     if (planText.trim().length > 10) {
@@ -228,20 +230,45 @@ export default function Landing() {
           <h2 className="text-h1 text-center mb-4">
             <span className="gradient-text">Simple Pricing</span>
           </h2>
-          <p className="text-body-lg text-muted-foreground text-center mb-12">
-            Start free. Upgrade when you need more.
+          <p className="text-body-lg text-muted-foreground text-center mb-8">
+            Start free. Scale when you're ready.
           </p>
 
-          <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+          {/* Billing Toggle */}
+          <div className="flex items-center justify-center gap-3 mb-10">
+            <span className={`text-[14px] font-medium transition-colors ${!isAnnual ? 'text-[#1A1A1A]' : 'text-[#666666]'}`}>
+              Monthly
+            </span>
+            <Switch
+              checked={isAnnual}
+              onCheckedChange={setIsAnnual}
+              className="data-[state=checked]:bg-[#0047AB]"
+            />
+            <span className={`text-[14px] font-medium transition-colors ${isAnnual ? 'text-[#1A1A1A]' : 'text-[#666666]'}`}>
+              Annual
+            </span>
+            <span className="bg-[#059669] text-white text-[11px] font-medium px-2 py-1 rounded-xl ml-1">
+              Save 25%
+            </span>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {/* Free Plan */}
-            <div className="bg-card rounded-xl p-8">
-              <h3 className="text-h3 text-foreground mb-2">Free</h3>
-              <p className="text-display-mobile text-[#1A1A1A] mb-6">₹0</p>
+            <div className="bg-[#F8F8F8] rounded-2xl p-8 border border-[#E5E5E5]">
+              <h3 className="text-[20px] font-semibold text-[#1A1A1A] mb-2">Free</h3>
+              <div className="mb-6">
+                <span className="text-[48px] font-bold text-[#1A1A1A]">$0</span>
+                <span className="text-[14px] text-[#666666] ml-1">forever</span>
+              </div>
               
               <ul className="space-y-3 mb-8">
-                {["3 analyses", "Full pre-mortem output", "Copy & share results"].map((feature, i) => (
-                  <li key={i} className="flex items-center gap-3 text-body text-foreground">
-                    <Check className="w-5 h-5 text-cobalt flex-shrink-0" />
+                {[
+                  "3 analyses (lifetime)",
+                  "Full pre-mortem output",
+                  "Copy results"
+                ].map((feature, i) => (
+                  <li key={i} className="flex items-center gap-3 text-[15px] text-[#1A1A1A]">
+                    <Check className="w-5 h-5 text-[#059669] flex-shrink-0" />
                     {feature}
                   </li>
                 ))}
@@ -249,74 +276,146 @@ export default function Landing() {
               
               <Button 
                 variant="outline"
-                className="w-full border-2 border-cobalt text-cobalt hover:bg-cobalt hover:text-white"
+                className="w-full border-2 border-[#0047AB] text-[#0047AB] hover:bg-[#0047AB] hover:text-white font-semibold text-[14px]"
                 onClick={handleAnalyze}
               >
                 Get Started
               </Button>
-              <p className="text-small text-muted-foreground text-center mt-3">No credit card required</p>
+              <p className="text-[13px] text-[#999999] text-center mt-3">No credit card required</p>
             </div>
 
-            {/* Pro Plan */}
-            <div className="bg-background border-2 border-crimson rounded-xl p-8 relative shadow-card-hover">
-              <span className="absolute -top-3 left-6 bg-crimson text-white text-micro font-medium px-3 py-1 rounded-full">
+            {/* Pro Plan - Highlighted */}
+            <div className="bg-white rounded-2xl p-8 border-2 border-[#BE3455] relative shadow-lg shadow-[#BE3455]/15 scale-[1.02]">
+              <span className="absolute -top-3 right-6 bg-[#BE3455] text-white text-[11px] font-semibold uppercase px-3 py-1.5 rounded-lg tracking-wide">
                 MOST POPULAR
               </span>
               
-              <h3 className="text-h3 text-foreground mb-2">Pro</h3>
-              <p className="mb-6">
-                <span className="text-display-mobile text-[#1A1A1A]">₹499</span>
-                <span className="text-body text-muted-foreground">/month</span>
-              </p>
+              <h3 className="text-[20px] font-semibold text-[#1A1A1A] mb-2">Pro</h3>
+              <div className="mb-6 transition-all duration-300">
+                {isAnnual && (
+                  <span className="text-[18px] text-[#999999] line-through mr-2">$9</span>
+                )}
+                <span className="text-[48px] font-bold text-[#1A1A1A]">
+                  {isAnnual ? '$6.75' : '$9'}
+                </span>
+                <span className="text-[14px] text-[#666666] ml-1">
+                  {isAnnual ? '/month, billed annually' : '/month'}
+                </span>
+              </div>
               
               <ul className="space-y-3 mb-8">
-                {["Unlimited analyses", "Save & access history", "Priority processing"].map((feature, i) => (
-                  <li key={i} className="flex items-center gap-3 text-body text-foreground">
-                    <Check className="w-5 h-5 text-cobalt flex-shrink-0" />
+                {[
+                  "Unlimited analyses",
+                  "Save & access history",
+                  "Deep Snag guided wizard",
+                  "Social sharing cards",
+                  "PDF export",
+                  "Priority processing",
+                  "Email support"
+                ].map((feature, i) => (
+                  <li key={i} className="flex items-center gap-3 text-[15px] text-[#1A1A1A]">
+                    <Check className="w-5 h-5 text-[#059669] flex-shrink-0" />
                     {feature}
                   </li>
                 ))}
               </ul>
               
               <Button 
-                className="w-full bg-crimson hover:bg-crimson-hover text-white"
+                className="w-full bg-[#BE3455] hover:bg-[#A02D48] text-white font-semibold text-[14px]"
               >
                 Upgrade to Pro
               </Button>
-              <p className="text-small text-muted-foreground text-center mt-3">Cancel anytime</p>
+              <p className="text-[13px] text-[#999999] text-center mt-3">Cancel anytime</p>
+            </div>
+
+            {/* Team Plan */}
+            <div className="bg-[#F8F8F8] rounded-2xl p-8 border border-[#E5E5E5]">
+              <h3 className="text-[20px] font-semibold text-[#1A1A1A] mb-2">Team</h3>
+              <div className="mb-6 transition-all duration-300">
+                {isAnnual && (
+                  <span className="text-[18px] text-[#999999] line-through mr-2">$29</span>
+                )}
+                <span className="text-[48px] font-bold text-[#1A1A1A]">
+                  {isAnnual ? '$21.75' : '$29'}
+                </span>
+                <span className="text-[14px] text-[#666666] ml-1">
+                  {isAnnual ? '/month, billed annually' : '/month'}
+                </span>
+              </div>
+              
+              <ul className="space-y-3 mb-8">
+                {[
+                  "Everything in Pro",
+                  "Up to 5 team members",
+                  "Shared team workspace",
+                  "Collaborative comments",
+                  "Team analytics dashboard",
+                  "Priority support"
+                ].map((feature, i) => (
+                  <li key={i} className="flex items-center gap-3 text-[15px] text-[#1A1A1A]">
+                    <Check className="w-5 h-5 text-[#059669] flex-shrink-0" />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+              
+              <Button 
+                className="w-full bg-[#0047AB] hover:bg-[#003380] text-white font-semibold text-[14px]"
+              >
+                Start Team Trial
+              </Button>
+              <p className="text-[13px] text-[#999999] text-center mt-3">14-day free trial</p>
             </div>
           </div>
 
-          <p className="text-center text-body text-muted-foreground mt-8">
-            Need team access? <button className="text-cobalt hover:underline">Contact us</button>
-          </p>
+          {/* Enterprise Callout */}
+          <div className="max-w-[600px] mx-auto mt-8 bg-[#F8F8F8] rounded-xl p-6 flex items-center gap-4">
+            <div className="w-10 h-10 rounded-full bg-[#0047AB]/10 flex items-center justify-center flex-shrink-0">
+              <Building className="w-5 h-5 text-[#0047AB]" />
+            </div>
+            <div className="flex-1">
+              <p className="text-[14px] text-[#333333]">
+                Need more than 5 seats? Looking for SSO, API access, or custom integrations?
+              </p>
+            </div>
+            <button className="text-[14px] font-medium text-[#0047AB] hover:underline whitespace-nowrap flex items-center gap-1">
+              Talk to us about Enterprise <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </section>
 
       {/* FAQ */}
       <section className="section-padding">
         <div className="container mx-auto px-4 max-w-2xl">
-          <h2 className="text-h1 text-center mb-12">
-            <span className="gradient-text">Questions</span>
+          <h2 className="text-h1 text-center mb-4">
+            <span className="gradient-text">Questions about pricing?</span>
           </h2>
+          <p className="text-body text-muted-foreground text-center mb-12">
+            Everything you need to know about our plans
+          </p>
 
           <div className="space-y-0">
             {[
               {
+                q: "Can I switch plans anytime?",
+                a: "Yes. Upgrade or downgrade anytime. Changes take effect on your next billing cycle."
+              },
+              {
+                q: "What payment methods do you accept?",
+                a: "All major credit cards, Google Pay, Apple Pay. Processed securely via Stripe."
+              },
+              {
+                q: "Is there a refund policy?",
+                a: "Yes. If you're not satisfied within the first 14 days of a paid plan, we'll refund you in full."
+              },
+              {
+                q: "What happens when I hit my free limit?",
+                a: "You'll be prompted to upgrade. Your existing analyses remain accessible."
+              },
+              {
                 q: "Is Snag replacing my judgment?",
                 a: "No. Snag surfaces what you might miss — blind spots, failure modes, warning signs. You still decide. Think of it as a second opinion that's seen a thousand plans fail."
-              },
-              {
-                q: "How accurate is it?",
-                a: "Snag identifies possibilities, not predictions. It shows what could happen and what to watch for."
-              },
-              {
-                q: "Can I use it for personal decisions?",
-                a: "Yes. Career moves, relocations, major purchases — any plan worth stress-testing."
-              },
-              {
-                q: "What happens to my data?",
-                a: "Stored securely, visible only to you. We don't sell or share. Delete anytime."
               },
               {
                 q: "How is this different from ChatGPT?",

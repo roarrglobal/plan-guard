@@ -292,6 +292,39 @@ export default function Dashboard() {
                                   {analysis.original_input.slice(0, 100)}
                                   {analysis.original_input.length > 100 && "..."}
                                 </p>
+                                
+                                {/* Analysis Summary */}
+                                {(() => {
+                                  const result = analysis.result as { 
+                                    blind_spots?: unknown[]; 
+                                    failure_modes?: unknown[];
+                                    warning_signals?: unknown[];
+                                  };
+                                  const blindSpots = result?.blind_spots?.length || 0;
+                                  const failureModes = result?.failure_modes?.length || 0;
+                                  const warnings = result?.warning_signals?.length || 0;
+                                  
+                                  return (
+                                    <div className="flex flex-wrap gap-2 mb-2">
+                                      {blindSpots > 0 && (
+                                        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[#0047AB] bg-[#0047AB]/10 px-2 py-0.5 rounded-full">
+                                          {blindSpots} blind spot{blindSpots !== 1 ? 's' : ''}
+                                        </span>
+                                      )}
+                                      {failureModes > 0 && (
+                                        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[#DC2626] bg-[#DC2626]/10 px-2 py-0.5 rounded-full">
+                                          {failureModes} failure mode{failureModes !== 1 ? 's' : ''}
+                                        </span>
+                                      )}
+                                      {warnings > 0 && (
+                                        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[#D97706] bg-[#D97706]/10 px-2 py-0.5 rounded-full">
+                                          {warnings} warning{warnings !== 1 ? 's' : ''}
+                                        </span>
+                                      )}
+                                    </div>
+                                  );
+                                })()}
+
                                 {/* Date */}
                                 <p className="text-[13px] text-[#999999]">
                                   {format(new Date(analysis.created_at), "MMM d, yyyy")}
