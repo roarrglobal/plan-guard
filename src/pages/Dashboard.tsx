@@ -3,10 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus, Trash2, Clock, LogOut } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Search, Plus, ChevronRight, ClipboardList, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import type { Json } from "@/integrations/supabase/types";
+import AnalysisCardExpanded from "@/components/dashboard/AnalysisCardExpanded";
 
 interface SavedAnalysis {
   id: string;
@@ -14,14 +16,35 @@ interface SavedAnalysis {
   original_input: string;
   result: Json;
   created_at: string;
+  category: string | null;
 }
+
+const CATEGORIES = [
+  { id: "all", label: "All" },
+  { id: "career", label: "Career" },
+  { id: "business", label: "Business" },
+  { id: "personal", label: "Personal" },
+  { id: "travel", label: "Travel" },
+  { id: "other", label: "Other" },
+];
+
+const CATEGORY_COLORS: Record<string, string> = {
+  career: "#0047AB",
+  business: "#059669",
+  personal: "#7C3AED",
+  travel: "#D97706",
+  other: "#666666",
+};
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { user, profile, signOut, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const [analyses, setAnalyses] = useState<SavedAnalysis[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeFilter, setActiveFilter] = useState("all");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -64,16 +87,21 @@ export default function Dashboard() {
       });
     } else {
       setAnalyses((prev) => prev.filter((a) => a.id !== id));
+      setExpandedId(null);
       toast({
         title: "Analysis deleted",
       });
     }
   };
 
-  const handleSignOut = async () => {
-    await signOut();
-    navigate("/");
-  };
+  const filteredAnalyses = analyses.filter((analysis) => {
+    const matchesSearch = analysis.original_input
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    const matchesFilter =
+      activeFilter === "all" || (analysis.category || "other") === activeFilter;
+    return matchesSearch && matchesFilter;
+  });
 
   if (authLoading || isLoading) {
     return (
@@ -87,88 +115,122 @@ export default function Dashboard() {
     <div className="min-h-screen bg-[#FAFAFA] flex flex-col">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-white border-b border-[#E5E5E5]">
-        <div className="flex items-center justify-between px-4 py-3">
-          <button
-            onClick={() => navigate("/")}
-            className="p-2 -ml-2 text-[#666666] hover:text-[#1A1A1A] transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <span className="text-[18px] font-bold text-[#1A1A1A]">
-            My Analyses
-          </span>
-          <button
-            onClick={handleSignOut}
-            className="p-2 -mr-2 text-[#666666] hover:text-[#1A1A1A] transition-colors"
-            title="Sign out"
-          >
-            <LogOut className="w-5 h-5" />
-          </button>
+        <div className="px-4 py-4">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-[28px] font-bold text-[#1A1A1A]" style={{ fontFamily: 'Inter' }}>
+              Your Snags
+            </h1>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={() => navigate("/analyze")}
+                className="bg-[#BE3455] hover:bg-[#A52D4A] text-white font-semibold px-4 py-2 rounded-lg gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                New Analysis
+              </Button>
+              <button
+                onClick={() => navigate("/settings")}
+                className="p-2 text-[#666666] hover:text-[#1A1A1A] transition-colors"
+              >
+                <Settings className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Search bar */}
+          <div className="relative mb-4">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#999999]" />
+            <Input
+              placeholder="Search your analyses..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 bg-[#F8F8F8] border-[#E5E5E5] text-[15px]"
+            />
+          </div>
+
+          {/* Filter pills */}
+          <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+            {CATEGORIES.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setActiveFilter(cat.id)}
+                className={`px-4 py-1.5 rounded-full text-[13px] font-medium whitespace-nowrap transition-colors ${
+                  activeFilter === cat.id
+                    ? "bg-[#0047AB] text-white"
+                    : "bg-[#F2F2F2] text-[#666666] hover:bg-[#E5E5E5]"
+                }`}
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
         </div>
       </header>
 
       {/* Content */}
       <main className="flex-1 px-4 py-4 max-w-[680px] mx-auto w-full">
-        {/* User info */}
-        <div className="bg-white border border-[#E5E5E5] rounded-lg p-4 mb-4">
-          <p className="text-[15px] text-[#333333]">
-            Welcome, <span className="font-medium">{profile?.display_name || user?.email}</span>
-          </p>
-          <p className="text-[13px] text-[#666666] mt-1">
-            {analyses.length} saved {analyses.length === 1 ? "analysis" : "analyses"}
-          </p>
-        </div>
-
-        {/* New Analysis button */}
-        <Button
-          onClick={() => navigate("/analyze")}
-          className="w-full bg-[#0047AB] hover:bg-[#003A8C] text-white font-semibold py-3 rounded-lg mb-6 gap-2"
-        >
-          <Plus className="w-5 h-5" />
-          New Analysis
-        </Button>
-
-        {/* Analyses list */}
-        {analyses.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-[15px] text-[#666666] mb-2">
-              No saved analyses yet
+        {filteredAnalyses.length === 0 ? (
+          /* Empty State */
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="w-16 h-16 rounded-full bg-[#F2F2F2] flex items-center justify-center mb-4">
+              <ClipboardList className="w-8 h-8 text-[#CCCCCC]" />
+            </div>
+            <p className="text-[18px] font-semibold text-[#666666] mb-2">
+              No snags yet
             </p>
-            <p className="text-[13px] text-[#999999]">
-              Start a new analysis to see it here
+            <p className="text-[14px] text-[#999999] mb-6">
+              {searchQuery || activeFilter !== "all"
+                ? "No analyses match your search"
+                : "Your analysis history will appear here"}
             </p>
+            {!searchQuery && activeFilter === "all" && (
+              <Button
+                onClick={() => navigate("/analyze")}
+                className="bg-[#BE3455] hover:bg-[#A52D4A] text-white font-semibold px-6 py-3 rounded-lg"
+              >
+                Run Your First Snag
+              </Button>
+            )}
           </div>
         ) : (
+          /* Analysis Cards */
           <div className="space-y-3">
-            {analyses.map((analysis) => (
-              <div
-                key={analysis.id}
-                className="bg-white border border-[#E5E5E5] rounded-lg p-4"
-              >
-                <div className="flex items-start justify-between gap-3">
+            {filteredAnalyses.map((analysis) => (
+              <div key={analysis.id}>
+                {expandedId === analysis.id ? (
+                  <AnalysisCardExpanded
+                    analysis={analysis}
+                    onCollapse={() => setExpandedId(null)}
+                    onDelete={() => deleteAnalysis(analysis.id)}
+                  />
+                ) : (
                   <button
-                    onClick={() =>
-                      navigate(`/analysis/${analysis.id}`, {
-                        state: { analysis },
-                      })
-                    }
-                    className="flex-1 text-left"
+                    onClick={() => setExpandedId(analysis.id)}
+                    className="w-full bg-white border border-[#E5E5E5] rounded-lg p-4 text-left hover:border-[#CCCCCC] transition-colors"
                   >
-                    <p className="text-[15px] font-medium text-[#333333] line-clamp-2">
-                      {analysis.title || analysis.original_input.slice(0, 100)}
-                    </p>
-                    <div className="flex items-center gap-1 mt-2 text-[12px] text-[#999999]">
-                      <Clock className="w-3.5 h-3.5" />
-                      {format(new Date(analysis.created_at), "MMM d, yyyy")}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        {/* Category tag */}
+                        <span
+                          className="inline-block text-[11px] font-medium uppercase tracking-wide mb-2"
+                          style={{ color: CATEGORY_COLORS[analysis.category || "other"] }}
+                        >
+                          {analysis.category || "other"}
+                        </span>
+                        {/* Plan preview */}
+                        <p className="text-[15px] text-[#333333] line-clamp-2 mb-2">
+                          {analysis.original_input.slice(0, 100)}
+                          {analysis.original_input.length > 100 && "..."}
+                        </p>
+                        {/* Date */}
+                        <p className="text-[13px] text-[#999999]">
+                          {format(new Date(analysis.created_at), "MMM d, yyyy")}
+                        </p>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-[#CCCCCC] flex-shrink-0 mt-1" />
                     </div>
                   </button>
-                  <button
-                    onClick={() => deleteAnalysis(analysis.id)}
-                    className="p-2 text-[#999999] hover:text-[#D64045] transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
+                )}
               </div>
             ))}
           </div>

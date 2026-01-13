@@ -16,27 +16,33 @@ export type Database = {
     Tables: {
       analyses: {
         Row: {
+          category: string | null
           created_at: string
           id: string
           original_input: string
           result: Json
           title: string | null
+          updated_at: string | null
           user_id: string
         }
         Insert: {
+          category?: string | null
           created_at?: string
           id?: string
           original_input: string
           result: Json
           title?: string | null
+          updated_at?: string | null
           user_id: string
         }
         Update: {
+          category?: string | null
           created_at?: string
           id?: string
           original_input?: string
           result?: Json
           title?: string | null
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []
