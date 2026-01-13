@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import type { Json } from "@/integrations/supabase/types";
 import AnalysisCardExpanded from "@/components/dashboard/AnalysisCardExpanded";
+import PullToRefresh from "@/components/ui/pull-to-refresh";
 
 interface SavedAnalysis {
   id: string;
@@ -57,7 +58,7 @@ export default function Dashboard() {
     }
   }, [user, authLoading, navigate]);
 
-  const fetchAnalyses = async () => {
+  const fetchAnalyses = useCallback(async () => {
     const { data, error } = await supabase
       .from("analyses")
       .select("*")
@@ -74,7 +75,12 @@ export default function Dashboard() {
       setAnalyses(data || []);
     }
     setIsLoading(false);
-  };
+  }, [toast]);
+
+  const handleRefresh = useCallback(async () => {
+    await fetchAnalyses();
+    toast({ title: "Refreshed" });
+  }, [fetchAnalyses, toast]);
 
   const deleteAnalysis = async (id: string) => {
     const { error } = await supabase.from("analyses").delete().eq("id", id);
@@ -112,9 +118,9 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] flex flex-col">
+    <div className="h-screen bg-[#FAFAFA] flex flex-col overflow-hidden">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-white border-b border-[#E5E5E5]">
+      <header className="sticky top-0 z-40 bg-white border-b border-[#E5E5E5] flex-shrink-0">
         <div className="px-4 py-4">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-[28px] font-bold text-[#1A1A1A]" style={{ fontFamily: 'Inter' }}>
@@ -167,82 +173,91 @@ export default function Dashboard() {
         </div>
       </header>
 
-      {/* Content */}
-      <main className="flex-1 px-4 py-4 max-w-[680px] mx-auto w-full">
-        {filteredAnalyses.length === 0 ? (
-          /* Empty State */
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="w-16 h-16 rounded-full bg-[#F2F2F2] flex items-center justify-center mb-4">
-              <ClipboardList className="w-8 h-8 text-[#CCCCCC]" />
-            </div>
-            <p className="text-[18px] font-semibold text-[#666666] mb-2">
-              No snags yet
+      {/* Content with Pull to Refresh */}
+      <div className="flex-1 overflow-hidden">
+        <PullToRefresh onRefresh={handleRefresh}>
+          <main className="px-4 py-4 max-w-[680px] mx-auto w-full min-h-full">
+            {/* Pull hint for mobile */}
+            <p className="text-center text-[12px] text-[#CCCCCC] mb-4 md:hidden">
+              Pull down to refresh
             </p>
-            <p className="text-[14px] text-[#999999] mb-6">
-              {searchQuery || activeFilter !== "all"
-                ? "No analyses match your search"
-                : "Your analysis history will appear here"}
-            </p>
-            {!searchQuery && activeFilter === "all" && (
-              <Button
-                onClick={() => navigate("/analyze")}
-                className="bg-[#BE3455] hover:bg-[#A52D4A] text-white font-semibold px-6 py-3 rounded-lg"
-              >
-                Run Your First Snag
-              </Button>
-            )}
-          </div>
-        ) : (
-          /* Analysis Cards */
-          <div className="space-y-3">
-            {filteredAnalyses.map((analysis) => (
-              <div key={analysis.id}>
-                {expandedId === analysis.id ? (
-                  <AnalysisCardExpanded
-                    analysis={analysis}
-                    onCollapse={() => setExpandedId(null)}
-                    onDelete={() => deleteAnalysis(analysis.id)}
-                    onCategoryChange={(newCategory) => {
-                      setAnalyses((prev) =>
-                        prev.map((a) =>
-                          a.id === analysis.id ? { ...a, category: newCategory } : a
-                        )
-                      );
-                    }}
-                  />
-                ) : (
-                  <button
-                    onClick={() => setExpandedId(analysis.id)}
-                    className="w-full bg-white border border-[#E5E5E5] rounded-lg p-4 text-left hover:border-[#CCCCCC] transition-colors"
+            
+            {filteredAnalyses.length === 0 ? (
+              /* Empty State */
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <div className="w-16 h-16 rounded-full bg-[#F2F2F2] flex items-center justify-center mb-4">
+                  <ClipboardList className="w-8 h-8 text-[#CCCCCC]" />
+                </div>
+                <p className="text-[18px] font-semibold text-[#666666] mb-2">
+                  No snags yet
+                </p>
+                <p className="text-[14px] text-[#999999] mb-6">
+                  {searchQuery || activeFilter !== "all"
+                    ? "No analyses match your search"
+                    : "Your analysis history will appear here"}
+                </p>
+                {!searchQuery && activeFilter === "all" && (
+                  <Button
+                    onClick={() => navigate("/analyze")}
+                    className="bg-[#BE3455] hover:bg-[#A52D4A] text-white font-semibold px-6 py-3 rounded-lg"
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        {/* Category tag */}
-                        <span
-                          className="inline-block text-[11px] font-medium uppercase tracking-wide mb-2"
-                          style={{ color: CATEGORY_COLORS[analysis.category || "other"] }}
-                        >
-                          {analysis.category || "other"}
-                        </span>
-                        {/* Plan preview */}
-                        <p className="text-[15px] text-[#333333] line-clamp-2 mb-2">
-                          {analysis.original_input.slice(0, 100)}
-                          {analysis.original_input.length > 100 && "..."}
-                        </p>
-                        {/* Date */}
-                        <p className="text-[13px] text-[#999999]">
-                          {format(new Date(analysis.created_at), "MMM d, yyyy")}
-                        </p>
-                      </div>
-                      <ChevronRight className="w-5 h-5 text-[#CCCCCC] flex-shrink-0 mt-1" />
-                    </div>
-                  </button>
+                    Run Your First Snag
+                  </Button>
                 )}
               </div>
-            ))}
-          </div>
-        )}
-      </main>
+            ) : (
+              /* Analysis Cards */
+              <div className="space-y-3 pb-8">
+                {filteredAnalyses.map((analysis) => (
+                  <div key={analysis.id}>
+                    {expandedId === analysis.id ? (
+                      <AnalysisCardExpanded
+                        analysis={analysis}
+                        onCollapse={() => setExpandedId(null)}
+                        onDelete={() => deleteAnalysis(analysis.id)}
+                        onCategoryChange={(newCategory) => {
+                          setAnalyses((prev) =>
+                            prev.map((a) =>
+                              a.id === analysis.id ? { ...a, category: newCategory } : a
+                            )
+                          );
+                        }}
+                      />
+                    ) : (
+                      <button
+                        onClick={() => setExpandedId(analysis.id)}
+                        className="w-full bg-white border border-[#E5E5E5] rounded-lg p-4 text-left hover:border-[#CCCCCC] transition-colors"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            {/* Category tag */}
+                            <span
+                              className="inline-block text-[11px] font-medium uppercase tracking-wide mb-2"
+                              style={{ color: CATEGORY_COLORS[analysis.category || "other"] }}
+                            >
+                              {analysis.category || "other"}
+                            </span>
+                            {/* Plan preview */}
+                            <p className="text-[15px] text-[#333333] line-clamp-2 mb-2">
+                              {analysis.original_input.slice(0, 100)}
+                              {analysis.original_input.length > 100 && "..."}
+                            </p>
+                            {/* Date */}
+                            <p className="text-[13px] text-[#999999]">
+                              {format(new Date(analysis.created_at), "MMM d, yyyy")}
+                            </p>
+                          </div>
+                          <ChevronRight className="w-5 h-5 text-[#CCCCCC] flex-shrink-0 mt-1" />
+                        </div>
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </main>
+        </PullToRefresh>
+      </div>
     </div>
   );
 }
