@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronUp, Copy, Download, Share2, Trash2, Check } from "lucide-react";
+import { ChevronUp, Copy, Download, Share2, Trash2, Check, Pencil } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import type { Json } from "@/integrations/supabase/types";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AnalysisResult {
   blind_spots?: Array<string | { title: string; description: string }>;
@@ -27,7 +28,16 @@ interface AnalysisCardExpandedProps {
   analysis: SavedAnalysis;
   onCollapse: () => void;
   onDelete: () => void;
+  onCategoryChange?: (newCategory: string) => void;
 }
+
+const CATEGORIES = [
+  { id: "career", label: "Career", color: "#0047AB" },
+  { id: "business", label: "Business", color: "#059669" },
+  { id: "personal", label: "Personal", color: "#7C3AED" },
+  { id: "travel", label: "Travel", color: "#D97706" },
+  { id: "other", label: "Other", color: "#666666" },
+];
 
 const CATEGORY_COLORS: Record<string, string> = {
   career: "#0047AB",
@@ -41,10 +51,42 @@ export default function AnalysisCardExpanded({
   analysis,
   onCollapse,
   onDelete,
+  onCategoryChange,
 }: AnalysisCardExpandedProps) {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
+  const [isEditingCategory, setIsEditingCategory] = useState(false);
+  const [currentCategory, setCurrentCategory] = useState(analysis.category || "other");
+  const [isSavingCategory, setIsSavingCategory] = useState(false);
   const result = analysis.result as AnalysisResult;
+
+  const handleCategoryChange = async (newCategory: string) => {
+    if (newCategory === currentCategory) {
+      setIsEditingCategory(false);
+      return;
+    }
+
+    setIsSavingCategory(true);
+    try {
+      const { error } = await supabase
+        .from("analyses")
+        .update({ category: newCategory })
+        .eq("id", analysis.id);
+
+      if (error) {
+        toast({ title: "Failed to update category", variant: "destructive" });
+      } else {
+        setCurrentCategory(newCategory);
+        onCategoryChange?.(newCategory);
+        toast({ title: "Category updated" });
+      }
+    } catch {
+      toast({ title: "Failed to update category", variant: "destructive" });
+    } finally {
+      setIsSavingCategory(false);
+      setIsEditingCategory(false);
+    }
+  };
 
   const formatForCopy = () => {
     let text = `PRE-MORTEM ANALYSIS\n`;
@@ -137,12 +179,40 @@ export default function AnalysisCardExpanded({
       <div className="p-4 border-b border-[#E5E5E5]">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1">
-            <span
-              className="inline-block text-[11px] font-medium uppercase tracking-wide mb-2"
-              style={{ color: CATEGORY_COLORS[analysis.category || "other"] }}
-            >
-              {analysis.category || "other"}
-            </span>
+            {isEditingCategory ? (
+              <div className="flex flex-wrap gap-2 mb-2">
+                {CATEGORIES.map((cat) => (
+                  <button
+                    key={cat.id}
+                    onClick={() => handleCategoryChange(cat.id)}
+                    disabled={isSavingCategory}
+                    className={`px-3 py-1 rounded-full text-[11px] font-medium uppercase tracking-wide transition-all ${
+                      currentCategory === cat.id
+                        ? "text-white"
+                        : "bg-[#F2F2F2] text-[#666666] hover:bg-[#E5E5E5]"
+                    }`}
+                    style={currentCategory === cat.id ? { backgroundColor: cat.color } : undefined}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+                <button
+                  onClick={() => setIsEditingCategory(false)}
+                  className="px-3 py-1 text-[11px] text-[#999999] hover:text-[#666666]"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setIsEditingCategory(true)}
+                className="inline-flex items-center gap-1 text-[11px] font-medium uppercase tracking-wide mb-2 hover:opacity-70 transition-opacity group"
+                style={{ color: CATEGORY_COLORS[currentCategory] }}
+              >
+                {currentCategory}
+                <Pencil className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+              </button>
+            )}
             <p className="text-[13px] text-[#999999]">
               {format(new Date(analysis.created_at), "MMM d, yyyy")}
             </p>

@@ -202,6 +202,13 @@ export default function Dashboard() {
                     analysis={analysis}
                     onCollapse={() => setExpandedId(null)}
                     onDelete={() => deleteAnalysis(analysis.id)}
+                    onCategoryChange={(newCategory) => {
+                      setAnalyses((prev) =>
+                        prev.map((a) =>
+                          a.id === analysis.id ? { ...a, category: newCategory } : a
+                        )
+                      );
+                    }}
                   />
                 ) : (
                   <button
