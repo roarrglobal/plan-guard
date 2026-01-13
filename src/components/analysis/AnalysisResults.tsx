@@ -4,17 +4,62 @@ import { useToast } from "@/hooks/use-toast";
 import { AnalysisSection } from "./AnalysisSection";
 import { FailureModeItem } from "./FailureModeItem";
 
+// Enhanced analysis result types
+export interface BlindSpot {
+  blind_spot: string;
+  why_it_matters: string;
+  how_to_test: string;
+}
+
+export interface FailureMode {
+  what_fails: string;
+  mechanism: string;
+  trigger_event?: string;
+  second_order_effect?: string;
+  third_order_effect?: string;
+  likelihood: "High" | "Medium" | "Low";
+  confidence?: string;
+  confidence_rationale?: string;
+}
+
+export interface WarningSignal {
+  signal: string;
+  timeframe?: string;
+  measurement?: string;
+}
+
+export interface KillCriterion {
+  condition: string;
+  action: string;
+  rationale?: string;
+}
+
+export interface AdversarialView {
+  challenge: string;
+  strongest_argument_against: string;
+  valid_counter: string;
+}
+
 export interface AnalysisResult {
-  blind_spots: string[];
-  failure_modes: {
-    what: string;
-    mechanism: string;
-    likelihood: "High" | "Medium" | "Low";
-    impact: string;
-  }[];
-  warning_signals: string[];
-  kill_criteria: string[];
+  context_extracted?: {
+    domain?: string;
+    decision_type?: string;
+    key_numbers?: string[];
+    stakeholders?: string[];
+    constraints?: string[];
+    implied_assumptions?: string[];
+  };
+  blind_spots: BlindSpot[] | string[];
+  failure_modes: FailureMode[] | { what: string; mechanism: string; likelihood: string; impact: string }[];
+  warning_signals: WarningSignal[] | string[];
+  kill_criteria: KillCriterion[] | string[];
+  adversarial_view?: AdversarialView;
   unasked_question: string;
+  analysis_limitations?: {
+    key_assumptions?: string[];
+    what_would_change_analysis?: { if_true: string; then: string }[];
+    information_that_would_help?: string[];
+  };
 }
 
 interface AnalysisResultsProps {
@@ -24,6 +69,26 @@ interface AnalysisResultsProps {
   onSave?: () => void;
   isLoggedIn?: boolean;
 }
+
+// Helper to check if blind spot is enhanced format
+const isEnhancedBlindSpot = (spot: BlindSpot | string): spot is BlindSpot => {
+  return typeof spot === 'object' && 'blind_spot' in spot;
+};
+
+// Helper to check if failure mode is enhanced format
+const isEnhancedFailureMode = (mode: any): mode is FailureMode => {
+  return typeof mode === 'object' && 'what_fails' in mode;
+};
+
+// Helper to check if warning signal is enhanced format
+const isEnhancedWarningSignal = (signal: WarningSignal | string): signal is WarningSignal => {
+  return typeof signal === 'object' && 'signal' in signal;
+};
+
+// Helper to check if kill criterion is enhanced format
+const isEnhancedKillCriterion = (criterion: KillCriterion | string): criterion is KillCriterion => {
+  return typeof criterion === 'object' && 'condition' in criterion;
+};
 
 export function AnalysisResults({
   result,
@@ -42,29 +107,64 @@ export function AnalysisResults({
 
     text += `BLIND SPOTS\n`;
     result.blind_spots.forEach((spot) => {
-      text += `• ${spot}\n`;
+      if (isEnhancedBlindSpot(spot)) {
+        text += `• ${spot.blind_spot}\n`;
+        text += `  Why it matters: ${spot.why_it_matters}\n`;
+        text += `  How to test: ${spot.how_to_test}\n\n`;
+      } else {
+        text += `• ${spot}\n`;
+      }
     });
     text += `\n`;
 
     text += `FAILURE MODES\n`;
     result.failure_modes.forEach((mode, i) => {
-      text += `${i + 1}. ${mode.what}\n`;
-      text += `   Mechanism: ${mode.mechanism}\n`;
-      text += `   Likelihood: ${mode.likelihood}\n`;
-      text += `   Impact: ${mode.impact}\n\n`;
+      if (isEnhancedFailureMode(mode)) {
+        text += `${i + 1}. ${mode.what_fails}\n`;
+        text += `   Mechanism: ${mode.mechanism}\n`;
+        if (mode.trigger_event) text += `   Trigger: ${mode.trigger_event}\n`;
+        text += `   Likelihood: ${mode.likelihood}\n`;
+        if (mode.second_order_effect) text += `   2nd Order Effect: ${mode.second_order_effect}\n`;
+        if (mode.third_order_effect) text += `   3rd Order Effect: ${mode.third_order_effect}\n`;
+      } else {
+        text += `${i + 1}. ${mode.what || (mode as any).what_fails}\n`;
+        text += `   Mechanism: ${mode.mechanism}\n`;
+        text += `   Likelihood: ${mode.likelihood}\n`;
+        text += `   Impact: ${(mode as any).impact || ''}\n`;
+      }
+      text += `\n`;
     });
 
-    text += `EARLY WARNING SIGNALS\n`;
+    text += `WARNING SIGNALS\n`;
     result.warning_signals.forEach((signal) => {
-      text += `• ${signal}\n`;
+      if (isEnhancedWarningSignal(signal)) {
+        text += `• ${signal.signal}`;
+        if (signal.timeframe) text += ` [${signal.timeframe}]`;
+        text += `\n`;
+        if (signal.measurement) text += `  Measure: ${signal.measurement}\n`;
+      } else {
+        text += `• ${signal}\n`;
+      }
     });
     text += `\n`;
 
     text += `KILL CRITERIA\n`;
     result.kill_criteria.forEach((criteria) => {
-      text += `• ${criteria}\n`;
+      if (isEnhancedKillCriterion(criteria)) {
+        text += `• ${criteria.condition} → ${criteria.action}\n`;
+        if (criteria.rationale) text += `  Rationale: ${criteria.rationale}\n`;
+      } else {
+        text += `• ${criteria}\n`;
+      }
     });
     text += `\n`;
+
+    if (result.adversarial_view) {
+      text += `ADVERSARIAL VIEW\n`;
+      text += `Challenge: ${result.adversarial_view.challenge}\n`;
+      text += `Skeptic's argument: ${result.adversarial_view.strongest_argument_against}\n`;
+      text += `Counter: ${result.adversarial_view.valid_counter}\n\n`;
+    }
 
     text += `THE UNASKED QUESTION\n`;
     text += `"${result.unasked_question}"\n\n`;
@@ -112,7 +212,7 @@ export function AnalysisResults({
       </header>
 
       {/* Content */}
-      <main className="flex-1 px-4 py-4 pb-24 max-w-[680px] mx-auto w-full">
+      <main className="flex-1 px-4 py-4 pb-28 max-w-[680px] mx-auto w-full">
         {/* Plan Summary Card */}
         <div className="bg-white border border-[#E5E5E5] rounded-lg p-4 mb-4">
           <p className="text-[11px] font-semibold text-[#999999] uppercase tracking-wide mb-2">
@@ -123,64 +223,180 @@ export function AnalysisResults({
           </p>
         </div>
 
-        {/* Analysis Sections */}
+        {/* Blind Spots */}
         <AnalysisSection title="Blind Spots" accentColor="cobalt">
-          <ul className="space-y-2">
+          <ul className="space-y-4">
             {result.blind_spots.map((spot, i) => (
-              <li
-                key={i}
-                className="flex items-start gap-3 text-[15px] text-[#333333] leading-relaxed"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-[#999999] mt-2 flex-shrink-0" />
-                <span>{spot}</span>
+              <li key={i} className="border-b border-[#F0F0F0] pb-3 last:border-b-0 last:pb-0">
+                {isEnhancedBlindSpot(spot) ? (
+                  <div className="space-y-2">
+                    <div className="flex items-start gap-3">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#0047AB] mt-2 flex-shrink-0" />
+                      <span className="text-[15px] font-medium text-[#333333]">{spot.blind_spot}</span>
+                    </div>
+                    <div className="pl-5 space-y-1">
+                      <p className="text-[13px] text-[#666666]">
+                        <span className="font-semibold">Why it matters:</span> {spot.why_it_matters}
+                      </p>
+                      <p className="text-[13px] text-[#666666]">
+                        <span className="font-semibold">How to test:</span> {spot.how_to_test}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-start gap-3 text-[15px] text-[#333333] leading-relaxed">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#999999] mt-2 flex-shrink-0" />
+                    <span>{spot}</span>
+                  </div>
+                )}
               </li>
             ))}
           </ul>
         </AnalysisSection>
 
+        {/* Failure Modes */}
         <AnalysisSection title="Failure Modes" accentColor="red">
-          <div>
+          <div className="space-y-4">
             {result.failure_modes.map((mode, i) => (
-              <FailureModeItem key={i} mode={mode} index={i + 1} />
+              <FailureModeItem 
+                key={i} 
+                mode={isEnhancedFailureMode(mode) ? {
+                  what: mode.what_fails,
+                  mechanism: mode.mechanism,
+                  likelihood: mode.likelihood,
+                  impact: mode.second_order_effect || '',
+                  trigger_event: mode.trigger_event,
+                  second_order_effect: mode.second_order_effect,
+                  third_order_effect: mode.third_order_effect,
+                  confidence: mode.confidence,
+                } : mode} 
+                index={i + 1} 
+              />
             ))}
           </div>
         </AnalysisSection>
 
+        {/* Warning Signals */}
         <AnalysisSection title="Warning Signals" accentColor="amber">
-          <ul className="space-y-2">
+          <ul className="space-y-3">
             {result.warning_signals.map((signal, i) => (
-              <li
-                key={i}
-                className="flex items-start gap-3 text-[15px] text-[#333333] leading-relaxed"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-[#999999] mt-2 flex-shrink-0" />
-                <span>{signal}</span>
+              <li key={i} className="border-b border-[#F0F0F0] pb-3 last:border-b-0 last:pb-0">
+                {isEnhancedWarningSignal(signal) ? (
+                  <div className="space-y-1">
+                    <div className="flex items-start gap-3">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#D97706] mt-2 flex-shrink-0" />
+                      <span className="text-[15px] text-[#333333]">
+                        {signal.signal}
+                        {signal.timeframe && (
+                          <span className="text-[13px] text-[#666666] ml-2">[{signal.timeframe}]</span>
+                        )}
+                      </span>
+                    </div>
+                    {signal.measurement && (
+                      <p className="text-[13px] text-[#666666] pl-5">
+                        <span className="font-semibold">Measure:</span> {signal.measurement}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex items-start gap-3 text-[15px] text-[#333333] leading-relaxed">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#999999] mt-2 flex-shrink-0" />
+                    <span>{signal}</span>
+                  </div>
+                )}
               </li>
             ))}
           </ul>
         </AnalysisSection>
 
+        {/* Kill Criteria */}
         <AnalysisSection title="Kill Criteria" accentColor="gray">
-          <ol className="space-y-2">
+          <ol className="space-y-3">
             {result.kill_criteria.map((criteria, i) => (
-              <li
-                key={i}
-                className="flex items-start gap-3 text-[15px] text-[#333333] leading-relaxed"
-              >
-                <span className="text-[15px] font-medium text-[#666666] flex-shrink-0">
-                  {i + 1}.
-                </span>
-                <span>{criteria}</span>
+              <li key={i} className="border-b border-[#F0F0F0] pb-3 last:border-b-0 last:pb-0">
+                {isEnhancedKillCriterion(criteria) ? (
+                  <div className="space-y-1">
+                    <div className="flex items-start gap-3">
+                      <span className="text-[15px] font-medium text-[#666666] flex-shrink-0">
+                        {i + 1}.
+                      </span>
+                      <span className="text-[15px] text-[#333333]">
+                        <span className="font-medium">{criteria.condition}</span> → {criteria.action}
+                      </span>
+                    </div>
+                    {criteria.rationale && (
+                      <p className="text-[13px] text-[#666666] pl-5">
+                        <span className="font-semibold">Why:</span> {criteria.rationale}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex items-start gap-3 text-[15px] text-[#333333] leading-relaxed">
+                    <span className="text-[15px] font-medium text-[#666666] flex-shrink-0">
+                      {i + 1}.
+                    </span>
+                    <span>{criteria}</span>
+                  </div>
+                )}
               </li>
             ))}
           </ol>
         </AnalysisSection>
 
+        {/* Adversarial View */}
+        {result.adversarial_view && (
+          <AnalysisSection title="The Adversarial View" accentColor="gray">
+            <div className="space-y-4">
+              <div>
+                <p className="text-[13px] font-semibold text-[#666666] mb-1">Challenge:</p>
+                <p className="text-[15px] text-[#333333] italic">"{result.adversarial_view.challenge}"</p>
+              </div>
+              <div>
+                <p className="text-[13px] font-semibold text-[#666666] mb-1">Skeptic's Argument:</p>
+                <p className="text-[15px] text-[#333333]">{result.adversarial_view.strongest_argument_against}</p>
+              </div>
+              <div>
+                <p className="text-[13px] font-semibold text-[#666666] mb-1">To Overcome This:</p>
+                <p className="text-[15px] text-[#333333]">{result.adversarial_view.valid_counter}</p>
+              </div>
+            </div>
+          </AnalysisSection>
+        )}
+
+        {/* The Unasked Question */}
         <AnalysisSection title="The Unasked Question" accentColor="cobalt">
           <p className="text-[16px] font-medium text-[#1A1A1A] italic leading-relaxed">
             "{result.unasked_question}"
           </p>
         </AnalysisSection>
+
+        {/* Analysis Limitations */}
+        {result.analysis_limitations && (
+          <AnalysisSection title="Analysis Limitations" accentColor="gray" defaultOpen={false}>
+            <div className="space-y-4 text-[13px] text-[#666666]">
+              {result.analysis_limitations.key_assumptions && result.analysis_limitations.key_assumptions.length > 0 && (
+                <div>
+                  <p className="font-semibold text-[#333333] mb-1">Key Assumptions:</p>
+                  <ul className="list-disc pl-4 space-y-1">
+                    {result.analysis_limitations.key_assumptions.map((assumption, i) => (
+                      <li key={i}>{assumption}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {result.analysis_limitations.information_that_would_help && result.analysis_limitations.information_that_would_help.length > 0 && (
+                <div>
+                  <p className="font-semibold text-[#333333] mb-1">Information That Would Help:</p>
+                  <ul className="list-disc pl-4 space-y-1">
+                    {result.analysis_limitations.information_that_would_help.map((info, i) => (
+                      <li key={i}>{info}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </AnalysisSection>
+        )}
       </main>
 
       {/* Fixed Bottom Actions */}
