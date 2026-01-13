@@ -75,42 +75,52 @@ export default function AnimatedScorecard() {
   }, [stats?.recentActivities]);
 
   const fetchStats = async () => {
+    // Demo data for when database is empty or has minimal data
+    const demoStats: Stats = {
+      totalCount: 12847,
+      categoryPercentages: [
+        { category: "career", percentage: 34 },
+        { category: "business", percentage: 28 },
+        { category: "personal", percentage: 18 },
+        { category: "travel", percentage: 12 },
+        { category: "other", percentage: 8 },
+      ],
+      recentCount: 12,
+      recentActivities: [
+        "Someone just snagged a startup decision",
+        "Someone just snagged a career move",
+        "Someone just snagged a relocation plan",
+        "Someone just snagged a business expansion",
+        "Someone just snagged a personal choice",
+      ],
+    };
+
     try {
       const { data, error } = await supabase.functions.invoke("get-public-stats");
       
-      if (error) {
-        console.error("Error fetching stats:", error);
-        // Use fallback data
-        setStats({
-          totalCount: 12847,
-          categoryPercentages: [
-            { category: "career", percentage: 34 },
-            { category: "business", percentage: 28 },
-            { category: "personal", percentage: 18 },
-            { category: "travel", percentage: 12 },
-            { category: "other", percentage: 8 },
-          ],
-          recentCount: 12,
-          recentActivities: [
-            "Someone just snagged a startup decision",
-            "Someone just snagged a career move",
-            "Someone just snagged a relocation plan",
-          ],
-        });
+      if (error || !data || data.totalCount === 0) {
+        // Use demo data when no real data exists
+        setStats(demoStats);
       } else {
-        // Add minimum values for visual appeal if counts are low
-        const enhancedStats = {
-          ...data,
+        // Blend real data with demo minimums for visual appeal
+        const hasValidPercentages = data.categoryPercentages?.some(
+          (c: { percentage: number }) => c.percentage > 0
+        );
+        
+        setStats({
           totalCount: Math.max(data.totalCount, 100),
+          categoryPercentages: hasValidPercentages 
+            ? data.categoryPercentages 
+            : demoStats.categoryPercentages,
           recentCount: Math.max(data.recentCount, 1),
-          recentActivities: data.recentActivities?.length 
+          recentActivities: data.recentActivities?.length > 0
             ? data.recentActivities 
-            : ["Someone just snagged a decision"],
-        };
-        setStats(enhancedStats);
+            : demoStats.recentActivities,
+        });
       }
     } catch (err) {
       console.error("Failed to fetch stats:", err);
+      setStats(demoStats);
     } finally {
       setIsLoading(false);
     }
@@ -132,7 +142,7 @@ export default function AnimatedScorecard() {
         {/* Main Counter */}
         <div className="text-center mb-6">
           <p className="text-[56px] md:text-[64px] font-bold text-white leading-none mb-2" style={{ fontFamily: 'Inter' }}>
-            {isInView && <AnimatedCounter value={stats.totalCount} />}
+            <AnimatedCounter value={stats.totalCount} />
           </p>
           <p className="text-[18px] text-[#999999]" style={{ fontFamily: 'Inter' }}>
             plans stress-tested
@@ -143,8 +153,8 @@ export default function AnimatedScorecard() {
         <motion.div 
           className="flex items-center justify-center gap-2 mb-8"
           initial={{ opacity: 0 }}
-          animate={isInView ? { opacity: 1 } : {}}
-          transition={{ delay: 2, duration: 0.5 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5, duration: 0.5 }}
         >
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#10B981] opacity-75"></span>
@@ -172,8 +182,8 @@ export default function AnimatedScorecard() {
                     fontFamily: 'Inter'
                   }}
                   initial={{ opacity: 0, scale: 0.8 }}
-                  animate={isInView ? { opacity: 1, scale: 1 } : {}}
-                  transition={{ delay: 0.5 + i * 0.1, duration: 0.3 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.3 + i * 0.1, duration: 0.3 }}
                 >
                   {CATEGORY_CONFIG[cat.category]?.label || cat.category} {cat.percentage}%
                 </motion.span>
