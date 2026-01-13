@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { useSoftLaunch } from "@/hooks/useSoftLaunch";
+import { WaitlistModal } from "@/components/softlaunch/WaitlistModal";
 
 const OUTCOME_OPTIONS = [
   { id: "great", emoji: "😄", label: "Great" },
@@ -32,6 +34,7 @@ export default function QuickRetroPage() {
   const location = useLocation();
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
+  const softLaunch = useSoftLaunch();
 
   const prefillCategory = (location.state as { category?: string })?.category || "";
 
@@ -44,11 +47,21 @@ export default function QuickRetroPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [aiNudge, setAiNudge] = useState<string | null>(null);
   const [savedId, setSavedId] = useState<string | null>(null);
+  const [waitlistModalOpen, setWaitlistModalOpen] = useState(false);
 
   const isValid = description.trim() && outcomeRating && lesson.trim() && category;
 
   const handleSubmit = async () => {
     if (!user || !isValid) return;
+
+    // Check soft launch limit
+    if (!softLaunch.canUseRetro) {
+      setWaitlistModalOpen(true);
+      return;
+    }
+
+    // Increment usage
+    await softLaunch.incrementRetros();
 
     setIsSubmitting(true);
     try {
@@ -321,6 +334,12 @@ export default function QuickRetroPage() {
           </p>
         </div>
       </div>
+      
+      <WaitlistModal
+        open={waitlistModalOpen}
+        onOpenChange={setWaitlistModalOpen}
+        limitType="retro"
+      />
     </div>
   );
 }
