@@ -342,12 +342,18 @@ export type Database = {
           display_name: string | null
           focus_areas: string[] | null
           id: string
+          lifetime_deep_snags_used: number | null
+          lifetime_frameworks_used: number | null
+          lifetime_post_mortems_used: number | null
           linkedin_url: string | null
           location: string | null
           preferences: Json | null
           role: string | null
           show_snags: boolean | null
+          subscription_ends_at: string | null
+          subscription_status: string | null
           subscription_tier: string | null
+          trial_ends_at: string | null
           updated_at: string
           user_id: string
           visibility: string | null
@@ -361,12 +367,18 @@ export type Database = {
           display_name?: string | null
           focus_areas?: string[] | null
           id?: string
+          lifetime_deep_snags_used?: number | null
+          lifetime_frameworks_used?: number | null
+          lifetime_post_mortems_used?: number | null
           linkedin_url?: string | null
           location?: string | null
           preferences?: Json | null
           role?: string | null
           show_snags?: boolean | null
+          subscription_ends_at?: string | null
+          subscription_status?: string | null
           subscription_tier?: string | null
+          trial_ends_at?: string | null
           updated_at?: string
           user_id: string
           visibility?: string | null
@@ -380,12 +392,18 @@ export type Database = {
           display_name?: string | null
           focus_areas?: string[] | null
           id?: string
+          lifetime_deep_snags_used?: number | null
+          lifetime_frameworks_used?: number | null
+          lifetime_post_mortems_used?: number | null
           linkedin_url?: string | null
           location?: string | null
           preferences?: Json | null
           role?: string | null
           show_snags?: boolean | null
+          subscription_ends_at?: string | null
+          subscription_status?: string | null
           subscription_tier?: string | null
+          trial_ends_at?: string | null
           updated_at?: string
           user_id?: string
           visibility?: string | null
@@ -473,6 +491,8 @@ export type Database = {
           documents_used: number | null
           frameworks_limit: number | null
           frameworks_used: number | null
+          habits_limit: number | null
+          habits_used: number | null
           id: string
           journal_entries_today: number | null
           period_end: string
@@ -494,6 +514,8 @@ export type Database = {
           documents_used?: number | null
           frameworks_limit?: number | null
           frameworks_used?: number | null
+          habits_limit?: number | null
+          habits_used?: number | null
           id?: string
           journal_entries_today?: number | null
           period_end: string
@@ -515,6 +537,8 @@ export type Database = {
           documents_used?: number | null
           frameworks_limit?: number | null
           frameworks_used?: number | null
+          habits_limit?: number | null
+          habits_used?: number | null
           id?: string
           journal_entries_today?: number | null
           period_end?: string
@@ -582,6 +606,10 @@ export type Database = {
         Args: { p_feature: string; p_user_id: string }
         Returns: boolean
       }
+      check_feature_access: {
+        Args: { p_feature: string; p_user_id: string }
+        Returns: Json
+      }
       get_or_create_usage: {
         Args: { p_user_id: string }
         Returns: {
@@ -593,6 +621,8 @@ export type Database = {
           documents_used: number | null
           frameworks_limit: number | null
           frameworks_used: number | null
+          habits_limit: number | null
+          habits_used: number | null
           id: string
           journal_entries_today: number | null
           period_end: string
@@ -618,6 +648,10 @@ export type Database = {
       }
       increment_framework_usage: {
         Args: { p_user_id: string }
+        Returns: undefined
+      }
+      increment_lifetime_usage: {
+        Args: { p_feature: string; p_user_id: string }
         Returns: undefined
       }
       increment_post_mortem_usage: {
