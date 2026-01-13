@@ -11,6 +11,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import AnalysisDetail from "./pages/AnalysisDetail";
 import SettingsPage from "./pages/SettingsPage";
+import ProfileSettings from "./pages/ProfileSettings";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Disclaimer from "./pages/Disclaimer";
@@ -38,6 +39,7 @@ const App = () => {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/analysis/:id" element={<AnalysisDetail />} />
               <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/profile" element={<ProfileSettings />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/disclaimer" element={<Disclaimer />} />

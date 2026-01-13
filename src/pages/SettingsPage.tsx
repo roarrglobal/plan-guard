@@ -9,7 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 export default function SettingsPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, signOut, isLoading } = useAuth();
+  const { user, profile, signOut, isLoading } = useAuth();
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -34,6 +34,28 @@ export default function SettingsPage() {
     });
   };
 
+  // Generate initials for avatar fallback
+  const getInitials = () => {
+    const name = profile?.display_name || user?.email?.split("@")[0] || "";
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  // Generate consistent color from name
+  const getAvatarColor = () => {
+    const name = profile?.display_name || user?.email || "";
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const colors = ["#0047AB", "#059669", "#7C3AED", "#D97706", "#BE3455", "#0891B2"];
+    return colors[Math.abs(hash) % colors.length];
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -41,6 +63,7 @@ export default function SettingsPage() {
       </div>
     );
   }
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
@@ -55,8 +78,47 @@ export default function SettingsPage() {
       </header>
 
       {/* Content */}
-      <main className="flex-1 p-4">
+      <main className="flex-1 p-4 max-w-[600px] mx-auto w-full">
         <h1 className="text-2xl font-bold text-foreground mb-6">Settings</h1>
+
+        {/* Profile section */}
+        <section className="mb-8">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+            Profile
+          </h2>
+          <div className="analysis-card">
+            <button
+              onClick={() => navigate("/profile")}
+              className="w-full flex items-center justify-between p-4 touch-target hover:bg-muted/50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                {profile?.avatar_url ? (
+                  <img
+                    src={profile.avatar_url}
+                    alt="Profile"
+                    className="w-12 h-12 rounded-full object-cover"
+                  />
+                ) : (
+                  <div
+                    className="w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold"
+                    style={{ backgroundColor: getAvatarColor() }}
+                  >
+                    {getInitials()}
+                  </div>
+                )}
+                <div className="text-left">
+                  <p className="font-medium text-foreground">
+                    {profile?.display_name || user?.email?.split("@")[0] || "Your Profile"}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {profile?.role || "Edit your profile"}
+                  </p>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-muted-foreground" />
+            </button>
+          </div>
+        </section>
 
         {/* Account section */}
         <section className="mb-8">
@@ -79,7 +141,7 @@ export default function SettingsPage() {
                 <CreditCard className="w-5 h-5 text-muted-foreground" />
                 <div>
                   <p className="font-medium text-foreground">Subscription</p>
-                  <p className="text-sm text-primary">Pro Plan • ₹499/month</p>
+                  <p className="text-sm text-primary">Free Plan</p>
                 </div>
               </div>
               <ChevronRight className="w-5 h-5 text-muted-foreground" />

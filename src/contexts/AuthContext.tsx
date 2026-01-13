@@ -3,14 +3,24 @@ import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import type { Json } from "@/integrations/supabase/types";
 
-interface Profile {
+export interface Profile {
   id: string;
   user_id: string;
   display_name: string | null;
   avatar_url: string | null;
   bio: string | null;
+  role: string | null;
+  focus_areas: string[] | null;
+  location: string | null;
+  linkedin_url: string | null;
+  visibility: string | null;
+  show_snags: boolean | null;
+  allow_connections: boolean | null;
+  discoverable: boolean | null;
   preferences: Json;
 }
+
+export type ProfileUpdates = Partial<Omit<Profile, 'id' | 'user_id' | 'preferences'>>;
 
 interface AuthContextType {
   user: User | null;
@@ -20,7 +30,8 @@ interface AuthContextType {
   signUp: (email: string, password: string, displayName?: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
-  updateProfile: (updates: Partial<Pick<Profile, 'display_name' | 'avatar_url' | 'bio'>>) => Promise<{ error: Error | null }>;
+  updateProfile: (updates: ProfileUpdates) => Promise<{ error: Error | null }>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -43,6 +54,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return null;
     }
     return data;
+  };
+
+  const refreshProfile = async () => {
+    if (user) {
+      const profileData = await fetchProfile(user.id);
+      setProfile(profileData);
+    }
   };
 
   useEffect(() => {
@@ -112,7 +130,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(null);
   };
 
-  const updateProfile = async (updates: Partial<Pick<Profile, 'display_name' | 'avatar_url' | 'bio'>>) => {
+  const updateProfile = async (updates: ProfileUpdates) => {
     if (!user) return { error: new Error("Not authenticated") };
 
     const { error } = await supabase
@@ -138,6 +156,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signIn,
         signOut,
         updateProfile,
+        refreshProfile,
       }}
     >
       {children}
