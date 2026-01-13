@@ -441,6 +441,69 @@ export type Database = {
         }
         Relationships: []
       }
+      quick_retros: {
+        Row: {
+          ai_nudge: string | null
+          category: string
+          created_at: string
+          description: string
+          full_post_mortem_id: string | null
+          id: string
+          lesson: string
+          outcome_rating: string
+          source_journal_id: string | null
+          updated_at: string
+          user_id: string
+          what_didnt: string | null
+          what_worked: string | null
+        }
+        Insert: {
+          ai_nudge?: string | null
+          category: string
+          created_at?: string
+          description: string
+          full_post_mortem_id?: string | null
+          id?: string
+          lesson: string
+          outcome_rating: string
+          source_journal_id?: string | null
+          updated_at?: string
+          user_id: string
+          what_didnt?: string | null
+          what_worked?: string | null
+        }
+        Update: {
+          ai_nudge?: string | null
+          category?: string
+          created_at?: string
+          description?: string
+          full_post_mortem_id?: string | null
+          id?: string
+          lesson?: string
+          outcome_rating?: string
+          source_journal_id?: string | null
+          updated_at?: string
+          user_id?: string
+          what_didnt?: string | null
+          what_worked?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quick_retros_full_post_mortem_id_fkey"
+            columns: ["full_post_mortem_id"]
+            isOneToOne: false
+            referencedRelation: "post_mortems"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quick_retros_source_journal_id_fkey"
+            columns: ["source_journal_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shares: {
         Row: {
           analysis_id: string | null

@@ -23,6 +23,7 @@ import DecisionsPage from "./pages/DecisionsPage";
 import DecisionNewPage from "./pages/DecisionNewPage";
 import PostMortemPage from "./pages/PostMortemPage";
 import PostMortemNewPage from "./pages/PostMortemNewPage";
+import QuickRetroPage from "./pages/QuickRetroPage";
 import HabitsPage from "./pages/HabitsPage";
 import FrameworksPage from "./pages/FrameworksPage";
 import SwotAnalysisPage from "./pages/SwotAnalysisPage";
@@ -63,6 +64,7 @@ const App = () => {
                 <Route path="/decisions/new" element={<DecisionNewPage />} />
                 <Route path="/post-mortem" element={<PostMortemPage />} />
                 <Route path="/post-mortem/new" element={<PostMortemNewPage />} />
+                <Route path="/quick-retro" element={<QuickRetroPage />} />
                 <Route path="/habits" element={<HabitsPage />} />
                 <Route path="/frameworks" element={<FrameworksPage />} />
                 <Route path="/frameworks/swot/:id" element={<SwotAnalysisPage />} />
