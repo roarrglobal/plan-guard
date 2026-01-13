@@ -46,9 +46,9 @@ export function AnalysisInput({
           placeholder={placeholder}
           disabled={isLoading}
           className={cn(
-            "input-field resize-none w-full",
+            "w-full bg-white border border-[#E0E0E0] rounded-lg px-4 py-4 text-[16px] text-[#1A1A1A] placeholder:text-[#999999] focus:outline-none focus:border-[#0047AB] transition-colors resize-none",
             compact ? "min-h-[120px]" : "min-h-[180px]",
-            "text-base leading-relaxed"
+            "leading-relaxed"
           )}
           onKeyDown={(e) => {
             if (e.key === "Enter" && e.metaKey && isValid) {
@@ -63,11 +63,9 @@ export function AnalysisInput({
           </span>
           
           <Button
-            variant="hero"
-            size="lg"
             onClick={handleSubmit}
             disabled={!isValid || isLoading}
-            className="gap-2"
+            className="bg-[#BE3455] hover:bg-[#A02D48] text-white font-semibold px-6 py-3 rounded-lg gap-2"
           >
             {isLoading ? (
               <>

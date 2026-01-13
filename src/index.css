@@ -8,7 +8,7 @@
   :root {
     /* TRC Brand - Light Mode (Primary) */
     --background: 0 0% 100%;
-    --background-alt: 0 0% 97%;
+    --background-alt: 0 0% 98%;
     --foreground: 0 0% 10%;
 
     --card: 0 0% 95%;
@@ -48,6 +48,21 @@
     --ring: 217 100% 34%;
 
     --radius: 0.5rem;
+
+    /* Analysis Output Colors - Simple, Readable */
+    --output-bg: 0 0% 98%;
+    --output-card: 0 0% 100%;
+    --output-text: 0 0% 20%;
+    --output-text-secondary: 0 0% 40%;
+    --output-text-muted: 0 0% 60%;
+    --output-border: 0 0% 90%;
+    --output-accent-blindspots: 217 100% 34%;
+    --output-accent-failures: 0 65% 55%;
+    --output-accent-warnings: 38 92% 45%;
+    --output-accent-kill: 0 0% 40%;
+    --output-likelihood-high: 0 65% 55%;
+    --output-likelihood-medium: 38 92% 45%;
+    --output-likelihood-low: 0 0% 40%;
 
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 0 0% 10%;

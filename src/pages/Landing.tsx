@@ -233,7 +233,7 @@ export default function Landing() {
             {/* Free Plan */}
             <div className="bg-card rounded-xl p-8">
               <h3 className="text-h3 text-foreground mb-2">Free</h3>
-              <p className="text-display-mobile text-foreground mb-6">₹0</p>
+              <p className="text-display-mobile text-[#1A1A1A] mb-6">₹0</p>
               
               <ul className="space-y-3 mb-8">
                 {["3 analyses", "Full pre-mortem output", "Copy & share results"].map((feature, i) => (
@@ -262,7 +262,7 @@ export default function Landing() {
               
               <h3 className="text-h3 text-foreground mb-2">Pro</h3>
               <p className="mb-6">
-                <span className="text-display-mobile gradient-text">₹499</span>
+                <span className="text-display-mobile text-[#1A1A1A]">₹499</span>
                 <span className="text-body text-muted-foreground">/month</span>
               </p>
               
