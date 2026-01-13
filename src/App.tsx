@@ -14,9 +14,9 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const App = () => {
-  // Enable dark mode by default
+  // Use light mode for TRC brand (remove dark mode default)
   useEffect(() => {
-    document.documentElement.classList.add("dark");
+    document.documentElement.classList.remove("dark");
   }, []);
 
   return (
