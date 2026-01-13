@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { format, formatDistanceToNow } from "date-fns";
+import { format, formatDistanceToNow, startOfDay, endOfDay, subDays, subMonths, isWithinInterval } from "date-fns";
 import {
   FileText,
   Download,
@@ -15,7 +15,8 @@ import {
   Square,
   ChevronRight,
   BarChart3,
-  Filter,
+  CalendarIcon,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +24,8 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import {
   exportPreMortemPDF,
@@ -119,6 +122,30 @@ export default function ReportsPage() {
   const [activeTab, setActiveTab] = useState("all");
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [isExporting, setIsExporting] = useState(false);
+  const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({
+    from: undefined,
+    to: undefined,
+  });
+  const [datePreset, setDatePreset] = useState<string | null>(null);
+
+  const DATE_PRESETS = [
+    { label: "Last 7 days", value: "7d", getRange: () => ({ from: subDays(new Date(), 7), to: new Date() }) },
+    { label: "Last 30 days", value: "30d", getRange: () => ({ from: subDays(new Date(), 30), to: new Date() }) },
+    { label: "Last 3 months", value: "3m", getRange: () => ({ from: subMonths(new Date(), 3), to: new Date() }) },
+    { label: "Last 6 months", value: "6m", getRange: () => ({ from: subMonths(new Date(), 6), to: new Date() }) },
+    { label: "This year", value: "year", getRange: () => ({ from: new Date(new Date().getFullYear(), 0, 1), to: new Date() }) },
+  ];
+
+  const handlePresetClick = (preset: typeof DATE_PRESETS[0]) => {
+    const range = preset.getRange();
+    setDateRange(range);
+    setDatePreset(preset.value);
+  };
+
+  const clearDateFilter = () => {
+    setDateRange({ from: undefined, to: undefined });
+    setDatePreset(null);
+  };
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -210,16 +237,33 @@ export default function ReportsPage() {
     return items;
   }, [analyses, decisions, frameworks, postMortems]);
 
-  // Filter items based on active tab and search
+  // Filter items based on active tab, search, and date range
   const filteredItems = useMemo(() => {
     return allItems.filter((item) => {
       const matchesTab = activeTab === "all" || item.type === activeTab;
       const matchesSearch =
         item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.subtitle.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesTab && matchesSearch;
+      
+      // Date range filtering
+      let matchesDate = true;
+      if (dateRange.from || dateRange.to) {
+        const itemDate = new Date(item.date);
+        if (dateRange.from && dateRange.to) {
+          matchesDate = isWithinInterval(itemDate, {
+            start: startOfDay(dateRange.from),
+            end: endOfDay(dateRange.to),
+          });
+        } else if (dateRange.from) {
+          matchesDate = itemDate >= startOfDay(dateRange.from);
+        } else if (dateRange.to) {
+          matchesDate = itemDate <= endOfDay(dateRange.to);
+        }
+      }
+      
+      return matchesTab && matchesSearch && matchesDate;
     });
-  }, [allItems, activeTab, searchQuery]);
+  }, [allItems, activeTab, searchQuery, dateRange]);
 
   const handleSelectItem = (itemId: string) => {
     const newSelected = new Set(selectedItems);
@@ -471,8 +515,8 @@ export default function ReportsPage() {
           </div>
         </div>
 
-        {/* Search and Select All */}
-        <div className="flex items-center gap-3 mb-4">
+        {/* Search, Date Filter, and Select All */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
@@ -482,6 +526,75 @@ export default function ReportsPage() {
               className="pl-10 bg-background"
             />
           </div>
+          
+          {/* Date Range Filter */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "justify-start text-left font-normal min-w-[200px]",
+                  !dateRange.from && !dateRange.to && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {dateRange.from ? (
+                  dateRange.to ? (
+                    <>
+                      {format(dateRange.from, "MMM d")} - {format(dateRange.to, "MMM d, yyyy")}
+                    </>
+                  ) : (
+                    format(dateRange.from, "MMM d, yyyy")
+                  )
+                ) : (
+                  "Filter by date"
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <div className="p-3 border-b">
+                <div className="flex flex-wrap gap-2">
+                  {DATE_PRESETS.map((preset) => (
+                    <Button
+                      key={preset.value}
+                      variant={datePreset === preset.value ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => handlePresetClick(preset)}
+                      className="text-xs"
+                    >
+                      {preset.label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              <Calendar
+                initialFocus
+                mode="range"
+                defaultMonth={dateRange.from}
+                selected={{ from: dateRange.from, to: dateRange.to }}
+                onSelect={(range) => {
+                  setDateRange({ from: range?.from, to: range?.to });
+                  setDatePreset(null);
+                }}
+                numberOfMonths={2}
+                className="pointer-events-auto"
+              />
+              {(dateRange.from || dateRange.to) && (
+                <div className="p-3 border-t">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearDateFilter}
+                    className="w-full"
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    Clear date filter
+                  </Button>
+                </div>
+              )}
+            </PopoverContent>
+          </Popover>
+          
           <Button
             variant="outline"
             size="sm"
@@ -501,6 +614,21 @@ export default function ReportsPage() {
             )}
           </Button>
         </div>
+        
+        {/* Active Date Filter Indicator */}
+        {(dateRange.from || dateRange.to) && (
+          <div className="flex items-center gap-2 mb-4 text-sm text-muted-foreground">
+            <CalendarIcon className="w-4 h-4" />
+            <span>
+              Showing reports from{" "}
+              {dateRange.from ? format(dateRange.from, "MMM d, yyyy") : "start"} to{" "}
+              {dateRange.to ? format(dateRange.to, "MMM d, yyyy") : "now"}
+            </span>
+            <Button variant="ghost" size="sm" onClick={clearDateFilter} className="h-6 px-2">
+              <X className="w-3 h-3" />
+            </Button>
+          </div>
+        )}
 
         {/* Reports List */}
         {filteredItems.length === 0 ? (
