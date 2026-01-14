@@ -82,6 +82,13 @@ CRITICAL: Use these EXACT field names. Do not deviate.
   
   "unasked_question": "The one uncomfortable question they should be asking",
   
+  "bottom_line": {
+    "verdict": "proceed_confidently|proceed_carefully|investigate_first|reconsider_seriously",
+    "reasoning": "One sentence explaining the verdict",
+    "change_condition": "The one thing that would change this assessment",
+    "next_step": "Your next concrete step (actionable recommendation)"
+  },
+  
   "category": "career|business|personal|travel|other"
 }
 
@@ -90,9 +97,11 @@ RULES:
 2. Use EXACTLY these field names — blind_spot, why_it_matters, how_to_test, what_fails, mechanism, likelihood, impact, mitigation, signal, timeframe, condition, action, threshold.
 3. likelihood must be exactly "High", "Medium", or "Low" (capitalized).
 4. category must be exactly one of: career, business, personal, travel, other (lowercase).
-5. Always provide exactly 3 blind spots, 3 failure modes, 3-5 warning signals, 2-3 kill criteria.
-6. Be specific to the user's actual plan. Reference their specific details.
-7. No generic advice. No clichés.`;
+5. verdict must be exactly one of: proceed_confidently, proceed_carefully, investigate_first, reconsider_seriously.
+6. Always provide exactly 3 blind spots, 3 failure modes, 3-5 warning signals, 2-3 kill criteria.
+7. Be specific to the user's actual plan. Reference their specific details.
+8. No generic advice. No clichés.
+9. The bottom_line verdict should be based on your overall assessment of the risks.`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {

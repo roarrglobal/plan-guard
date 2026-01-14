@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       analyses: {
         Row: {
+          bottom_line: Json | null
           category: string | null
           created_at: string
           id: string
@@ -28,6 +29,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          bottom_line?: Json | null
           category?: string | null
           created_at?: string
           id?: string
@@ -40,6 +42,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          bottom_line?: Json | null
           category?: string | null
           created_at?: string
           id?: string
@@ -63,12 +66,17 @@ export type Database = {
           deadline: string | null
           decision_text: string
           deep_snag_id: string | null
+          followup_enabled: boolean | null
           id: string
           options: Json | null
           outcome_check_date: string | null
+          outcome_lesson: string | null
           outcome_logged_at: string | null
           outcome_notes: string | null
+          outcome_proceeded: string | null
+          outcome_result: string | null
           outcome_status: string | null
+          risks_materialized: string[] | null
           stakes: string | null
           status: string
           updated_at: string
@@ -83,12 +91,17 @@ export type Database = {
           deadline?: string | null
           decision_text: string
           deep_snag_id?: string | null
+          followup_enabled?: boolean | null
           id?: string
           options?: Json | null
           outcome_check_date?: string | null
+          outcome_lesson?: string | null
           outcome_logged_at?: string | null
           outcome_notes?: string | null
+          outcome_proceeded?: string | null
+          outcome_result?: string | null
           outcome_status?: string | null
+          risks_materialized?: string[] | null
           stakes?: string | null
           status?: string
           updated_at?: string
@@ -103,12 +116,17 @@ export type Database = {
           deadline?: string | null
           decision_text?: string
           deep_snag_id?: string | null
+          followup_enabled?: boolean | null
           id?: string
           options?: Json | null
           outcome_check_date?: string | null
+          outcome_lesson?: string | null
           outcome_logged_at?: string | null
           outcome_notes?: string | null
+          outcome_proceeded?: string | null
+          outcome_result?: string | null
           outcome_status?: string | null
+          risks_materialized?: string[] | null
           stakes?: string | null
           status?: string
           updated_at?: string
@@ -290,6 +308,63 @@ export type Database = {
             columns: ["linked_post_mortem_id"]
             isOneToOne: false
             referencedRelation: "post_mortems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kill_criteria_reminders: {
+        Row: {
+          analysis_id: string | null
+          created_at: string
+          criterion_text: string
+          decision_id: string | null
+          id: string
+          reminder_date: string
+          reminder_enabled: boolean | null
+          responded_at: string | null
+          response: string | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          analysis_id?: string | null
+          created_at?: string
+          criterion_text: string
+          decision_id?: string | null
+          id?: string
+          reminder_date: string
+          reminder_enabled?: boolean | null
+          responded_at?: string | null
+          response?: string | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          analysis_id?: string | null
+          created_at?: string
+          criterion_text?: string
+          decision_id?: string | null
+          id?: string
+          reminder_date?: string
+          reminder_enabled?: boolean | null
+          responded_at?: string | null
+          response?: string | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kill_criteria_reminders_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
+            referencedRelation: "analyses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kill_criteria_reminders_decision_id_fkey"
+            columns: ["decision_id"]
+            isOneToOne: false
+            referencedRelation: "decisions"
             referencedColumns: ["id"]
           },
         ]

@@ -37,6 +37,7 @@ import PorterAnalysisPage from "./pages/PorterAnalysisPage";
 import PremortemAnalysisPage from "./pages/PremortemAnalysisPage";
 import JournalDetailPage from "./pages/JournalDetailPage";
 import ReportsPage from "./pages/ReportsPage";
+import DecisionOutcomePage from "./pages/DecisionOutcomePage";
 
 const queryClient = new QueryClient();
 
@@ -71,6 +72,7 @@ const App = () => {
                 <Route path="/decisions" element={<DecisionsPage />} />
                 <Route path="/decisions/new" element={<DecisionNewPage />} />
                 <Route path="/decisions/:id" element={<DecisionDetailPage />} />
+                <Route path="/decisions/:id/outcome" element={<DecisionOutcomePage />} />
                 <Route path="/post-mortem" element={<PostMortemPage />} />
                 <Route path="/post-mortem/new" element={<PostMortemNewPage />} />
                 <Route path="/post-mortem/:id" element={<PostMortemDetailPage />} />

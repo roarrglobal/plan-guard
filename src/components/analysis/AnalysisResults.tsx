@@ -6,6 +6,7 @@ import { FailureModeItem } from "./FailureModeItem";
 import { AnalysisDisclaimer } from "./AnalysisDisclaimer";
 import { FirstUseAcknowledgment, useFirstUseAcknowledgment } from "./FirstUseAcknowledgment";
 import { ShareModal } from "@/components/sharing/ShareModal";
+import { BottomLineSection, type BottomLine } from "./BottomLineSection";
 import { exportPreMortemPDF, type PreMortemData } from "@/lib/pdfExport";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -41,6 +42,7 @@ export interface AnalysisResult {
   warning_signals: WarningSignal[] | string[];
   kill_criteria: KillCriterion[] | string[];
   unasked_question: string;
+  bottom_line?: BottomLine;
   category?: string;
 }
 
@@ -356,6 +358,11 @@ export function AnalysisResults({
             "{result.unasked_question}"
           </p>
         </AnalysisSection>
+
+        {/* Bottom Line */}
+        {result.bottom_line && (
+          <BottomLineSection bottomLine={result.bottom_line} />
+        )}
 
         {/* Disclaimer */}
         <AnalysisDisclaimer />
