@@ -19,6 +19,8 @@ import { UsageCounter } from "@/components/softlaunch/UsageCounter";
 import { WaitlistModal } from "@/components/softlaunch/WaitlistModal";
 import { TrialExpiredModal } from "@/components/softlaunch/TrialExpiredModal";
 import { useSoftLaunch } from "@/hooks/useSoftLaunch";
+import { DashboardPatterns } from "@/components/dashboard/DashboardPatterns";
+import { DashboardPendingOutcomes } from "@/components/dashboard/DashboardPendingOutcomes";
 
 interface SavedAnalysis {
   id: string;
@@ -337,6 +339,12 @@ export default function Dashboard() {
                     </div>
                   </section>
                 )}
+
+                {/* Pending Outcomes */}
+                <DashboardPendingOutcomes />
+
+                {/* My Patterns (Pro feature, shows after 5+ outcomes) */}
+                <DashboardPatterns />
 
                 {/* Pending Actions */}
                 <PendingActionsSection />
