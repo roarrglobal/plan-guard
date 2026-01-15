@@ -87,25 +87,31 @@ export function AnalysisResults({
   const { hasAcknowledged, setHasAcknowledged } = useFirstUseAcknowledgment();
   const { profile } = useAuth();
 
+  // Defensive: ensure arrays exist to prevent .map errors
+  const blindSpots = result?.blind_spots || [];
+  const failureModes = result?.failure_modes || [];
+  const warningSignals = result?.warning_signals || [];
+  const killCriteria = result?.kill_criteria || [];
+
   const handleExportPDF = () => {
     const pdfData: PreMortemData = {
       originalInput,
-      blindSpots: result.blind_spots.map(spot => 
+      blindSpots: blindSpots.map(spot => 
         isEnhancedBlindSpot(spot) ? spot : { blind_spot: spot }
       ),
-      failureModes: result.failure_modes.map(mode => 
+      failureModes: failureModes.map(mode => 
         isEnhancedFailureMode(mode) 
           ? mode 
           : { what_fails: mode.what, mechanism: mode.mechanism, likelihood: mode.likelihood, impact: (mode as any).impact }
       ),
-      warningSignals: result.warning_signals.map(signal =>
+      warningSignals: warningSignals.map(signal =>
         isEnhancedWarningSignal(signal) ? signal : { signal }
       ),
-      killCriteria: result.kill_criteria.map(criteria =>
+      killCriteria: killCriteria.map(criteria =>
         isEnhancedKillCriterion(criteria) ? criteria : { condition: criteria, action: "Review and reassess" }
       ),
-      unaskedQuestion: result.unasked_question,
-      category: result.category,
+      unaskedQuestion: result?.unasked_question || "No question generated",
+      category: result?.category,
     };
 
     try {
@@ -245,7 +251,7 @@ export function AnalysisResults({
         {/* Blind Spots */}
         <AnalysisSection title="Blind Spots" accentColor="cobalt">
           <ul className="space-y-4">
-            {result.blind_spots.map((spot, i) => (
+            {blindSpots.map((spot, i) => (
               <li key={i} className="border-b border-[#F0F0F0] pb-3 last:border-b-0 last:pb-0">
                 {isEnhancedBlindSpot(spot) ? (
                   <div className="space-y-2">
@@ -276,7 +282,7 @@ export function AnalysisResults({
         {/* Failure Modes */}
         <AnalysisSection title="Failure Modes" accentColor="red">
           <div className="space-y-4">
-            {result.failure_modes.map((mode, i) => (
+            {failureModes.map((mode, i) => (
               <FailureModeItem 
                 key={i} 
                 mode={isEnhancedFailureMode(mode) ? {
@@ -295,7 +301,7 @@ export function AnalysisResults({
         {/* Warning Signals */}
         <AnalysisSection title="Warning Signals" accentColor="amber">
           <ul className="space-y-3">
-            {result.warning_signals.map((signal, i) => (
+            {warningSignals.map((signal, i) => (
               <li key={i} className="border-b border-[#F0F0F0] pb-3 last:border-b-0 last:pb-0">
                 {isEnhancedWarningSignal(signal) ? (
                   <div className="flex items-start gap-3">
@@ -321,7 +327,7 @@ export function AnalysisResults({
         {/* Kill Criteria */}
         <AnalysisSection title="Kill Criteria" accentColor="gray">
           <ol className="space-y-3">
-            {result.kill_criteria.map((criteria, i) => (
+            {killCriteria.map((criteria, i) => (
               <li key={i} className="border-b border-[#F0F0F0] pb-3 last:border-b-0 last:pb-0">
                 {isEnhancedKillCriterion(criteria) ? (
                   <div className="space-y-1">
@@ -355,7 +361,7 @@ export function AnalysisResults({
         {/* The Unasked Question */}
         <AnalysisSection title="The Unasked Question" accentColor="cobalt">
           <p className="text-[16px] font-medium text-[#1A1A1A] italic leading-relaxed">
-            "{result.unasked_question}"
+            "{result?.unasked_question || "What question haven't you asked yourself?"}"
           </p>
         </AnalysisSection>
 
