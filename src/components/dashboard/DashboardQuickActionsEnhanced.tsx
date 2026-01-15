@@ -8,6 +8,7 @@ import LimitReachedModal from "@/components/usage/LimitReachedModal";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUsage } from "@/hooks/useUsage";
+import { extractTextFromPDF, isPDF } from "@/lib/pdfExtract";
 
 export function DashboardQuickActionsEnhanced() {
   const navigate = useNavigate();
@@ -102,13 +103,26 @@ export function DashboardQuickActionsEnhanced() {
           reader.onerror = reject;
           reader.readAsDataURL(file);
         });
+      } else if (isPDF(file)) {
+        // Extract text from PDF using pdfjs
+        try {
+          extractedText = await extractTextFromPDF(file);
+        } catch (pdfError) {
+          console.error("PDF extraction error:", pdfError);
+          // Fall back to context if PDF extraction fails
+          if (context && context.length > 20) {
+            extractedText = `Document: ${file.name}\n\nUser provided context: ${context}`;
+          } else {
+            throw new Error(pdfError instanceof Error ? pdfError.message : "Failed to extract text from PDF");
+          }
+        }
       } else if (file.type === "text/plain") {
         extractedText = await file.text();
+      } else if (file.type.includes("word")) {
+        // For Word docs, we still need user context
+        extractedText = `Document uploaded: ${file.name}\n\nUser's description: ${context || "No description provided"}`;
       } else {
-        extractedText = `[Document: ${file.name}]\n\nNote: Full text extraction for PDF/DOCX files requires additional processing.`;
-        if (context) {
-          extractedText = `Document uploaded: ${file.name}\n\nUser's description: ${context}`;
-        }
+        extractedText = await file.text();
       }
 
       // Call the analyze-document edge function
