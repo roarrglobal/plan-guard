@@ -49,11 +49,23 @@ serve(async (req) => {
   try {
     const { extractedText, userContext, sourceType, imageBase64, mimeType } = await req.json();
 
-    if (!extractedText && !imageBase64) {
-      return new Response(
-        JSON.stringify({ error: "No content provided for analysis" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    // Check if we have meaningful content to analyze
+    const hasValidText = extractedText && 
+      extractedText.length > 50 && 
+      !extractedText.includes("Full text extraction for PDF/DOCX files requires additional processing");
+    
+    if (!hasValidText && !imageBase64) {
+      // If we only have context but no actual document content, use context as the analysis input
+      if (userContext && userContext.length > 20) {
+        // Continue with userContext as the main content
+      } else {
+        return new Response(
+          JSON.stringify({ 
+            error: "Could not extract text from this document. Please provide more context about what the document contains, or try uploading a plain text file or image instead."
+          }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
@@ -93,15 +105,20 @@ First, describe what you see in the image and what decision it might relate to. 
       ];
     } else {
       // Text-based document analysis
+      // Use the best available content
+      const contentToAnalyze = (extractedText && extractedText.length > 50 && !extractedText.includes("Full text extraction for PDF/DOCX files requires additional processing"))
+        ? extractedText
+        : userContext;
+      
       const userMessage = `Here is the document content for analysis:
 
 ---
-${extractedText}
+${contentToAnalyze}
 ---
 
-${userContext ? `User's context: "${userContext}"` : "No additional context provided."}
+${userContext && contentToAnalyze !== userContext ? `Additional context from user: "${userContext}"` : ""}
 
-Analyze this document and provide the pre-mortem analysis.`;
+Analyze this content and provide the pre-mortem analysis.`;
 
       messages = [
         { role: "system", content: systemPrompt },
@@ -164,8 +181,21 @@ Analyze this document and provide the pre-mortem analysis.`;
       analysis = JSON.parse(cleanedContent);
     } catch (parseError) {
       console.error("Failed to parse AI response:", content);
+      
+      // If the AI returned a plain text message instead of JSON, create a fallback response
+      // This happens when the document content wasn't properly extracted
+      if (content.includes("cannot be analyzed") || content.includes("need the actual content") || content.includes("provide the text")) {
+        return new Response(
+          JSON.stringify({ 
+            error: "Could not extract text from this document. Please try uploading a plain text file, an image, or provide additional context about the document."
+          }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      
+      // For other parse failures, return a more helpful error
       return new Response(
-        JSON.stringify({ error: "Failed to parse analysis results" }),
+        JSON.stringify({ error: "Failed to parse analysis results. Please try again." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
