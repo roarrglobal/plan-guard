@@ -436,8 +436,8 @@ export function AnalysisResults({
         isOpen={showShareModal}
         onClose={() => setShowShareModal(false)}
         planPreview={originalInput.slice(0, 80)}
-        blindSpotsCount={result.blind_spots.length}
-        failureModesCount={result.failure_modes.length}
+        blindSpotsCount={blindSpots.length}
+        failureModesCount={failureModes.length}
       />
     </>
   );
