@@ -21,7 +21,7 @@ interface AnalysisInputProps {
   showAttachLink?: boolean;
 }
 
-const MAX_CHARS = 1000;
+const MAX_CHARS = 5000;
 const MIN_CHARS = 20;
 
 export function AnalysisInput({

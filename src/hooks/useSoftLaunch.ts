@@ -76,6 +76,10 @@ export function useSoftLaunch() {
   const retrosUsed = profile?.retros_used ?? 0;
   const waitlistJoined = profile?.waitlist_joined ?? false;
   const discountCode = profile?.discount_code ?? null;
+  
+  // Check if user has a paid tier (bypasses soft launch limits)
+  const tier = profile?.subscription_tier ?? "free";
+  const isPaidTier = tier !== "free";
 
   // Join waitlist mutation
   const joinWaitlistMutation = useMutation({
@@ -147,12 +151,12 @@ export function useSoftLaunch() {
     return true;
   };
 
-  // Check if user can use a feature
-  const canUseDeepSnag = deepSnagsUsed < FREE_TRIAL_LIMITS.deepSnags && !isTrialExpired;
-  const canUseRetro = retrosUsed < FREE_TRIAL_LIMITS.retros && !isTrialExpired;
-  const canUseJournal = journalsToday < FREE_TRIAL_LIMITS.journalsPerDay;
-  const isPostMortemLocked = true; // Always locked in soft launch
-  const isHabitsViewOnly = true; // Always view-only in soft launch
+  // Check if user can use a feature (paid tiers bypass all soft launch limits)
+  const canUseDeepSnag = isPaidTier || (deepSnagsUsed < FREE_TRIAL_LIMITS.deepSnags && !isTrialExpired);
+  const canUseRetro = isPaidTier || (retrosUsed < FREE_TRIAL_LIMITS.retros && !isTrialExpired);
+  const canUseJournal = isPaidTier || journalsToday < FREE_TRIAL_LIMITS.journalsPerDay;
+  const isPostMortemLocked = !isPaidTier; // Only locked for free tier
+  const isHabitsViewOnly = !isPaidTier; // Only view-only for free tier
 
   // Get limits object
   const limits: SoftLaunchLimits = {
