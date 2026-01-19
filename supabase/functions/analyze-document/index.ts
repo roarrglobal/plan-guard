@@ -1,5 +1,15 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { 
+  validateString, 
+  validateBase64,
+  validateMimeType,
+  sanitizeForPrompt, 
+  validationErrorResponse,
+  MAX_TEXT_SIZE,
+  MAX_BASE64_SIZE,
+  MIN_TEXT_LENGTH
+} from "../_shared/validation.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -80,23 +90,74 @@ serve(async (req) => {
     const userId = user.id;
     console.log("Authenticated user:", userId);
 
-    const { extractedText, userContext, sourceType, imageBase64, mimeType } = await req.json();
+    const body = await req.json();
+    const { extractedText, userContext, sourceType, imageBase64, mimeType } = body;
 
-    // Check if we have meaningful content to analyze
-    const hasValidText = extractedText && 
-      extractedText.length > 50 && 
-      !extractedText.includes("Full text extraction for PDF/DOCX files requires additional processing");
+    // SECURITY: Validate all inputs with size limits
+    let validatedText: string | null = null;
+    let validatedContext: string | null = null;
+    let validatedImage: string | null = null;
+    let validatedMimeType: string | null = null;
     
-    if (!hasValidText && !imageBase64) {
+    // Validate extracted text if provided
+    if (extractedText) {
+      const textValidation = validateString(extractedText, {
+        maxLength: MAX_TEXT_SIZE,
+        fieldName: 'Document text'
+      });
+      if (!textValidation.valid) {
+        return validationErrorResponse(textValidation.error, corsHeaders);
+      }
+      // Check if it's meaningful content
+      if (textValidation.value.length > MIN_TEXT_LENGTH && 
+          !textValidation.value.includes("Full text extraction for PDF/DOCX files requires additional processing")) {
+        validatedText = textValidation.value;
+      }
+    }
+    
+    // Validate user context if provided
+    if (userContext) {
+      const contextValidation = validateString(userContext, {
+        maxLength: MAX_TEXT_SIZE,
+        fieldName: 'Context'
+      });
+      if (!contextValidation.valid) {
+        return validationErrorResponse(contextValidation.error, corsHeaders);
+      }
+      validatedContext = contextValidation.value;
+    }
+    
+    // Validate base64 image if provided
+    if (imageBase64) {
+      const imageValidation = validateBase64(imageBase64, {
+        maxSize: MAX_BASE64_SIZE,
+        fieldName: 'Image'
+      });
+      if (!imageValidation.valid) {
+        return validationErrorResponse(imageValidation.error, corsHeaders);
+      }
+      validatedImage = imageValidation.value;
+      
+      // Validate MIME type when image is present
+      if (!mimeType) {
+        return validationErrorResponse('MIME type is required for image uploads', corsHeaders);
+      }
+      const mimeValidation = validateMimeType(mimeType);
+      if (!mimeValidation.valid) {
+        return validationErrorResponse(mimeValidation.error, corsHeaders);
+      }
+      validatedMimeType = mimeValidation.value;
+    }
+    
+    // Check if we have meaningful content to analyze
+    if (!validatedText && !validatedImage) {
       // If we only have context but no actual document content, use context as the analysis input
-      if (userContext && userContext.length > 20) {
-        // Continue with userContext as the main content
+      if (validatedContext && validatedContext.length > 20) {
+        // Continue with context as the main content
       } else {
-        return new Response(
-          JSON.stringify({ 
-            error: "Could not extract text from this document. Please provide more context about what the document contains, or try uploading a plain text file or image instead."
-          }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        return validationErrorResponse(
+          "Could not extract text from this document. Please provide more context about what the document contains, or try uploading a plain text file or image instead.",
+          corsHeaders
         );
       }
     }
@@ -112,7 +173,7 @@ serve(async (req) => {
 
     let messages: any[];
 
-    if (imageBase64 && mimeType) {
+    if (validatedImage && validatedMimeType) {
       // Image analysis with vision
       messages = [
         {
@@ -121,7 +182,7 @@ serve(async (req) => {
             {
               type: "image_url",
               image_url: {
-                url: `data:${mimeType};base64,${imageBase64}`
+                url: `data:${validatedMimeType};base64,${validatedImage}`
               }
             },
             {
@@ -129,7 +190,7 @@ serve(async (req) => {
               text: `${systemPrompt}
 
 The user uploaded this image for decision analysis. 
-${userContext ? `User's context: "${userContext}"` : "No additional context provided."}
+${validatedContext ? `User's context: "${sanitizeForPrompt(validatedContext)}"` : "No additional context provided."}
 
 First, describe what you see in the image and what decision it might relate to. Then provide the pre-mortem analysis in the JSON format specified above.`
             }
@@ -139,17 +200,15 @@ First, describe what you see in the image and what decision it might relate to. 
     } else {
       // Text-based document analysis
       // Use the best available content
-      const contentToAnalyze = (extractedText && extractedText.length > 50 && !extractedText.includes("Full text extraction for PDF/DOCX files requires additional processing"))
-        ? extractedText
-        : userContext;
+      const contentToAnalyze = validatedText || validatedContext || '';
       
       const userMessage = `Here is the document content for analysis:
 
 ---
-${contentToAnalyze}
+${sanitizeForPrompt(contentToAnalyze)}
 ---
 
-${userContext && contentToAnalyze !== userContext ? `Additional context from user: "${userContext}"` : ""}
+${validatedContext && contentToAnalyze !== validatedContext ? `Additional context from user: "${sanitizeForPrompt(validatedContext)}"` : ""}
 
 Analyze this content and provide the pre-mortem analysis.`;
 

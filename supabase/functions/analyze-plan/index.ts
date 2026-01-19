@@ -1,5 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { 
+  validateString, 
+  sanitizeForPrompt, 
+  validationErrorResponse,
+  MAX_TEXT_SIZE,
+  MIN_PLAN_LENGTH 
+} from "../_shared/validation.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -162,18 +169,20 @@ serve(async (req) => {
       );
     }
     
-    const plan = body?.plan;
+    // SECURITY: Validate and sanitize the plan input
+    const planValidation = validateString(body?.plan, {
+      minLength: MIN_PLAN_LENGTH,
+      maxLength: MAX_TEXT_SIZE,
+      fieldName: 'Plan'
+    });
     
-    console.log("Received request body:", JSON.stringify(body));
-    console.log("Plan text (first 100 chars):", plan?.substring(0, 100));
-
-    if (!plan || typeof plan !== "string" || plan.trim().length < 20) {
-      console.log("Validation failed - plan is invalid or too short");
-      return new Response(
-        JSON.stringify({ error: "Plan must be at least 20 characters" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    if (!planValidation.valid) {
+      console.log("Validation failed:", planValidation.error);
+      return validationErrorResponse(planValidation.error, corsHeaders);
     }
+    
+    const plan = planValidation.value;
+    console.log("Plan validated, length:", plan.length);
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -196,7 +205,7 @@ serve(async (req) => {
         model: "google/gemini-2.5-pro",
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: `Analyze this plan and identify potential problems:\n\n${plan}` },
+          { role: "user", content: `Analyze this plan and identify potential problems:\n\n${sanitizeForPrompt(plan)}` },
         ],
       }),
     });

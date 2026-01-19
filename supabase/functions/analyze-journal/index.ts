@@ -1,5 +1,14 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { 
+  validateString, 
+  validateObject,
+  validateEnum,
+  sanitizeForPrompt, 
+  validationErrorResponse,
+  MAX_TEXT_SIZE,
+  MIN_TEXT_LENGTH 
+} from "../_shared/validation.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -143,12 +152,52 @@ serve(async (req) => {
       );
     }
 
-    const { content, entryType, mood, action, analysisType } = body;
+    const { action, analysisType } = body;
+    
+    // SECURITY: Validate action type
+    const validActions = ['suggest', 'quick_retro_nudge', 'extract', 'analyze'] as const;
+    const actionValidation = validateEnum(action, validActions, {
+      fieldName: 'Action',
+      defaultValue: 'analyze'
+    });
+    
+    if (!actionValidation.valid) {
+      return validationErrorResponse(actionValidation.error, corsHeaders);
+    }
+    
+    const validatedAction = actionValidation.value;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
     // Handle AI suggestion for analysis type
-    if (action === "suggest") {
+    if (validatedAction === "suggest") {
+      // Validate content for suggestion
+      const contentValidation = validateObject(body.content, { fieldName: 'Content' });
+      if (!contentValidation.valid) {
+        return validationErrorResponse(contentValidation.error, corsHeaders);
+      }
+      
+      const entryTypeValidation = validateString(body.entryType, {
+        maxLength: 100,
+        fieldName: 'Entry type'
+      });
+      
+      // Extract text content for analysis
+      let textContent = '';
+      const content = body.content;
+      if (typeof content === 'string') {
+        textContent = content.slice(0, MAX_TEXT_SIZE);
+      } else if (content && typeof content === 'object') {
+        const parts: string[] = [];
+        for (const [key, value] of Object.entries(content)) {
+          if (typeof value === 'string') {
+            parts.push(value.slice(0, 2000));
+          }
+        }
+        textContent = parts.join(' ').slice(0, MAX_TEXT_SIZE);
+      }
+      
+      const entryType = entryTypeValidation.valid ? entryTypeValidation.value : 'general';
       if (!LOVABLE_API_KEY) {
         return new Response(
           JSON.stringify({ suggestion: "ask_user", reason: "Unable to determine, please choose manually." }),
@@ -206,7 +255,7 @@ Look for:
 - Past language: "happened", "went", "was", "learned", "realized", "discovered", "turned out", "yesterday", "last week"
 
 Journal entry:
-${content}
+${sanitizeForPrompt(textContent)}
 
 Return JSON only: {"suggestion": "pre_mortem" or "post_mortem" or "ask_user", "confidence": "high" or "medium", "reason": "brief explanation in 1-2 sentences"}`;
 
@@ -256,7 +305,7 @@ Return JSON only: {"suggestion": "pre_mortem" or "post_mortem" or "ask_user", "c
     }
 
     // Handle Quick Retro AI nudge
-    if (action === "quick_retro_nudge") {
+    if (validatedAction === "quick_retro_nudge") {
       if (!LOVABLE_API_KEY) {
         return new Response(
           JSON.stringify({ nudge: null }),
@@ -264,14 +313,22 @@ Return JSON only: {"suggestion": "pre_mortem" or "post_mortem" or "ask_user", "c
         );
       }
 
-      const { description, whatWorked, whatDidnt, lesson, category } = body;
+      // Validate quick retro inputs
+      const descValidation = validateString(body.description, { maxLength: 5000, fieldName: 'Description' });
+      const lessonValidation = validateString(body.lesson, { maxLength: 2000, fieldName: 'Lesson' });
+      
+      const description = descValidation.valid ? descValidation.value : 'Not provided';
+      const lesson = lessonValidation.valid ? lessonValidation.value : 'Not provided';
+      const whatWorked = typeof body.whatWorked === 'string' ? sanitizeForPrompt(body.whatWorked.slice(0, 2000)) : 'Not specified';
+      const whatDidnt = typeof body.whatDidnt === 'string' ? sanitizeForPrompt(body.whatDidnt.slice(0, 2000)) : 'Not specified';
+      const category = typeof body.category === 'string' ? sanitizeForPrompt(body.category.slice(0, 100)) : 'general';
       
       const nudgePrompt = `Based on this quick retrospective, provide ONE insightful observation or question in under 30 words:
 
 What happened: ${description}
 Category: ${category}
-What worked: ${whatWorked || "Not specified"}
-What didn't work: ${whatDidnt || "Not specified"}  
+What worked: ${whatWorked}
+What didn't work: ${whatDidnt}  
 Lesson: ${lesson}
 
 Be specific to their content. Look for patterns or deeper questions. Return just the nudge text, no quotes or formatting.`;
@@ -312,10 +369,27 @@ Be specific to their content. Look for patterns or deeper questions. Return just
     }
 
     // Handle extraction action for Pre-Mortem/Post-Mortem
-    if (action === "extract") {
+    if (validatedAction === "extract") {
+      // Validate content for extraction
+      let extractContent = '';
+      const content = body.content;
+      if (typeof content === 'string') {
+        extractContent = sanitizeForPrompt(content.slice(0, MAX_TEXT_SIZE));
+      } else if (content && typeof content === 'object') {
+        const parts: string[] = [];
+        for (const [key, value] of Object.entries(content)) {
+          if (typeof value === 'string') {
+            parts.push(value.slice(0, 2000));
+          }
+        }
+        extractContent = sanitizeForPrompt(parts.join(' ').slice(0, MAX_TEXT_SIZE));
+      }
+      
+      const entryType = typeof body.entryType === 'string' ? sanitizeForPrompt(body.entryType.slice(0, 100)) : 'general';
+      
       if (!LOVABLE_API_KEY) {
         return new Response(
-          JSON.stringify({ extracted: content }),
+          JSON.stringify({ extracted: extractContent }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
@@ -325,14 +399,14 @@ Be specific to their content. Look for patterns or deeper questions. Return just
 
 Entry type: ${entryType}
 Content:
-${content}
+${extractContent}
 
 Return ONLY the extracted decision/plan as a single paragraph. No JSON, no formatting. Just the extracted text that can be analyzed for potential failure modes and blind spots.`
         : `The user has written a journal entry. Extract any outcome, event, experience, or completed situation they're reflecting on. Frame it as something to analyze retrospectively.
 
 Entry type: ${entryType}
 Content:
-${content}
+${extractContent}
 
 Return ONLY the extracted outcome/event as a single paragraph. No JSON, no formatting. Just the extracted text that can be analyzed for lessons learned and root causes.`;
 

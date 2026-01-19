@@ -1,5 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { 
+  validateString, 
+  validateObject,
+  sanitizeForPrompt, 
+  validationErrorResponse,
+  MAX_TEXT_SIZE,
+  MIN_PLAN_LENGTH 
+} from "../_shared/validation.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -149,13 +157,40 @@ serve(async (req) => {
       );
     }
 
-    const { description, outcomeStatus, outcomeRating, userInputs, postMortemType } = body;
-
-    if (!description || typeof description !== "string" || description.trim().length < 20) {
-      return new Response(
-        JSON.stringify({ error: "Description must be at least 20 characters" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    const { outcomeStatus, outcomeRating, postMortemType } = body;
+    
+    // SECURITY: Validate all inputs
+    const descriptionValidation = validateString(body.description, {
+      minLength: MIN_PLAN_LENGTH,
+      maxLength: MAX_TEXT_SIZE,
+      fieldName: 'Description'
+    });
+    
+    if (!descriptionValidation.valid) {
+      return validationErrorResponse(descriptionValidation.error, corsHeaders);
+    }
+    
+    const description = descriptionValidation.value;
+    
+    // Validate userInputs object
+    const inputsValidation = validateObject(body.userInputs, {
+      fieldName: 'User inputs'
+    });
+    
+    if (!inputsValidation.valid) {
+      return validationErrorResponse(inputsValidation.error, corsHeaders);
+    }
+    
+    const userInputs = inputsValidation.value;
+    
+    // Sanitize all text fields in userInputs
+    const sanitizedInputs: Record<string, string> = {};
+    if (userInputs) {
+      for (const [key, value] of Object.entries(userInputs)) {
+        if (typeof value === 'string') {
+          sanitizedInputs[key] = sanitizeForPrompt(value.slice(0, 2000)); // Max 2KB per field
+        }
+      }
     }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
@@ -167,35 +202,35 @@ serve(async (req) => {
       );
     }
 
-    // Build the user message with all context
+    // Build the user message with all sanitized context
     const userMessage = `
 Analyze this post-mortem reflection:
 
-EVENT/DECISION: ${description}
+EVENT/DECISION: ${sanitizeForPrompt(description)}
 
-TYPE: ${postMortemType || "general"}
+TYPE: ${sanitizeForPrompt(postMortemType || "general")}
 
-OUTCOME STATUS: ${outcomeStatus || "unknown"} (Satisfaction: ${outcomeRating || "N/A"}/10)
+OUTCOME STATUS: ${sanitizeForPrompt(outcomeStatus || "unknown")} (Satisfaction: ${outcomeRating || "N/A"}/10)
 
 USER'S REFLECTIONS:
 - What went well:
-  1. ${userInputs?.went_well_1 || "Not provided"}
-  2. ${userInputs?.went_well_2 || "Not provided"}
-  3. ${userInputs?.went_well_3 || "Not provided"}
+  1. ${sanitizedInputs.went_well_1 || "Not provided"}
+  2. ${sanitizedInputs.went_well_2 || "Not provided"}
+  3. ${sanitizedInputs.went_well_3 || "Not provided"}
 
 - What didn't go well:
-  1. ${userInputs?.went_wrong_1 || "Not provided"}
-  2. ${userInputs?.went_wrong_2 || "Not provided"}
-  3. ${userInputs?.went_wrong_3 || "Not provided"}
+  1. ${sanitizedInputs.went_wrong_1 || "Not provided"}
+  2. ${sanitizedInputs.went_wrong_2 || "Not provided"}
+  3. ${sanitizedInputs.went_wrong_3 || "Not provided"}
 
-- What they would do differently: ${userInputs?.do_differently || "Not provided"}
+- What they would do differently: ${sanitizedInputs.do_differently || "Not provided"}
 
-- What surprised them: ${userInputs?.surprised_by || "Not provided"}
+- What surprised them: ${sanitizedInputs.surprised_by || "Not provided"}
 
-- What they want to carry forward: ${userInputs?.carry_forward || "Not provided"}
+- What they want to carry forward: ${sanitizedInputs.carry_forward || "Not provided"}
 
-${userInputs?.expectations ? `- What they expected: ${userInputs.expectations}` : ""}
-${userInputs?.actual_result ? `- What actually happened: ${userInputs.actual_result}` : ""}
+${sanitizedInputs.expectations ? `- What they expected: ${sanitizedInputs.expectations}` : ""}
+${sanitizedInputs.actual_result ? `- What actually happened: ${sanitizedInputs.actual_result}` : ""}
 
 Provide a thorough post-mortem analysis with deep insights and actionable lessons.
 `;
