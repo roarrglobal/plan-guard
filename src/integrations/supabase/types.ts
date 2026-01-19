@@ -805,6 +805,60 @@ export type Database = {
       }
     }
     Views: {
+      public_profiles: {
+        Row: {
+          allow_connections: boolean | null
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          discoverable: boolean | null
+          display_name: string | null
+          focus_areas: string[] | null
+          id: string | null
+          linkedin_url: string | null
+          location: string | null
+          role: string | null
+          show_snags: boolean | null
+          updated_at: string | null
+          user_id: string | null
+          visibility: string | null
+        }
+        Insert: {
+          allow_connections?: boolean | null
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          discoverable?: boolean | null
+          display_name?: string | null
+          focus_areas?: string[] | null
+          id?: string | null
+          linkedin_url?: string | null
+          location?: string | null
+          role?: string | null
+          show_snags?: boolean | null
+          updated_at?: string | null
+          user_id?: string | null
+          visibility?: string | null
+        }
+        Update: {
+          allow_connections?: boolean | null
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          discoverable?: boolean | null
+          display_name?: string | null
+          focus_areas?: string[] | null
+          id?: string | null
+          linkedin_url?: string | null
+          location?: string | null
+          role?: string | null
+          show_snags?: boolean | null
+          updated_at?: string | null
+          user_id?: string | null
+          visibility?: string | null
+        }
+        Relationships: []
+      }
       scorecard_stats: {
         Row: {
           business_count: number | null
@@ -871,10 +925,9 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: undefined
       }
-      increment_lifetime_usage: {
-        Args: { p_feature: string; p_user_id: string }
-        Returns: undefined
-      }
+      increment_lifetime_usage:
+        | { Args: { p_feature: string; p_user_id: string }; Returns: undefined }
+        | { Args: { p_feature: string; p_user_id: string }; Returns: undefined }
       increment_post_mortem_usage: {
         Args: { p_user_id: string }
         Returns: undefined
