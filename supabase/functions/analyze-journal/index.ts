@@ -198,6 +198,7 @@ serve(async (req) => {
       }
       
       const entryType = entryTypeValidation.valid ? entryTypeValidation.value : 'general';
+
       if (!LOVABLE_API_KEY) {
         return new Response(
           JSON.stringify({ suggestion: "ask_user", reason: "Unable to determine, please choose manually." }),
@@ -428,13 +429,13 @@ Return ONLY the extracted outcome/event as a single paragraph. No JSON, no forma
         if (!response.ok) {
           console.error("AI extraction failed:", response.status);
           return new Response(
-            JSON.stringify({ extracted: content }),
+            JSON.stringify({ extracted: extractContent }),
             { headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         }
 
         const aiResponse = await response.json();
-        const extracted = aiResponse.choices?.[0]?.message?.content?.trim() || content;
+        const extracted = aiResponse.choices?.[0]?.message?.content?.trim() || extractContent;
 
         return new Response(
           JSON.stringify({ extracted }),
@@ -443,50 +444,60 @@ Return ONLY the extracted outcome/event as a single paragraph. No JSON, no forma
       } catch (err) {
         console.error("Extraction error:", err);
         return new Response(
-          JSON.stringify({ extracted: content }),
+          JSON.stringify({ extracted: extractContent }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
     }
 
-    // Regular journal analysis
+    // Regular journal analysis - extract and validate content
+    const journalContent = body.content;
+    const entryType = typeof body.entryType === 'string' ? sanitizeForPrompt(body.entryType.slice(0, 100)) : 'general';
+    const mood = typeof body.mood === 'string' ? sanitizeForPrompt(body.mood.slice(0, 100)) : null;
+    
     // Extract text content from structured journal content
     let textContent = "";
-    if (typeof content === "string") {
-      textContent = content;
-    } else if (content && typeof content === "object") {
+    if (typeof journalContent === "string") {
+      textContent = journalContent;
+    } else if (journalContent && typeof journalContent === "object") {
       // Handle structured journal content
       const parts: string[] = [];
-      if (content.freeform) parts.push(content.freeform);
-      if (content.grateful_for) parts.push(`Grateful for: ${content.grateful_for}`);
-      if (content.why_grateful) parts.push(`Why: ${content.why_grateful}`);
-      if (content.one_thing_to_remember) parts.push(`One thing to remember: ${content.one_thing_to_remember}`);
-      if (content.i_am_statements) parts.push(`I am: ${content.i_am_statements}`);
-      if (content.vision) parts.push(`Vision: ${content.vision}`);
-      if (content.action_today) parts.push(`Action today: ${content.action_today}`);
-      if (content.release) parts.push(`Releasing: ${content.release}`);
+      if (journalContent.freeform) parts.push(journalContent.freeform);
+      if (journalContent.grateful_for) parts.push(`Grateful for: ${journalContent.grateful_for}`);
+      if (journalContent.why_grateful) parts.push(`Why: ${journalContent.why_grateful}`);
+      if (journalContent.one_thing_to_remember) parts.push(`One thing to remember: ${journalContent.one_thing_to_remember}`);
+      if (journalContent.i_am_statements) parts.push(`I am: ${journalContent.i_am_statements}`);
+      if (journalContent.vision) parts.push(`Vision: ${journalContent.vision}`);
+      if (journalContent.action_today) parts.push(`Action today: ${journalContent.action_today}`);
+      if (journalContent.release) parts.push(`Releasing: ${journalContent.release}`);
       // Handle gratitude fields
-      if (content.gratitude_1) parts.push(`Grateful for: ${content.gratitude_1}`);
-      if (content.gratitude_2) parts.push(`Grateful for: ${content.gratitude_2}`);
-      if (content.gratitude_3) parts.push(`Grateful for: ${content.gratitude_3}`);
+      if (journalContent.gratitude_1) parts.push(`Grateful for: ${journalContent.gratitude_1}`);
+      if (journalContent.gratitude_2) parts.push(`Grateful for: ${journalContent.gratitude_2}`);
+      if (journalContent.gratitude_3) parts.push(`Grateful for: ${journalContent.gratitude_3}`);
       // Handle evening review fields
-      if (content.went_well) parts.push(`What went well: ${content.went_well}`);
-      if (content.could_be_better) parts.push(`Could be better: ${content.could_be_better}`);
-      if (content.learned) parts.push(`Learned: ${content.learned}`);
+      if (journalContent.went_well) parts.push(`What went well: ${journalContent.went_well}`);
+      if (journalContent.could_be_better) parts.push(`Could be better: ${journalContent.could_be_better}`);
+      if (journalContent.learned) parts.push(`Learned: ${journalContent.learned}`);
       // Handle morning fields
-      if (content.intention) parts.push(`Intention: ${content.intention}`);
-      if (content.looking_forward_to) parts.push(`Looking forward to: ${content.looking_forward_to}`);
+      if (journalContent.intention) parts.push(`Intention: ${journalContent.intention}`);
+      if (journalContent.looking_forward_to) parts.push(`Looking forward to: ${journalContent.looking_forward_to}`);
       // Handle text field
-      if (content.text) parts.push(content.text);
+      if (journalContent.text) parts.push(journalContent.text);
       textContent = parts.join("\n\n");
     }
 
-    if (!textContent || textContent.trim().length < 10) {
-      return new Response(
-        JSON.stringify({ error: "Journal entry content is too short" }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    // Validate and sanitize final content
+    const contentValidation = validateString(textContent, {
+      minLength: MIN_TEXT_LENGTH,
+      maxLength: MAX_TEXT_SIZE,
+      fieldName: 'Journal entry'
+    });
+    
+    if (!contentValidation.valid) {
+      return validationErrorResponse(contentValidation.error, corsHeaders);
     }
+    
+    const sanitizedContent = contentValidation.value;
 
     if (!LOVABLE_API_KEY) {
       console.error("LOVABLE_API_KEY is not configured");
@@ -499,11 +510,11 @@ Return ONLY the extracted outcome/event as a single paragraph. No JSON, no forma
     const userMessage = `
 Analyze this journal entry:
 
-ENTRY TYPE: ${entryType || "general"}
+ENTRY TYPE: ${entryType}
 ${mood ? `MOOD: ${mood}` : ""}
 
 CONTENT:
-${textContent}
+${sanitizedContent}
 
 Provide a thoughtful analysis with insights tailored to this specific entry.
 `;
