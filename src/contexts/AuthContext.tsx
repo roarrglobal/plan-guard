@@ -33,6 +33,8 @@ export interface Profile {
   waitlist_joined: boolean | null;
   waitlist_joined_at: string | null;
   discount_code: string | null;
+  // User type
+  user_type: string | null;
 }
 
 export type ProfileUpdates = Partial<Omit<Profile, 'id' | 'user_id' | 'preferences'>>;

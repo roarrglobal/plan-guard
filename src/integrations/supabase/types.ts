@@ -467,6 +467,7 @@ export type Database = {
           trial_start_date: string | null
           updated_at: string
           user_id: string
+          user_type: string | null
           visibility: string | null
           waitlist_joined: boolean | null
           waitlist_joined_at: string | null
@@ -499,6 +500,7 @@ export type Database = {
           trial_start_date?: string | null
           updated_at?: string
           user_id: string
+          user_type?: string | null
           visibility?: string | null
           waitlist_joined?: boolean | null
           waitlist_joined_at?: string | null
@@ -531,6 +533,7 @@ export type Database = {
           trial_start_date?: string | null
           updated_at?: string
           user_id?: string
+          user_type?: string | null
           visibility?: string | null
           waitlist_joined?: boolean | null
           waitlist_joined_at?: string | null

@@ -46,6 +46,10 @@ export default {
           DEFAULT: "#BE3455",
           hover: "#AB2F4D",
         },
+        cobalt: {
+          DEFAULT: "#0047AB",
+          hover: "#003D94",
+        },
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",

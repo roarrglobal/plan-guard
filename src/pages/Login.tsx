@@ -5,13 +5,18 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { SnagLogo } from "@/components/SnagLogo";
+import { UserTypeSelection } from "@/components/auth/UserTypeSelection";
+import { cn } from "@/lib/utils";
+
+type UserType = "individual" | "business";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { signIn, signUp, user, isLoading: authLoading } = useAuth();
+  const { signIn, signUp, user, isLoading: authLoading, updateProfile } = useAuth();
   const { toast } = useToast();
   
   const [isSignUp, setIsSignUp] = useState(false);
+  const [userType, setUserType] = useState<UserType | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -24,6 +29,14 @@ export default function Login() {
       navigate("/dashboard", { replace: true });
     }
   }, [user, authLoading, navigate]);
+
+  const handleUserTypeSelect = (type: UserType) => {
+    setUserType(type);
+  };
+
+  const handleSwitchUserType = () => {
+    setUserType(null);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,6 +52,10 @@ export default function Login() {
             variant: "destructive",
           });
         } else {
+          // Update profile with user_type after signup
+          if (userType) {
+            await updateProfile({ user_type: userType } as any);
+          }
           toast({
             title: "Account created",
             description: "Welcome to Snag!",
@@ -66,12 +83,17 @@ export default function Login() {
     }
   };
 
+  // Show user type selection for signup flow when no type is selected
+  if (isSignUp && !userType) {
+    return <UserTypeSelection selectedType={userType} onSelect={handleUserTypeSelect} />;
+  }
+
   return (
     <div className="min-h-screen bg-muted flex flex-col">
       {/* Header */}
       <header className="flex items-center justify-between px-4 py-3 bg-background border-b border-border">
         <button
-          onClick={() => navigate("/")}
+          onClick={() => isSignUp && userType ? handleSwitchUserType() : navigate("/")}
           className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="w-5 h-5" />
@@ -86,6 +108,27 @@ export default function Login() {
           <div className="flex justify-center mb-6">
             <SnagLogo size="lg" />
           </div>
+
+          {/* User Type Badge for Signup */}
+          {isSignUp && userType && (
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <span
+                className={cn(
+                  "px-3 py-1 rounded-full text-caption font-medium text-white",
+                  userType === "individual" ? "bg-crimson" : "bg-cobalt"
+                )}
+              >
+                {userType === "individual" ? "Individual Account" : "Business Account"}
+              </span>
+              <button
+                type="button"
+                onClick={handleSwitchUserType}
+                className="text-caption text-muted-foreground hover:text-foreground underline"
+              >
+                Switch
+              </button>
+            </div>
+          )}
           
           <h1 className="text-h3 font-bold text-foreground text-center mb-2">
             {isSignUp ? "Create account" : "Welcome back"}
@@ -194,7 +237,12 @@ export default function Login() {
           <p className="text-body-small text-muted-foreground text-center mt-6">
             {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
             <button
-              onClick={() => setIsSignUp(!isSignUp)}
+              onClick={() => {
+                setIsSignUp(!isSignUp);
+                if (!isSignUp) {
+                  setUserType(null); // Reset user type when switching to signup
+                }
+              }}
               className="text-primary font-medium hover:underline"
             >
               {isSignUp ? "Sign in" : "Sign up"}
