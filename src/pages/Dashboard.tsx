@@ -21,6 +21,8 @@ import { TrialExpiredModal } from "@/components/softlaunch/TrialExpiredModal";
 import { useSoftLaunch } from "@/hooks/useSoftLaunch";
 import { DashboardPatterns } from "@/components/dashboard/DashboardPatterns";
 import { DashboardPendingOutcomes } from "@/components/dashboard/DashboardPendingOutcomes";
+import { IndividualDashboard } from "@/components/dashboard/IndividualDashboard";
+import { BusinessDashboard } from "@/components/dashboard/BusinessDashboard";
 
 interface SavedAnalysis {
   id: string;
@@ -149,8 +151,17 @@ export default function Dashboard() {
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
   const displayName = profile?.display_name || user?.email?.split("@")[0] || "there";
 
+  // Determine user type for dashboard layout
+  const userType = profile?.user_type || "individual";
+
   // Recent analyses for quick view
   const recentAnalyses = analyses.slice(0, 3);
+
+  // Soft launch data for dashboard props
+  const softLaunchData = {
+    limits: softLaunch.limits,
+  };
+
 
   return (
     <>
@@ -239,117 +250,20 @@ export default function Dashboard() {
                 )}
               </div>
             ) : (
-              /* Main Dashboard - Clean Layout */
-              <div className="space-y-8 animate-in fade-in duration-300">
-                
-                {/* Hero Section - Greeting & Quick Start */}
-                <section className="space-y-4">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h1 className="text-2xl font-bold text-foreground">
-                        {greeting}, {displayName}
-                      </h1>
-                      <p className="text-muted-foreground text-sm mt-1">
-                        {format(new Date(), "EEEE, MMMM d, yyyy")}
-                      </p>
-                    </div>
-                    <TrialBadge />
-                  </div>
-                  
-                  {/* Usage counters */}
-                  <div className="flex items-center gap-4 text-xs">
-                    <UsageCounter 
-                      used={softLaunch.limits.deepSnags.used} 
-                      limit={softLaunch.limits.deepSnags.limit} 
-                      label="Deep Snag used" 
-                    />
-                    <span className="text-border">•</span>
-                    <UsageCounter 
-                      used={softLaunch.limits.journalsPerDay.used} 
-                      limit={softLaunch.limits.journalsPerDay.limit} 
-                      label="journals today" 
-                    />
-                  </div>
-
-                  {/* Primary Action Card */}
-                  <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-background">
-                    <CardContent className="p-5">
-                      <p className="text-sm text-muted-foreground mb-4">
-                        What decision or plan needs a stress-test today?
-                      </p>
-                      <div className="flex flex-wrap gap-3">
-                        <Button 
-                          onClick={() => navigate("/analyze")} 
-                          className="gap-2"
-                        >
-                          <Target className="w-4 h-4" />
-                          New Analysis
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          onClick={() => navigate("/journal/new")}
-                          className="gap-2"
-                        >
-                          <PenLine className="w-4 h-4" />
-                          Journal Entry
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          onClick={() => navigate("/decisions/new")}
-                          className="gap-2"
-                        >
-                          <Plus className="w-4 h-4" />
-                          Capture Decision
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </section>
-
-                {/* Stats Overview */}
-                <section>
-                  <QuickStats analysesCount={analyses.length} />
-                </section>
-
-                {/* Recent Analyses */}
-                {recentAnalyses.length > 0 && (
-                  <section>
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-lg font-semibold text-foreground">Recent Analyses</h2>
-                      {analyses.length > 3 && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={() => setShowAllAnalyses(true)}
-                          className="text-primary"
-                        >
-                          View all ({analyses.length})
-                          <ChevronRight className="w-4 h-4 ml-1" />
-                        </Button>
-                      )}
-                    </div>
-                    <div className="space-y-3">
-                      {recentAnalyses.map((analysis) => (
-                        <RecentAnalysisCard 
-                          key={analysis.id} 
-                          analysis={analysis} 
-                          onClick={() => navigate(`/analysis/${analysis.id}`)}
-                        />
-                      ))}
-                    </div>
-                  </section>
-                )}
-
-                {/* Pending Outcomes */}
-                <DashboardPendingOutcomes />
-
-                {/* My Patterns (Pro feature, shows after 5+ outcomes) */}
-                <DashboardPatterns />
-
-                {/* Pending Actions */}
-                <PendingActionsSection />
-
-              </div>
+              /* Main Dashboard - Render based on user type */
+              userType === "business" ? (
+                <BusinessDashboard 
+                  displayName={displayName}
+                  greeting={greeting}
+                  softLaunch={softLaunchData}
+                />
+              ) : (
+                <IndividualDashboard 
+                  displayName={displayName}
+                  greeting={greeting}
+                  softLaunch={softLaunchData}
+                />
+              )
             )}
           </main>
         </PullToRefresh>
