@@ -135,8 +135,9 @@ serve(async (req) => {
       global: { headers: { Authorization: authHeader } }
     });
 
-    // Validate the JWT and get user
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    // Validate the JWT and get user - MUST pass token explicitly when verify_jwt=false
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
     
     if (userError || !user) {
       console.log("Invalid token:", userError?.message);
