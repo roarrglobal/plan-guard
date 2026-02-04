@@ -12,7 +12,7 @@ type UserType = "individual" | "business";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { signIn, signUp, user, isLoading: authLoading, updateProfile } = useAuth();
+  const { signIn, signUp, user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   
   const [isSignUp, setIsSignUp] = useState(false);
@@ -44,7 +44,7 @@ export default function Login() {
 
     try {
       if (isSignUp) {
-        const { error } = await signUp(email, password, displayName);
+        const { error } = await signUp(email, password, displayName, userType || undefined);
         if (error) {
           toast({
             title: "Sign up failed",
@@ -52,10 +52,6 @@ export default function Login() {
             variant: "destructive",
           });
         } else {
-          // Update profile with user_type after signup
-          if (userType) {
-            await updateProfile({ user_type: userType } as any);
-          }
           toast({
             title: "Account created",
             description: "Welcome to Snag!",

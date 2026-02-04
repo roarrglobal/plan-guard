@@ -44,7 +44,7 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   isLoading: boolean;
-  signUp: (email: string, password: string, displayName?: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, displayName?: string, userType?: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: ProfileUpdates) => Promise<{ error: Error | null }>;
@@ -116,17 +116,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, displayName?: string) => {
-    const { error } = await supabase.auth.signUp({
+  const signUp = async (email: string, password: string, displayName?: string, userType?: string) => {
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: window.location.origin,
         data: {
           display_name: displayName,
+          user_type: userType || 'individual',
         },
       },
     });
+
+    // If signup was successful and we have a user, update their profile with user_type
+    if (!error && data.user) {
+      // Wait a moment for the profile to be created by the trigger, then update
+      setTimeout(async () => {
+        await supabase
+          .from("profiles")
+          .update({ user_type: userType || 'individual' })
+          .eq("user_id", data.user!.id);
+      }, 500);
+    }
 
     return { error };
   };
