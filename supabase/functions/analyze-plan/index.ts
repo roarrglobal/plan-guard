@@ -117,38 +117,39 @@ serve(async (req) => {
   }
 
   try {
-    // SECURITY: Verify authentication
+    // Check for authentication - but allow unauthenticated requests for free trial
     const authHeader = req.headers.get('Authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      console.log("No authorization header provided");
-      return new Response(
-        JSON.stringify({ error: "Authentication required" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // Create Supabase client to validate the token
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    let userId: string | null = null;
     
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } }
-    });
+    // If auth header provided, validate the token
+    if (authHeader?.startsWith('Bearer ')) {
+      const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+      const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+      
+      const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+        global: { headers: { Authorization: authHeader } }
+      });
 
-    // Validate the JWT and get user - MUST pass token explicitly when verify_jwt=false
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
-    
-    if (userError || !user) {
-      console.log("Invalid token:", userError?.message);
-      return new Response(
-        JSON.stringify({ error: "Invalid or expired token" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      // Validate the JWT and get user - MUST pass token explicitly when verify_jwt=false
+      const token = authHeader.replace('Bearer ', '');
+      const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+      
+      if (!userError && user) {
+        userId = user.id;
+        console.log("Authenticated user:", userId);
+      } else {
+        console.log("Token validation failed (allowing as anonymous):", userError?.message);
+      }
+    } else {
+      console.log("No authorization header - processing as free trial");
     }
-
-    const userId = user.id;
-    console.log("Authenticated user:", userId);
+    
+    // Log whether this is authenticated or anonymous
+    if (userId) {
+      console.log("Processing authenticated request for user:", userId);
+    } else {
+      console.log("Processing anonymous/free trial request");
+    }
 
     // Handle empty body gracefully
     let body;
