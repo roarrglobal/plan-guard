@@ -53,10 +53,15 @@ export default function Login() {
           });
         } else {
           toast({
-            title: "Account created",
-            description: "Welcome to Snag!",
+            title: "Check your email",
+            description: "We've sent you a verification link. Please verify your email to continue.",
+            duration: 10000,
           });
-          navigate("/dashboard", { replace: true });
+          // Don't navigate - user needs to verify email first
+          setIsSignUp(false); // Switch to login view
+          setEmail("");
+          setPassword("");
+          setDisplayName("");
         }
       } else {
         const { error } = await signIn(email, password);
