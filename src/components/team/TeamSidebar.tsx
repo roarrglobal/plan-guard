@@ -11,7 +11,7 @@ interface TeamSidebarProps {
 
 const navItems = (slug: string) => [
   { label: "Dashboard", icon: LayoutDashboard, href: `/team/${slug}/dashboard` },
-  { label: "Decisions", icon: ListChecks, href: `/team/${slug}/decisions`, placeholder: true },
+  { label: "Decisions", icon: ListChecks, href: `/team/${slug}/decisions` },
   { label: "Analytics", icon: BarChart3, href: `/team/${slug}/analytics`, placeholder: true },
   { label: "Members", icon: Users, href: `/team/${slug}/members` },
   { label: "Settings", icon: Settings, href: `/team/${slug}/settings` },

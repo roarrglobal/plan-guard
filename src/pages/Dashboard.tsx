@@ -23,6 +23,7 @@ import { DashboardPatterns } from "@/components/dashboard/DashboardPatterns";
 import { DashboardPendingOutcomes } from "@/components/dashboard/DashboardPendingOutcomes";
 import { IndividualDashboard } from "@/components/dashboard/IndividualDashboard";
 import { BusinessDashboard } from "@/components/dashboard/BusinessDashboard";
+import { usePendingInvitations } from "@/hooks/usePendingInvitations";
 
 interface SavedAnalysis {
   id: string;
@@ -54,6 +55,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { user, isLoading: authLoading, profile } = useAuth();
   const { toast } = useToast();
+  usePendingInvitations();
   const [analyses, setAnalyses] = useState<SavedAnalysis[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
