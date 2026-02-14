@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { ArrowLeft, User, LogOut, Trash2, ChevronRight, CreditCard, Palette } from "lucide-react";
+import { ArrowLeft, User, LogOut, Trash2, ChevronRight, CreditCard, Palette, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SnagLogo } from "@/components/SnagLogo";
 import { useToast } from "@/hooks/use-toast";
@@ -148,6 +148,28 @@ export default function SettingsPage() {
               </div>
               <ChevronRight className="w-5 h-5 text-muted-foreground" />
             </div>
+          </div>
+        </section>
+
+        {/* Notifications section */}
+        <section className="mb-8">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+            Notifications
+          </h2>
+          <div className="analysis-card">
+            <button
+              onClick={() => navigate("/settings/notifications")}
+              className="w-full flex items-center justify-between p-4 touch-target hover:bg-muted/50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <Bell className="w-5 h-5 text-muted-foreground" />
+                <div className="text-left">
+                  <p className="font-medium text-foreground">Email Notifications</p>
+                  <p className="text-sm text-muted-foreground">Manage outcome reminders & digests</p>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-muted-foreground" />
+            </button>
           </div>
         </section>
 

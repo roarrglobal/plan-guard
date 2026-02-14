@@ -16,6 +16,8 @@ import Dashboard from "./pages/Dashboard";
 import AnalysisDetail from "./pages/AnalysisDetail";
 import AnalysisHistoryPage from "./pages/AnalysisHistoryPage";
 import SettingsPage from "./pages/SettingsPage";
+import NotificationSettingsPage from "./pages/NotificationSettingsPage";
+import UnsubscribePage from "./pages/UnsubscribePage";
 import ProfileSettings from "./pages/ProfileSettings";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
@@ -74,6 +76,7 @@ const App = () => {
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/disclaimer" element={<Disclaimer />} />
               <Route path="/invite/:token" element={<AcceptInvitePage />} />
+              <Route path="/unsubscribe" element={<UnsubscribePage />} />
               
               {/* App routes with layout */}
               <Route element={<AppLayout />}>
@@ -98,6 +101,7 @@ const App = () => {
                 <Route path="/frameworks/porter/:id" element={<PorterAnalysisPage />} />
                 <Route path="/frameworks/premortem/:id" element={<PremortemAnalysisPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
+                <Route path="/settings/notifications" element={<NotificationSettingsPage />} />
                 <Route path="/profile" element={<ProfileSettings />} />
                 <Route path="/reports" element={<ReportsPage />} />
               </Route>
