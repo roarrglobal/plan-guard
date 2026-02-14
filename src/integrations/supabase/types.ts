@@ -1028,6 +1028,7 @@ export type Database = {
           outcome_notes: string | null
           resolved_at: string | null
           reversibility: string | null
+          search_vector: unknown
           stakes: string | null
           status: string
           team_id: string
@@ -1052,6 +1053,7 @@ export type Database = {
           outcome_notes?: string | null
           resolved_at?: string | null
           reversibility?: string | null
+          search_vector?: unknown
           stakes?: string | null
           status?: string
           team_id: string
@@ -1076,6 +1078,7 @@ export type Database = {
           outcome_notes?: string | null
           resolved_at?: string | null
           reversibility?: string | null
+          search_vector?: unknown
           stakes?: string | null
           status?: string
           team_id?: string
@@ -1699,6 +1702,24 @@ export type Database = {
         Returns: boolean
       }
       is_trial_expired: { Args: { p_user_id: string }; Returns: boolean }
+      search_team_decisions: {
+        Args: {
+          p_categories?: string[]
+          p_creator_id?: string
+          p_date_from?: string
+          p_date_to?: string
+          p_has_outcome?: boolean
+          p_page?: number
+          p_page_size?: number
+          p_query?: string
+          p_sort_by?: string
+          p_stakes?: string[]
+          p_statuses?: string[]
+          p_team_id: string
+          p_visibilities?: string[]
+        }
+        Returns: Json
+      }
     }
     Enums: {
       department_type:
