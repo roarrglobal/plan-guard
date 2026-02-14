@@ -16,6 +16,7 @@ export interface DecisionTemplate {
   created_by: string | null;
   created_at: string;
   updated_at: string;
+  usage_count: number;
 }
 
 export function useDecisionTemplates(teamId: string | undefined) {

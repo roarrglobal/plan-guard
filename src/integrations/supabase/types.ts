@@ -71,6 +71,7 @@ export type Database = {
           prompt_additions: string | null
           team_id: string | null
           updated_at: string
+          usage_count: number
         }
         Insert: {
           blind_spot_library?: Json
@@ -86,6 +87,7 @@ export type Database = {
           prompt_additions?: string | null
           team_id?: string | null
           updated_at?: string
+          usage_count?: number
         }
         Update: {
           blind_spot_library?: Json
@@ -101,6 +103,7 @@ export type Database = {
           prompt_additions?: string | null
           team_id?: string | null
           updated_at?: string
+          usage_count?: number
         }
         Relationships: [
           {
@@ -232,6 +235,95 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "department_insights_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_preferences: {
+        Row: {
+          id: string
+          outcome_reminders: boolean
+          product_updates: boolean
+          team_activity: boolean
+          unsubscribed_all: boolean
+          updated_at: string
+          user_id: string
+          weekly_digest: boolean
+        }
+        Insert: {
+          id?: string
+          outcome_reminders?: boolean
+          product_updates?: boolean
+          team_activity?: boolean
+          unsubscribed_all?: boolean
+          updated_at?: string
+          user_id: string
+          weekly_digest?: boolean
+        }
+        Update: {
+          id?: string
+          outcome_reminders?: boolean
+          product_updates?: boolean
+          team_activity?: boolean
+          unsubscribed_all?: boolean
+          updated_at?: string
+          user_id?: string
+          weekly_digest?: boolean
+        }
+        Relationships: []
+      }
+      email_queue: {
+        Row: {
+          created_at: string
+          email_type: Database["public"]["Enums"]["email_type"]
+          error_message: string | null
+          id: string
+          retry_count: number
+          scheduled_for: string
+          sent_at: string | null
+          status: Database["public"]["Enums"]["email_status"]
+          subject: string
+          team_id: string | null
+          template_data: Json
+          to_email: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email_type: Database["public"]["Enums"]["email_type"]
+          error_message?: string | null
+          id?: string
+          retry_count?: number
+          scheduled_for?: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["email_status"]
+          subject: string
+          team_id?: string | null
+          template_data?: Json
+          to_email: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email_type?: Database["public"]["Enums"]["email_type"]
+          error_message?: string | null
+          id?: string
+          retry_count?: number
+          scheduled_for?: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["email_status"]
+          subject?: string
+          team_id?: string | null
+          template_data?: Json
+          to_email?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_queue_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
@@ -1496,6 +1588,25 @@ export type Database = {
         Returns: Json
       }
       get_invite_details: { Args: { p_token: string }; Returns: Json }
+      get_or_create_email_preferences: {
+        Args: { p_user_id: string }
+        Returns: {
+          id: string
+          outcome_reminders: boolean
+          product_updates: boolean
+          team_activity: boolean
+          unsubscribed_all: boolean
+          updated_at: string
+          user_id: string
+          weekly_digest: boolean
+        }
+        SetofOptions: {
+          from: "*"
+          to: "email_preferences"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_or_create_team_usage: {
         Args: { p_team_id: string }
         Returns: {
@@ -1575,6 +1686,10 @@ export type Database = {
         Args: { p_team_id: string; p_type: string }
         Returns: undefined
       }
+      increment_template_usage: {
+        Args: { p_template_id: string }
+        Returns: undefined
+      }
       is_team_admin: {
         Args: { p_team_id: string; p_user_id: string }
         Returns: boolean
@@ -1594,6 +1709,16 @@ export type Database = {
         | "marketing"
         | "operations"
         | "strategy"
+      email_status: "pending" | "sent" | "failed" | "bounced"
+      email_type:
+        | "outcome_reminder"
+        | "outcome_overdue"
+        | "weekly_digest"
+        | "analysis_complete"
+        | "team_invite"
+        | "welcome"
+        | "trial_ending"
+        | "trial_ended"
       insight_type: "blind_spot_pattern" | "failure_pattern" | "success_pattern"
       team_invite_role: "admin" | "member" | "viewer"
       team_member_role: "owner" | "admin" | "member" | "viewer"
@@ -1735,6 +1860,17 @@ export const Constants = {
         "marketing",
         "operations",
         "strategy",
+      ],
+      email_status: ["pending", "sent", "failed", "bounced"],
+      email_type: [
+        "outcome_reminder",
+        "outcome_overdue",
+        "weekly_digest",
+        "analysis_complete",
+        "team_invite",
+        "welcome",
+        "trial_ending",
+        "trial_ended",
       ],
       insight_type: [
         "blind_spot_pattern",

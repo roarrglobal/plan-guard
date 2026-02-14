@@ -158,6 +158,10 @@ export default function TeamDecisionNewPage() {
       toast.error(error.message);
     } else {
       toast.success("Decision saved as draft");
+      // Increment template usage count
+      if (selectedTemplate?.id) {
+        supabase.rpc("increment_template_usage", { p_template_id: selectedTemplate.id } as any).then(() => {});
+      }
       await supabase.from("team_activity").insert({
         team_id: team.id,
         user_id: user.id,
@@ -209,6 +213,11 @@ export default function TeamDecisionNewPage() {
       entity_id: (data as any).id,
       metadata: { title: title.trim() },
     });
+
+    // Increment template usage count
+    if (selectedTemplate?.id) {
+      supabase.rpc("increment_template_usage", { p_template_id: selectedTemplate.id } as any).then(() => {});
+    }
 
     navigate(`/team/${team.slug}/decisions/${(data as any).id}?analyze=${analysisType}`);
     setIsSaving(false);

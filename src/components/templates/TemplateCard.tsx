@@ -38,10 +38,10 @@ export function TemplateCard({ template, onUse, onCustomize, canCustomize, usage
           <span>{template.blind_spot_library?.length || 0} blind spots</span>
           <span>·</span>
           <span>{template.failure_mode_library?.length || 0} failure modes</span>
-          {usageCount !== undefined && usageCount > 0 && (
+          {(template.usage_count > 0 || (usageCount !== undefined && usageCount > 0)) && (
             <>
               <span>·</span>
-              <span>{usageCount} uses</span>
+              <span>{template.usage_count || usageCount} uses</span>
             </>
           )}
         </div>
