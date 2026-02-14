@@ -85,6 +85,61 @@
     --dept-strategy: 349 57% 47%;
   }
 
+  /* B2B Theme - Cobalt primary, dark sidebar, professional feel */
+  .theme-business {
+    /* Cobalt Primary */
+    --primary: 216 100% 34%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 216 100% 28%;
+
+    --accent: 216 100% 34%;
+    --accent-foreground: 0 0% 100%;
+
+    --ring: 216 100% 34%;
+
+    /* Cooler background */
+    --background: 0 0% 100%;
+    --background-alt: 210 20% 97%;
+
+    /* Tighter radius for professional feel */
+    --radius: 0.5rem;
+
+    /* Dark sidebar */
+    --sidebar-background: 0 0% 10%;
+    --sidebar-foreground: 0 0% 90%;
+    --sidebar-primary: 216 100% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 216 100% 50%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 18%;
+    --sidebar-ring: 216 100% 50%;
+
+    /* Analysis accents use cobalt */
+    --output-accent-blindspots: 216 100% 34%;
+  }
+
+  .theme-business.dark {
+    --primary: 216 100% 50%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 216 100% 45%;
+
+    --accent: 216 100% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --ring: 216 100% 50%;
+
+    --sidebar-background: 0 0% 7%;
+    --sidebar-foreground: 0 0% 90%;
+    --sidebar-primary: 216 100% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 216 100% 55%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 15%;
+    --sidebar-ring: 216 100% 55%;
+
+    --output-accent-blindspots: 216 100% 50%;
+  }
+
   .dark {
     --background: 0 0% 7%;
     --background-alt: 0 0% 10%;
