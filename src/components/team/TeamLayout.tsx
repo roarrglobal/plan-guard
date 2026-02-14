@@ -5,6 +5,7 @@ import { useTeamBySlug } from "@/hooks/useTeams";
 import { TeamSidebar } from "./TeamSidebar";
 import { Menu } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { KeyboardShortcutsModal } from "./KeyboardShortcutsModal";
 
 export function TeamLayout() {
   const { slug } = useParams<{ slug: string }>();
@@ -13,12 +14,36 @@ export function TeamLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
 
   useEffect(() => { setSidebarOpen(false); }, [location.pathname]);
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/login");
   }, [authLoading, user]);
+
+  // Global keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      // Don't trigger in inputs/textareas
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement)?.isContentEditable) return;
+
+      // Cmd/Ctrl + N: New Decision
+      if ((e.metaKey || e.ctrlKey) && e.key === "n") {
+        e.preventDefault();
+        if (team) navigate(`/team/${team.slug}/decisions/new`);
+      }
+
+      // ? key: Show shortcuts
+      if (e.key === "?" && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        setShortcutsOpen(true);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [team, navigate]);
 
   if (authLoading || teamLoading) {
     return (
@@ -51,6 +76,7 @@ export function TeamLayout() {
           <Outlet context={{ team }} />
         </main>
       </div>
+      <KeyboardShortcutsModal open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
     </div>
   );
 }
