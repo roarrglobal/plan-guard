@@ -632,6 +632,68 @@ export type Database = {
           },
         ]
       }
+      team_decisions: {
+        Row: {
+          category: string | null
+          chosen_option: string | null
+          created_at: string
+          created_by: string
+          deadline: string | null
+          decision_text: string
+          description: string | null
+          id: string
+          options: Json | null
+          outcome_notes: string | null
+          resolved_at: string | null
+          stakes: string | null
+          status: string
+          team_id: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          chosen_option?: string | null
+          created_at?: string
+          created_by: string
+          deadline?: string | null
+          decision_text: string
+          description?: string | null
+          id?: string
+          options?: Json | null
+          outcome_notes?: string | null
+          resolved_at?: string | null
+          stakes?: string | null
+          status?: string
+          team_id: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          chosen_option?: string | null
+          created_at?: string
+          created_by?: string
+          deadline?: string | null
+          decision_text?: string
+          description?: string | null
+          id?: string
+          options?: Json | null
+          outcome_notes?: string | null
+          resolved_at?: string | null
+          stakes?: string | null
+          status?: string
+          team_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_decisions_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       team_invitations: {
         Row: {
           accepted_at: string | null

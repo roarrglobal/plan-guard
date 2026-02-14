@@ -42,6 +42,9 @@ import TeamNewPage from "./pages/TeamNewPage";
 import TeamDashboardPage from "./pages/TeamDashboardPage";
 import TeamMembersPage from "./pages/TeamMembersPage";
 import TeamSettingsPage from "./pages/TeamSettingsPage";
+import TeamDecisionsPage from "./pages/TeamDecisionsPage";
+import TeamDecisionDetailPage from "./pages/TeamDecisionDetailPage";
+import AcceptInvitePage from "./pages/AcceptInvitePage";
 import { TeamLayout } from "@/components/team/TeamLayout";
 
 const queryClient = new QueryClient();
@@ -64,6 +67,7 @@ const App = () => {
               <Route path="/terms" element={<Terms />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/disclaimer" element={<Disclaimer />} />
+              <Route path="/invite/:token" element={<AcceptInvitePage />} />
               
               {/* App routes with layout */}
               <Route element={<AppLayout />}>
@@ -98,7 +102,8 @@ const App = () => {
                 <Route path="dashboard" element={<TeamDashboardPage />} />
                 <Route path="members" element={<TeamMembersPage />} />
                 <Route path="settings" element={<TeamSettingsPage />} />
-                <Route path="decisions" element={<div className="p-8 text-muted-foreground">Team Decisions — coming soon</div>} />
+                <Route path="decisions" element={<TeamDecisionsPage />} />
+                <Route path="decisions/:decisionId" element={<TeamDecisionDetailPage />} />
                 <Route path="analytics" element={<div className="p-8 text-muted-foreground">Team Analytics — coming soon</div>} />
               </Route>
 

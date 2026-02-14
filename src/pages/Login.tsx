@@ -23,10 +23,12 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Redirect to dashboard if already logged in
+  // Redirect to dashboard (or redirect param) if already logged in
   useEffect(() => {
     if (!authLoading && user) {
-      navigate("/dashboard", { replace: true });
+      const params = new URLSearchParams(window.location.search);
+      const redirect = params.get("redirect");
+      navigate(redirect || "/dashboard", { replace: true });
     }
   }, [user, authLoading, navigate]);
 
