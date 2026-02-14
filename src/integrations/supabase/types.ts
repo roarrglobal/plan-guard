@@ -1062,6 +1062,7 @@ export type Database = {
       }
     }
     Functions: {
+      auth_user_email: { Args: never; Returns: string }
       can_use_feature: {
         Args: { p_feature: string; p_user_id: string }
         Returns: boolean
