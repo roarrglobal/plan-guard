@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate, useOutletContext } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useOutletContext, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -8,8 +8,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowRight, Save, Zap } from "lucide-react";
+import { ArrowLeft, ArrowRight, Save, Zap, FileText, X } from "lucide-react";
+import { DepartmentBadge } from "@/components/templates/DepartmentBadge";
+import { TemplateSelectorModal } from "@/components/templates/TemplateSelectorModal";
+import { useDecisionTemplates, type DecisionTemplate } from "@/hooks/useDecisionTemplates";
 import type { Team } from "@/hooks/useTeams";
 
 const CATEGORIES = [
@@ -60,8 +64,16 @@ export default function TeamDecisionNewPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { team } = useOutletContext<{ team: Team }>();
-  const [step, setStep] = useState(1);
+  const [searchParams] = useSearchParams();
+  const { data: templates = [] } = useDecisionTemplates(team?.id);
+
+  const [step, setStep] = useState(0); // Start at step 0 (template selection)
   const [isSaving, setIsSaving] = useState(false);
+  const [templateSelectorOpen, setTemplateSelectorOpen] = useState(false);
+
+  // Selected template
+  const [selectedTemplate, setSelectedTemplate] = useState<DecisionTemplate | null>(null);
+  const [templateFieldValues, setTemplateFieldValues] = useState<Record<string, any>>({});
 
   // Form state
   const [title, setTitle] = useState("");
@@ -75,8 +87,48 @@ export default function TeamDecisionNewPage() {
   const [visibility, setVisibility] = useState("team");
   const [analysisType, setAnalysisType] = useState("standard");
 
+  // Auto-select template from URL param
+  useEffect(() => {
+    const templateId = searchParams.get("template");
+    if (templateId && templates.length > 0) {
+      const t = templates.find(t => t.id === templateId);
+      if (t) {
+        handleSelectTemplate(t);
+        setStep(1);
+      }
+    }
+  }, [searchParams, templates]);
+
+  const handleSelectTemplate = (template: DecisionTemplate) => {
+    setSelectedTemplate(template);
+    setCategory(template.department);
+    setTemplateFieldValues({});
+  };
+
+  const handleClearTemplate = () => {
+    setSelectedTemplate(null);
+    setTemplateFieldValues({});
+  };
+
   const canProceedStep1 = title.trim().length >= 5;
-  const canProceedStep2 = true; // all optional
+
+  const buildInputContext = () => {
+    let context = inputContext.trim();
+    if (selectedTemplate && Object.keys(templateFieldValues).length > 0) {
+      const templateContext = selectedTemplate.input_fields
+        .map((f: any) => {
+          const val = templateFieldValues[f.name];
+          if (val !== undefined && val !== "" && val !== null) {
+            return `${f.label}: ${val}`;
+          }
+          return null;
+        })
+        .filter(Boolean)
+        .join("\n");
+      context = templateContext + (context ? "\n\n" + context : "");
+    }
+    return context || null;
+  };
 
   const handleSaveDraft = async () => {
     if (!user || !team || !title.trim()) return;
@@ -94,9 +146,10 @@ export default function TeamDecisionNewPage() {
         reversibility,
         timeline,
         deadline: deadline || null,
-        input_context: inputContext.trim() || null,
+        input_context: buildInputContext(),
         visibility,
         status: "open",
+        template_id: selectedTemplate?.id || null,
       } as any)
       .select()
       .single();
@@ -105,7 +158,6 @@ export default function TeamDecisionNewPage() {
       toast.error(error.message);
     } else {
       toast.success("Decision saved as draft");
-      // Log activity
       await supabase.from("team_activity").insert({
         team_id: team.id,
         user_id: user.id,
@@ -123,7 +175,6 @@ export default function TeamDecisionNewPage() {
     if (!user || !team || !title.trim()) return;
     setIsSaving(true);
 
-    // Create decision first
     const { data, error } = await supabase
       .from("team_decisions")
       .insert({
@@ -136,9 +187,10 @@ export default function TeamDecisionNewPage() {
         reversibility,
         timeline,
         deadline: deadline || null,
-        input_context: inputContext.trim() || null,
+        input_context: buildInputContext(),
         visibility,
         status: "open",
+        template_id: selectedTemplate?.id || null,
       } as any)
       .select()
       .single();
@@ -149,7 +201,6 @@ export default function TeamDecisionNewPage() {
       return;
     }
 
-    // Log activity
     await supabase.from("team_activity").insert({
       team_id: team.id,
       user_id: user.id,
@@ -159,10 +210,14 @@ export default function TeamDecisionNewPage() {
       metadata: { title: title.trim() },
     });
 
-    // Navigate to detail page which will trigger analysis
     navigate(`/team/${team.slug}/decisions/${(data as any).id}?analyze=${analysisType}`);
     setIsSaving(false);
   };
+
+  const totalSteps = selectedTemplate ? 4 : 3;
+  const stepLabels = selectedTemplate
+    ? ["Template", "Basic Info", "Context", "Visibility & Analysis"]
+    : ["Start", "Basic Info", "Context & Analysis"];
 
   return (
     <div className="p-4 md:p-8 max-w-2xl mx-auto space-y-6">
@@ -180,27 +235,82 @@ export default function TeamDecisionNewPage() {
 
       {/* Step indicator */}
       <div className="flex items-center gap-2">
-        {[1, 2, 3].map((s) => (
-          <div key={s} className="flex items-center gap-2">
+        {Array.from({ length: totalSteps }, (_, i) => (
+          <div key={i} className="flex items-center gap-2">
             <button
-              onClick={() => s < step && setStep(s)}
+              onClick={() => i < step && setStep(i)}
               className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
-                s === step
+                i === step
                   ? "bg-primary text-primary-foreground"
-                  : s < step
+                  : i < step
                   ? "bg-primary/20 text-primary cursor-pointer"
                   : "bg-muted text-muted-foreground"
               }`}
             >
-              {s}
+              {i + 1}
             </button>
-            {s < 3 && <div className={`w-8 h-0.5 ${s < step ? "bg-primary/40" : "bg-muted"}`} />}
+            {i < totalSteps - 1 && <div className={`w-8 h-0.5 ${i < step ? "bg-primary/40" : "bg-muted"}`} />}
           </div>
         ))}
         <span className="text-xs text-muted-foreground ml-2">
-          {step === 1 ? "Basic Info" : step === 2 ? "Context" : "Visibility & Analysis"}
+          {stepLabels[step]}
         </span>
       </div>
+
+      {/* Step 0: Choose how to start */}
+      {step === 0 && (
+        <Card>
+          <CardContent className="p-5 space-y-5">
+            <Label className="text-sm font-medium">Choose how to start</Label>
+
+            {selectedTemplate ? (
+              <div className="p-4 rounded-lg border border-primary/30 bg-primary/5 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-primary" />
+                    <span className="text-sm font-medium text-foreground">{selectedTemplate.name}</span>
+                    <DepartmentBadge department={selectedTemplate.department} size="sm" />
+                  </div>
+                  <Button size="sm" variant="ghost" onClick={handleClearTemplate} className="h-7 w-7 p-0">
+                    <X className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">{selectedTemplate.description}</p>
+              </div>
+            ) : (
+              <div className="grid gap-3">
+                <button
+                  onClick={() => setStep(1)}
+                  className="p-4 rounded-lg border border-border hover:border-primary/30 hover:bg-primary/5 text-left transition-colors"
+                >
+                  <p className="text-sm font-medium text-foreground">Start from scratch</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Create a custom decision analysis</p>
+                </button>
+                <button
+                  onClick={() => setTemplateSelectorOpen(true)}
+                  className="p-4 rounded-lg border border-border hover:border-primary/30 hover:bg-primary/5 text-left transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-primary" />
+                    <p className="text-sm font-medium text-foreground">Use a template</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Start with department-specific blind spots and failure modes
+                  </p>
+                </button>
+              </div>
+            )}
+
+            {selectedTemplate && (
+              <div className="flex justify-end">
+                <Button onClick={() => setStep(1)}>
+                  Next <ArrowRight className="w-4 h-4 ml-1" />
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Step 1: Basic Info */}
       {step === 1 && (
@@ -259,7 +369,91 @@ export default function TeamDecisionNewPage() {
               </div>
             </div>
 
-            <div className="flex justify-end">
+            {/* Template-specific input fields */}
+            {selectedTemplate && selectedTemplate.input_fields?.length > 0 && (
+              <div className="space-y-4 pt-2 border-t border-border">
+                <Label className="text-sm font-medium flex items-center gap-2">
+                  <FileText className="w-3.5 h-3.5 text-primary" />
+                  Template Fields
+                </Label>
+                {selectedTemplate.input_fields.map((field: any) => (
+                  <div key={field.name} className="space-y-1.5">
+                    <Label className="text-xs font-medium">
+                      {field.label}
+                      {field.required && <span className="text-primary ml-1">*</span>}
+                    </Label>
+                    {field.type === "text" && (
+                      <Input
+                        value={templateFieldValues[field.name] || ""}
+                        onChange={e => setTemplateFieldValues(prev => ({ ...prev, [field.name]: e.target.value }))}
+                        className="bg-input"
+                      />
+                    )}
+                    {field.type === "number" && (
+                      <Input
+                        type="number"
+                        value={templateFieldValues[field.name] || ""}
+                        onChange={e => setTemplateFieldValues(prev => ({ ...prev, [field.name]: e.target.value }))}
+                        className="bg-input"
+                      />
+                    )}
+                    {field.type === "date" && (
+                      <Input
+                        type="date"
+                        value={templateFieldValues[field.name] || ""}
+                        onChange={e => setTemplateFieldValues(prev => ({ ...prev, [field.name]: e.target.value }))}
+                        className="bg-input"
+                      />
+                    )}
+                    {field.type === "select" && (
+                      <Select
+                        value={templateFieldValues[field.name] || ""}
+                        onValueChange={v => setTemplateFieldValues(prev => ({ ...prev, [field.name]: v }))}
+                      >
+                        <SelectTrigger className="bg-input"><SelectValue placeholder="Select..." /></SelectTrigger>
+                        <SelectContent>
+                          {(field.options || []).map((o: string) => (
+                            <SelectItem key={o} value={o}>{o}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                    {field.type === "slider" && (
+                      <div className="flex items-center gap-3">
+                        <Slider
+                          value={[templateFieldValues[field.name] || field.min || 0]}
+                          onValueChange={([v]) => setTemplateFieldValues(prev => ({ ...prev, [field.name]: v }))}
+                          min={field.min || 0}
+                          max={field.max || 100}
+                          step={1}
+                          className="flex-1"
+                        />
+                        <span className="text-sm font-medium text-foreground w-8 text-right">
+                          {templateFieldValues[field.name] || field.min || 0}
+                        </span>
+                      </div>
+                    )}
+                    {field.type === "boolean" && (
+                      <Select
+                        value={templateFieldValues[field.name]?.toString() || ""}
+                        onValueChange={v => setTemplateFieldValues(prev => ({ ...prev, [field.name]: v === "true" }))}
+                      >
+                        <SelectTrigger className="bg-input"><SelectValue placeholder="Select..." /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="true">Yes</SelectItem>
+                          <SelectItem value="false">No</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="flex justify-between">
+              <Button variant="outline" onClick={() => setStep(0)}>
+                <ArrowLeft className="w-4 h-4 mr-1" /> Back
+              </Button>
               <Button onClick={() => setStep(2)} disabled={!canProceedStep1}>
                 Next <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
@@ -384,6 +578,18 @@ export default function TeamDecisionNewPage() {
               </div>
             </div>
 
+            {selectedTemplate && (
+              <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
+                <div className="flex items-center gap-2 text-xs text-primary">
+                  <FileText className="w-3.5 h-3.5" />
+                  <span className="font-medium">Using template: {selectedTemplate.name}</span>
+                </div>
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  {selectedTemplate.blind_spot_library?.length || 0} blind spots and {selectedTemplate.failure_mode_library?.length || 0} failure modes will be included in the analysis
+                </p>
+              </div>
+            )}
+
             <div className="flex flex-col gap-3 pt-2">
               <Button onClick={handleRunAnalysis} disabled={isSaving || !canProceedStep1} className="w-full">
                 <Zap className="w-4 h-4 mr-2" />
@@ -400,6 +606,16 @@ export default function TeamDecisionNewPage() {
           </CardContent>
         </Card>
       )}
+
+      <TemplateSelectorModal
+        open={templateSelectorOpen}
+        onOpenChange={setTemplateSelectorOpen}
+        templates={templates}
+        onSelect={(t) => {
+          handleSelectTemplate(t);
+          setStep(0);
+        }}
+      />
     </div>
   );
 }

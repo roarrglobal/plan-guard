@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, ListChecks, BarChart3, Users, Settings, X, Keyboard } from "lucide-react";
+import { LayoutDashboard, ListChecks, BarChart3, Users, Settings, X, Keyboard, FileText } from "lucide-react";
 import { useTeamPermissions } from "@/hooks/useTeamPermissions";
 import type { Team } from "@/hooks/useTeams";
 import { KeyboardShortcutsModal } from "./KeyboardShortcutsModal";
@@ -22,6 +22,7 @@ export function TeamSidebar({ slug, teamName, open, onClose, teamId }: TeamSideb
   const items = [
     { label: "Dashboard", icon: LayoutDashboard, href: `/team/${slug}/dashboard`, show: can("view_dashboard") },
     { label: "Decisions", icon: ListChecks, href: `/team/${slug}/decisions`, show: can("view_decisions") },
+    { label: "Templates", icon: FileText, href: `/team/${slug}/templates`, show: can("view_decisions") },
     { label: "Analytics", icon: BarChart3, href: `/team/${slug}/analytics`, show: can("view_analytics") },
     { label: "Members", icon: Users, href: `/team/${slug}/members`, show: can("view_members") },
     { label: "Settings", icon: Settings, href: `/team/${slug}/settings`, show: can("view_settings") },

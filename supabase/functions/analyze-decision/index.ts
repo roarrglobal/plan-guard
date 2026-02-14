@@ -86,6 +86,29 @@ RULES:
 6. Consider organizational politics, execution risk, market dynamics
 7. The unasked question should be genuinely uncomfortable`;
 
+function buildSystemPrompt(template: any): string {
+  let prompt = SYSTEM_PROMPT;
+  if (template) {
+    const blindSpots = (template.blind_spot_library || [])
+      .map((s: any) => `- ${s.spot}: ${s.prompt}`)
+      .join("\n");
+    const failureModes = (template.failure_mode_library || [])
+      .map((m: any) => `- ${m.mode}: ${m.mechanism}\n  Likelihood factors: ${(m.likelihood_factors || []).join(", ")}`)
+      .join("\n");
+
+    prompt += `\n\nThis is a ${template.department} decision using the '${template.name}' template.
+
+DOMAIN-SPECIFIC BLIND SPOTS TO EVALUATE:
+${blindSpots}
+
+DOMAIN-SPECIFIC FAILURE MODES TO CONSIDER:
+${failureModes}
+
+Use these domain-specific items as your starting point. Add additional blind spots and failure modes specific to this particular situation. In each blind_spot and failure_mode object in your response, add a "source" field with value "library" for items from the template and "generated" for new items you identify.`;
+  }
+  return prompt;
+}
+
 function buildUserPrompt(decision: any, analysisType: string): string {
   const parts = [
     `DECISION: ${decision.decision_text}`,
@@ -170,6 +193,18 @@ serve(async (req) => {
       });
     }
 
+    // Fetch template if decision has one
+    let template: any = null;
+    const templateId = (decision as any).template_id;
+    if (templateId) {
+      const { data: tpl } = await supabase
+        .from("decision_templates")
+        .select("*")
+        .eq("id", templateId)
+        .single();
+      template = tpl;
+    }
+
     // Build user prompt from decision data
     const userPrompt = buildUserPrompt(decision, analysis_type);
     const inputValidation = validateString(userPrompt, {
@@ -208,7 +243,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model,
         messages: [
-          { role: "system", content: SYSTEM_PROMPT },
+          { role: "system", content: buildSystemPrompt(template) },
           { role: "user", content: sanitizeForPrompt(inputValidation.value) },
         ],
       }),
