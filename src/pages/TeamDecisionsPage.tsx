@@ -1,52 +1,37 @@
 import { useState } from "react";
-import { useOutletContext, Link } from "react-router-dom";
+import { useOutletContext, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTeamMembers } from "@/hooks/useTeams";
 import { useTeamPermissions } from "@/hooks/useTeamPermissions";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { toast } from "sonner";
-import { Plus, ListChecks, Clock, CheckCircle2, AlertTriangle } from "lucide-react";
+import { Plus, ListChecks, Clock, CheckCircle2, AlertTriangle, Search, Eye, Lock, Shield, Zap } from "lucide-react";
 import { format } from "date-fns";
 import type { Team } from "@/hooks/useTeams";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-
-interface TeamDecision {
-  id: string;
-  team_id: string;
-  created_by: string;
-  decision_text: string;
-  description: string | null;
-  category: string;
-  stakes: string;
-  status: string;
-  options: any;
-  chosen_option: string | null;
-  deadline: string | null;
-  outcome_notes: string | null;
-  resolved_at: string | null;
-  created_at: string;
-  updated_at: string;
-  creator_name?: string;
-}
+import { useQuery } from "@tanstack/react-query";
 
 const statusConfig: Record<string, { icon: any; color: string; label: string }> = {
   open: { icon: Clock, color: "bg-primary/10 text-primary", label: "Open" },
   in_progress: { icon: AlertTriangle, color: "bg-warning/10 text-warning", label: "In Progress" },
-  resolved: { icon: CheckCircle2, color: "bg-success/10 text-success", label: "Resolved" },
+  decided: { icon: Zap, color: "bg-[hsl(215,100%,33%)]/10 text-[hsl(215,100%,33%)]", label: "Decided" },
+  resolved: { icon: CheckCircle2, color: "bg-[hsl(160,84%,39%)]/10 text-[hsl(160,84%,39%)]", label: "Resolved" },
 };
 
 const stakesColors: Record<string, string> = {
   low: "bg-muted text-muted-foreground",
   medium: "bg-primary/10 text-primary",
   high: "bg-destructive/10 text-destructive",
+  critical: "bg-destructive text-destructive-foreground",
+};
+
+const visibilityIcons: Record<string, any> = {
+  private: Lock,
+  team: Eye,
+  leadership: Shield,
 };
 
 export default function TeamDecisionsPage() {
@@ -54,11 +39,11 @@ export default function TeamDecisionsPage() {
   const { user } = useAuth();
   const { members } = useTeamMembers(team?.id);
   const { can } = useTeamPermissions(team?.id);
-  const queryClient = useQueryClient();
-  const [createOpen, setCreateOpen] = useState(false);
-  const [newDecision, setNewDecision] = useState({ text: "", description: "", category: "general", stakes: "medium" });
-  const [isCreating, setIsCreating] = useState(false);
+  const navigate = useNavigate();
   const [filter, setFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [stakesFilter, setStakesFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { data: decisions = [], isLoading } = useQuery({
     queryKey: ["team-decisions", team?.id],
@@ -69,63 +54,103 @@ export default function TeamDecisionsPage() {
         .select("*")
         .eq("team_id", team.id)
         .order("created_at", { ascending: false });
-      
-      // Enrich with creator names
-      const enriched = (data || []).map((d: any) => {
+
+      return (data || []).map((d: any) => {
         const member = members.find((m) => m.user_id === d.created_by);
         return { ...d, creator_name: member?.display_name || "Team Member" };
       });
-      return enriched as TeamDecision[];
     },
     enabled: !!team?.id,
   });
 
-  const filtered = filter === "all" ? decisions : decisions.filter((d) => d.status === filter);
+  // Filtering
+  const filtered = decisions.filter((d: any) => {
+    if (filter !== "all" && d.status !== filter) return false;
+    if (categoryFilter !== "all" && d.category !== categoryFilter) return false;
+    if (stakesFilter !== "all" && d.stakes !== stakesFilter) return false;
+    if (searchQuery && !d.decision_text.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    return true;
+  });
 
-  const handleCreate = async () => {
-    if (!user || !team || !newDecision.text.trim()) return;
-    setIsCreating(true);
+  // Usage query
+  const { data: usage } = useQuery({
+    queryKey: ["team-usage", team?.id],
+    queryFn: async () => {
+      if (!team) return null;
+      const { data } = await supabase.rpc("get_or_create_team_usage", { p_team_id: team.id });
+      return data as any;
+    },
+    enabled: !!team?.id,
+  });
 
-    const { error } = await supabase.from("team_decisions").insert({
-      team_id: team.id,
-      created_by: user.id,
-      decision_text: newDecision.text.trim(),
-      description: newDecision.description.trim() || null,
-      category: newDecision.category,
-      stakes: newDecision.stakes,
-    });
-
-    if (error) {
-      toast.error(error.message);
-    } else {
-      toast.success("Decision created");
-      setNewDecision({ text: "", description: "", category: "general", stakes: "medium" });
-      setCreateOpen(false);
-      queryClient.invalidateQueries({ queryKey: ["team-decisions", team.id] });
-    }
-    setIsCreating(false);
-  };
+  const usagePercent = usage ? Math.round(((usage.deep_snags_used || 0) / 200) * 100) : 0;
 
   return (
-    <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-6">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Team Decisions</h1>
-          <p className="text-sm text-muted-foreground">{decisions.length} decision{decisions.length !== 1 ? "s" : ""}</p>
+          <p className="text-sm text-muted-foreground">
+            {decisions.length} decision{decisions.length !== 1 ? "s" : ""}
+            {usage && (
+              <span className="ml-2">
+                · {usage.deep_snags_used || 0}/200 Deep Snags
+                {usagePercent >= 80 && <span className="text-warning ml-1">⚠️</span>}
+              </span>
+            )}
+          </p>
         </div>
         {can("create_decision") && (
-          <Button onClick={() => setCreateOpen(true)} size="sm">
+          <Button onClick={() => navigate(`/team/${team.slug}/decisions/new`)} className="bg-primary">
             <Plus className="w-4 h-4 mr-2" /> New Decision
           </Button>
         )}
       </div>
 
-      {/* Filters */}
+      {/* Search & Filters */}
+      <div className="flex gap-2 flex-wrap items-center">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Search decisions..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9 bg-input"
+          />
+        </div>
+        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+          <SelectTrigger className="w-[130px]"><SelectValue placeholder="Category" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Categories</SelectItem>
+            <SelectItem value="sales">Sales</SelectItem>
+            <SelectItem value="finance">Finance</SelectItem>
+            <SelectItem value="product">Product</SelectItem>
+            <SelectItem value="hr">HR</SelectItem>
+            <SelectItem value="marketing">Marketing</SelectItem>
+            <SelectItem value="operations">Operations</SelectItem>
+            <SelectItem value="strategy">Strategy</SelectItem>
+            <SelectItem value="other">Other</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={stakesFilter} onValueChange={setStakesFilter}>
+          <SelectTrigger className="w-[120px]"><SelectValue placeholder="Stakes" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Stakes</SelectItem>
+            <SelectItem value="low">Low</SelectItem>
+            <SelectItem value="medium">Medium</SelectItem>
+            <SelectItem value="high">High</SelectItem>
+            <SelectItem value="critical">Critical</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Status tabs */}
       <div className="flex gap-2 flex-wrap">
         {[
           { value: "all", label: "All" },
           { value: "open", label: "Open" },
           { value: "in_progress", label: "In Progress" },
+          { value: "decided", label: "Decided" },
           { value: "resolved", label: "Resolved" },
         ].map((f) => (
           <button
@@ -152,15 +177,16 @@ export default function TeamDecisionsPage() {
           <CardContent className="p-8 text-center">
             <ListChecks className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
             <p className="text-sm text-muted-foreground">
-              {filter === "all" ? "No decisions yet. Create one to get started." : `No ${filter.replace("_", " ")} decisions.`}
+              {decisions.length === 0 ? "No decisions yet. Create one to get started." : "No matching decisions."}
             </p>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-3">
-          {filtered.map((d) => {
+          {filtered.map((d: any) => {
             const statusCfg = statusConfig[d.status] || statusConfig.open;
             const StatusIcon = statusCfg.icon;
+            const VisIcon = visibilityIcons[d.visibility] || Eye;
             return (
               <Link key={d.id} to={`/team/${team.slug}/decisions/${d.id}`}>
                 <Card className="hover:shadow-md transition-shadow cursor-pointer">
@@ -171,14 +197,20 @@ export default function TeamDecisionsPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-foreground line-clamp-1">{d.decision_text}</p>
+                        {d.description && (
+                          <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{d.description}</p>
+                        )}
                         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                           <span className="text-xs text-muted-foreground">{d.creator_name}</span>
                           <span className="text-xs text-muted-foreground">·</span>
                           <span className="text-xs text-muted-foreground">{format(new Date(d.created_at), "MMM d")}</span>
                           <Badge variant="outline" className={`text-[10px] ${stakesColors[d.stakes] || ""}`}>
-                            {d.stakes} stakes
+                            {d.stakes}
                           </Badge>
-                          <Badge variant="outline" className="text-[10px]">{d.category}</Badge>
+                          <Badge variant="outline" className="text-[10px] capitalize">{d.category}</Badge>
+                          <Badge variant="outline" className="text-[10px] gap-1">
+                            <VisIcon className="w-2.5 h-2.5" /> {d.visibility || "team"}
+                          </Badge>
                         </div>
                       </div>
                     </div>
@@ -189,65 +221,6 @@ export default function TeamDecisionsPage() {
           })}
         </div>
       )}
-
-      {/* Create dialog */}
-      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>New Team Decision</DialogTitle>
-            <DialogDescription>Capture a decision for your team to track</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 mt-2">
-            <div className="space-y-2">
-              <Label>What's the decision?</Label>
-              <Input
-                placeholder="e.g. Should we expand to APAC market?"
-                value={newDecision.text}
-                onChange={(e) => setNewDecision({ ...newDecision, text: e.target.value })}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Context (optional)</Label>
-              <Textarea
-                placeholder="Additional context or background..."
-                value={newDecision.description}
-                onChange={(e) => setNewDecision({ ...newDecision, description: e.target.value })}
-                rows={3}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Category</Label>
-                <Select value={newDecision.category} onValueChange={(v) => setNewDecision({ ...newDecision, category: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="general">General</SelectItem>
-                    <SelectItem value="strategy">Strategy</SelectItem>
-                    <SelectItem value="product">Product</SelectItem>
-                    <SelectItem value="hiring">Hiring</SelectItem>
-                    <SelectItem value="operations">Operations</SelectItem>
-                    <SelectItem value="finance">Finance</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Stakes</Label>
-                <Select value={newDecision.stakes} onValueChange={(v) => setNewDecision({ ...newDecision, stakes: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <Button onClick={handleCreate} disabled={!newDecision.text.trim() || isCreating} className="w-full">
-              {isCreating ? "Creating..." : "Create Decision"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

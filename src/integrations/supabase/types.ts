@@ -632,6 +632,60 @@ export type Database = {
           },
         ]
       }
+      team_analyses: {
+        Row: {
+          analysis_type: string
+          created_at: string
+          decision_id: string
+          id: string
+          input_text: string
+          output_json: Json | null
+          processing_time_ms: number | null
+          team_id: string
+          token_count: number | null
+          user_id: string
+        }
+        Insert: {
+          analysis_type?: string
+          created_at?: string
+          decision_id: string
+          id?: string
+          input_text: string
+          output_json?: Json | null
+          processing_time_ms?: number | null
+          team_id: string
+          token_count?: number | null
+          user_id: string
+        }
+        Update: {
+          analysis_type?: string
+          created_at?: string
+          decision_id?: string
+          id?: string
+          input_text?: string
+          output_json?: Json | null
+          processing_time_ms?: number | null
+          team_id?: string
+          token_count?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_analyses_decision_id_fkey"
+            columns: ["decision_id"]
+            isOneToOne: false
+            referencedRelation: "team_decisions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_analyses_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       team_decisions: {
         Row: {
           category: string | null
@@ -639,16 +693,22 @@ export type Database = {
           created_at: string
           created_by: string
           deadline: string | null
+          decided_at: string | null
           decision_text: string
           description: string | null
           id: string
+          input_context: string | null
           options: Json | null
+          outcome_check_date: string | null
           outcome_notes: string | null
           resolved_at: string | null
+          reversibility: string | null
           stakes: string | null
           status: string
           team_id: string
+          timeline: string | null
           updated_at: string
+          visibility: string | null
         }
         Insert: {
           category?: string | null
@@ -656,16 +716,22 @@ export type Database = {
           created_at?: string
           created_by: string
           deadline?: string | null
+          decided_at?: string | null
           decision_text: string
           description?: string | null
           id?: string
+          input_context?: string | null
           options?: Json | null
+          outcome_check_date?: string | null
           outcome_notes?: string | null
           resolved_at?: string | null
+          reversibility?: string | null
           stakes?: string | null
           status?: string
           team_id: string
+          timeline?: string | null
           updated_at?: string
+          visibility?: string | null
         }
         Update: {
           category?: string | null
@@ -673,16 +739,22 @@ export type Database = {
           created_at?: string
           created_by?: string
           deadline?: string | null
+          decided_at?: string | null
           decision_text?: string
           description?: string | null
           id?: string
+          input_context?: string | null
           options?: Json | null
+          outcome_check_date?: string | null
           outcome_notes?: string | null
           resolved_at?: string | null
+          reversibility?: string | null
           stakes?: string | null
           status?: string
           team_id?: string
+          timeline?: string | null
           updated_at?: string
+          visibility?: string | null
         }
         Relationships: [
           {
@@ -772,6 +844,44 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_usage: {
+        Row: {
+          deep_snags_used: number | null
+          id: string
+          month: string
+          post_mortems_used: number | null
+          quick_snags_used: number | null
+          team_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          deep_snags_used?: number | null
+          id?: string
+          month: string
+          post_mortems_used?: number | null
+          quick_snags_used?: number | null
+          team_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          deep_snags_used?: number | null
+          id?: string
+          month?: string
+          post_mortems_used?: number | null
+          quick_snags_used?: number | null
+          team_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_usage_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
@@ -1076,6 +1186,24 @@ export type Database = {
         Returns: Json
       }
       get_invite_details: { Args: { p_token: string }; Returns: Json }
+      get_or_create_team_usage: {
+        Args: { p_team_id: string }
+        Returns: {
+          deep_snags_used: number | null
+          id: string
+          month: string
+          post_mortems_used: number | null
+          quick_snags_used: number | null
+          team_id: string
+          updated_at: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "team_usage"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_or_create_usage: {
         Args: { p_user_id: string }
         Returns: {
@@ -1129,6 +1257,10 @@ export type Database = {
         Returns: undefined
       }
       increment_retros_used: { Args: { p_user_id: string }; Returns: number }
+      increment_team_snag_usage: {
+        Args: { p_team_id: string; p_type: string }
+        Returns: undefined
+      }
       is_team_admin: {
         Args: { p_team_id: string; p_user_id: string }
         Returns: boolean
