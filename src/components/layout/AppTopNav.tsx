@@ -21,6 +21,7 @@ import {
 import { cn } from "@/lib/utils";
 import { SnagLogo } from "@/components/SnagLogo";
 import { TeamSwitcher } from "@/components/team/TeamSwitcher";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 interface AppTopNavProps {
   onMenuClick: () => void;
@@ -182,6 +183,9 @@ export function AppTopNav({ onMenuClick, sidebarOpen }: AppTopNavProps) {
 
         {/* Right: Usage + Profile */}
         <div className="flex items-center gap-2">
+          {/* Notifications */}
+          <NotificationBell />
+
           {/* Team switcher */}
           <TeamSwitcher />
 

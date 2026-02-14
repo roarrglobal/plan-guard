@@ -1,9 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
@@ -13,6 +12,7 @@ import { formatDistanceToNow } from "date-fns";
 interface DecisionCommentsProps {
   decisionId: string;
   teamId: string;
+  teamSlug?: string;
   members: Array<{ user_id: string; display_name?: string | null }>;
 }
 
@@ -26,7 +26,12 @@ interface Comment {
   updated_at: string;
 }
 
-export function DecisionComments({ decisionId, teamId, members }: DecisionCommentsProps) {
+interface MentionSuggestion {
+  user_id: string;
+  display_name: string;
+}
+
+export function DecisionComments({ decisionId, teamId, teamSlug, members }: DecisionCommentsProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [newComment, setNewComment] = useState("");
@@ -34,6 +39,14 @@ export function DecisionComments({ decisionId, teamId, members }: DecisionCommen
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Mention state
+  const [showMentions, setShowMentions] = useState(false);
+  const [mentionQuery, setMentionQuery] = useState("");
+  const [mentionIndex, setMentionIndex] = useState(0);
+  const [mentionStart, setMentionStart] = useState(-1);
+  const mentionRef = useRef<HTMLDivElement>(null);
 
   const { data: comments = [], isLoading } = useQuery({
     queryKey: ["decision-comments", decisionId],
@@ -60,11 +73,9 @@ export function DecisionComments({ decisionId, teamId, members }: DecisionCommen
         }
       )
       .subscribe();
-
     return () => { supabase.removeChannel(channel); };
   }, [decisionId, queryClient]);
 
-  // Scroll to bottom on new comments
   useEffect(() => {
     if (comments.length > 0) {
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -77,15 +88,71 @@ export function DecisionComments({ decisionId, teamId, members }: DecisionCommen
   const getInitials = (name: string) =>
     name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2);
 
+  // Filter members for mention autocomplete
+  const filteredMembers: MentionSuggestion[] = members
+    .filter((m) => m.user_id !== user?.id && m.display_name)
+    .filter((m) =>
+      !mentionQuery || (m.display_name || "").toLowerCase().includes(mentionQuery.toLowerCase())
+    )
+    .map((m) => ({ user_id: m.user_id, display_name: m.display_name || "Team Member" }))
+    .slice(0, 5);
+
+  const insertMention = useCallback((member: MentionSuggestion) => {
+    const before = newComment.slice(0, mentionStart);
+    const after = newComment.slice(textareaRef.current?.selectionStart || mentionStart);
+    const mention = `@${member.display_name} `;
+    setNewComment(before + mention + after);
+    setShowMentions(false);
+    setMentionQuery("");
+    setMentionStart(-1);
+    textareaRef.current?.focus();
+  }, [newComment, mentionStart]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    const cursorPos = e.target.selectionStart;
+    setNewComment(value);
+
+    // Check if we're in a mention context
+    const textBeforeCursor = value.slice(0, cursorPos);
+    const lastAtIndex = textBeforeCursor.lastIndexOf("@");
+
+    if (lastAtIndex >= 0) {
+      const textAfterAt = textBeforeCursor.slice(lastAtIndex + 1);
+      // Only show if @ is at start or after a space, and no spaces in the query yet
+      const charBeforeAt = lastAtIndex > 0 ? value[lastAtIndex - 1] : " ";
+      if ((charBeforeAt === " " || charBeforeAt === "\n" || lastAtIndex === 0) && !textAfterAt.includes(" ")) {
+        setMentionStart(lastAtIndex);
+        setMentionQuery(textAfterAt);
+        setShowMentions(true);
+        setMentionIndex(0);
+        return;
+      }
+    }
+    setShowMentions(false);
+  };
+
+  // Extract mentioned user_ids from text
+  const extractMentions = (text: string): string[] => {
+    const mentionedIds: string[] = [];
+    members.forEach((m) => {
+      if (m.display_name && text.includes(`@${m.display_name}`)) {
+        mentionedIds.push(m.user_id);
+      }
+    });
+    return mentionedIds.filter((id) => id !== user?.id);
+  };
+
   const handleSend = async () => {
     if (!newComment.trim() || !user) return;
     setIsSending(true);
+    const content = newComment.trim();
 
     const { error } = await supabase.from("team_decision_comments").insert({
       decision_id: decisionId,
       team_id: teamId,
       user_id: user.id,
-      content: newComment.trim(),
+      content,
     });
 
     if (error) {
@@ -99,8 +166,43 @@ export function DecisionComments({ decisionId, teamId, members }: DecisionCommen
         action_type: "comment_added",
         entity_type: "decision",
         entity_id: decisionId,
-        metadata: { preview: newComment.trim().slice(0, 100) },
+        metadata: { preview: content.slice(0, 100) },
       });
+
+      // Create notifications for mentioned users and decision participants
+      const mentionedIds = extractMentions(content);
+      const senderName = getMemberName(user.id);
+
+      // Notify mentioned users
+      if (mentionedIds.length > 0) {
+        const mentionNotifications = mentionedIds.map((uid) => ({
+          user_id: uid,
+          team_id: teamId,
+          type: "mention",
+          title: `${senderName} mentioned you`,
+          body: content.slice(0, 200),
+          entity_type: "decision",
+          entity_id: decisionId,
+          actor_id: user.id,
+        }));
+        await supabase.from("notifications").insert(mentionNotifications);
+      }
+
+      // Send email notification via edge function (fire and forget)
+      try {
+        supabase.functions.invoke("send-notification-email", {
+          body: {
+            team_id: teamId,
+            decision_id: decisionId,
+            type: "comment",
+            actor_name: senderName,
+            content: content.slice(0, 500),
+            mentioned_user_ids: mentionedIds,
+          },
+        });
+      } catch {
+        // Silent fail for email
+      }
     }
     setIsSending(false);
   };
@@ -111,7 +213,6 @@ export function DecisionComments({ decisionId, teamId, members }: DecisionCommen
       .from("team_decision_comments")
       .update({ content: editContent.trim() })
       .eq("id", commentId);
-
     if (error) toast.error("Failed to edit comment");
     else {
       setEditingId(null);
@@ -128,11 +229,58 @@ export function DecisionComments({ decisionId, teamId, members }: DecisionCommen
     if (error) toast.error("Failed to delete comment");
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (showMentions && filteredMembers.length > 0) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setMentionIndex((i) => Math.min(i + 1, filteredMembers.length - 1));
+        return;
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setMentionIndex((i) => Math.max(i - 1, 0));
+        return;
+      }
+      if (e.key === "Enter" || e.key === "Tab") {
+        e.preventDefault();
+        insertMention(filteredMembers[mentionIndex]);
+        return;
+      }
+      if (e.key === "Escape") {
+        setShowMentions(false);
+        return;
+      }
+    }
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
+  };
+
+  // Render comment text with highlighted mentions
+  const renderContent = (text: string) => {
+    const mentionRegex = /@(\S+(?:\s\S+)?)/g;
+    const parts: React.ReactNode[] = [];
+    let lastIndex = 0;
+    let match;
+
+    while ((match = mentionRegex.exec(text)) !== null) {
+      const mentionName = match[1];
+      const isMember = members.some((m) => m.display_name === mentionName);
+      if (isMember) {
+        if (match.index > lastIndex) {
+          parts.push(text.slice(lastIndex, match.index));
+        }
+        parts.push(
+          <span key={match.index} className="text-primary font-medium bg-primary/10 px-0.5 rounded">
+            @{mentionName}
+          </span>
+        );
+        lastIndex = match.index + match[0].length;
+      }
+    }
+    if (lastIndex < text.length) parts.push(text.slice(lastIndex));
+    return parts.length > 0 ? parts : text;
   };
 
   return (
@@ -178,11 +326,11 @@ export function DecisionComments({ decisionId, teamId, members }: DecisionCommen
                   </div>
                   {isEditing ? (
                     <div className="mt-1 space-y-2">
-                      <Textarea
+                      <textarea
                         value={editContent}
                         onChange={(e) => setEditContent(e.target.value)}
                         rows={2}
-                        className="text-sm"
+                        className="w-full text-sm border rounded-md p-2 bg-background text-foreground resize-none focus:outline-none focus:ring-2 focus:ring-ring"
                         autoFocus
                       />
                       <div className="flex gap-1">
@@ -195,7 +343,9 @@ export function DecisionComments({ decisionId, teamId, members }: DecisionCommen
                       </div>
                     </div>
                   ) : (
-                    <p className="text-sm text-muted-foreground whitespace-pre-wrap mt-0.5">{comment.content}</p>
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap mt-0.5">
+                      {renderContent(comment.content)}
+                    </p>
                   )}
                 </div>
                 {isOwn && !isEditing && (
@@ -217,24 +367,50 @@ export function DecisionComments({ decisionId, teamId, members }: DecisionCommen
           <div ref={bottomRef} />
         </div>
 
-        {/* Input */}
-        <div className="flex gap-2">
-          <Textarea
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Add a comment... (Enter to send, Shift+Enter for newline)"
-            rows={1}
-            className="resize-none text-sm min-h-[38px]"
-          />
-          <Button
-            size="icon"
-            onClick={handleSend}
-            disabled={!newComment.trim() || isSending}
-            className="shrink-0"
-          >
-            <Send className="w-4 h-4" />
-          </Button>
+        {/* Input with mention autocomplete */}
+        <div className="relative">
+          {showMentions && filteredMembers.length > 0 && (
+            <div
+              ref={mentionRef}
+              className="absolute bottom-full mb-1 left-0 w-64 bg-popover border border-border rounded-lg shadow-lg z-50 py-1"
+            >
+              {filteredMembers.map((m, i) => (
+                <button
+                  key={m.user_id}
+                  onClick={() => insertMention(m)}
+                  className={`w-full text-left px-3 py-2 text-sm flex items-center gap-2 transition-colors ${
+                    i === mentionIndex ? "bg-accent text-accent-foreground" : "hover:bg-muted text-foreground"
+                  }`}
+                >
+                  <Avatar className="w-5 h-5">
+                    <AvatarFallback className="text-[8px] bg-primary/10 text-primary">
+                      {getInitials(m.display_name)}
+                    </AvatarFallback>
+                  </Avatar>
+                  {m.display_name}
+                </button>
+              ))}
+            </div>
+          )}
+          <div className="flex gap-2">
+            <textarea
+              ref={textareaRef}
+              value={newComment}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              placeholder="Add a comment... Type @ to mention (Enter to send)"
+              rows={1}
+              className="flex-1 resize-none text-sm min-h-[38px] border rounded-md p-2 bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+            <Button
+              size="icon"
+              onClick={handleSend}
+              disabled={!newComment.trim() || isSending}
+              className="shrink-0"
+            >
+              <Send className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
