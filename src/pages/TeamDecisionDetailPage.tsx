@@ -13,8 +13,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { ArrowLeft, Trash2, Zap, Eye, Lock, Shield, CalendarDays, Timer, ClipboardCheck } from "lucide-react";
+import { ArrowLeft, Trash2, Zap, Eye, Lock, Shield, CalendarDays, Timer, ClipboardCheck, Download } from "lucide-react";
 import { format, differenceInDays, isPast } from "date-fns";
+import { DecisionExportModal, type ExportSections } from "@/components/export/DecisionExportModal";
+import { exportTeamDecisionPDF, type TeamDecisionExportData } from "@/lib/teamPdfExport";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Team } from "@/hooks/useTeams";
 import { SnagAnalysisDisplay } from "@/components/team/decisions/SnagAnalysisDisplay";
@@ -53,6 +55,7 @@ export default function TeamDecisionDetailPage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisType, setAnalysisType] = useState("standard");
   const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const { data: decision, isLoading } = useQuery({
     queryKey: ["team-decision", decisionId],
@@ -223,19 +226,24 @@ export default function TeamDecisionDetailPage() {
       </button>
 
       {/* Header */}
-      <div>
-        <h1 className="text-xl font-bold text-foreground">{decision.decision_text}</h1>
-        <div className="flex items-center gap-2 mt-2 flex-wrap">
-          <span className="text-sm text-muted-foreground">by {creatorName}</span>
-          <span className="text-sm text-muted-foreground">·</span>
-          <span className="text-sm text-muted-foreground">{format(new Date(decision.created_at), "MMM d, yyyy")}</span>
-          <DecisionStatusBadge status={decision.status} size="md" />
-          <Badge variant="outline" className="capitalize">{decision.category}</Badge>
-          <Badge variant="outline" className={stakesColors[decision.stakes] || ""}>{decision.stakes} stakes</Badge>
-          <Badge variant="outline" className="gap-1 capitalize">
-            <VisIcon className="w-3 h-3" /> {decision.visibility || "team"}
-          </Badge>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-bold text-foreground">{decision.decision_text}</h1>
+          <div className="flex items-center gap-2 mt-2 flex-wrap">
+            <span className="text-sm text-muted-foreground">by {creatorName}</span>
+            <span className="text-sm text-muted-foreground">·</span>
+            <span className="text-sm text-muted-foreground">{format(new Date(decision.created_at), "MMM d, yyyy")}</span>
+            <DecisionStatusBadge status={decision.status} size="md" />
+            <Badge variant="outline" className="capitalize">{decision.category}</Badge>
+            <Badge variant="outline" className={stakesColors[decision.stakes] || ""}>{decision.stakes} stakes</Badge>
+            <Badge variant="outline" className="gap-1 capitalize">
+              <VisIcon className="w-3 h-3" /> {decision.visibility || "team"}
+            </Badge>
+          </div>
         </div>
+        <Button variant="outline" size="sm" onClick={() => setShowExportModal(true)} className="shrink-0">
+          <Download className="w-4 h-4 mr-1" /> Export
+        </Button>
       </div>
 
       {/* Tracking banner */}
@@ -509,6 +517,27 @@ export default function TeamDecisionDetailPage() {
         open={showScheduleModal}
         onOpenChange={setShowScheduleModal}
         onSchedule={handleScheduleOutcome}
+      />
+
+      <DecisionExportModal
+        open={showExportModal}
+        onOpenChange={setShowExportModal}
+        hasAnalysis={analyses.length > 0}
+        hasOutcome={!!outcome}
+        hasStakeholders={!!(latestAnalysis?.output_json as any)?.stakeholder_map?.length}
+        onExport={(sections: ExportSections, includeBranding: boolean) => {
+          const analysisData = latestAnalysis?.output_json as any;
+          const exportData: TeamDecisionExportData = {
+            decision,
+            teamName: team.name,
+            creatorName,
+            analysis: analysisData || undefined,
+            outcome: outcome || undefined,
+            sections,
+            includeBranding,
+          };
+          exportTeamDecisionPDF(exportData, creatorName);
+        }}
       />
     </div>
   );

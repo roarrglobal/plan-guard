@@ -10,6 +10,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import type { Team } from "@/hooks/useTeams";
+import { TeamReportExportModal } from "@/components/export/TeamReportExportModal";
+import { exportTeamSummaryPDF } from "@/lib/teamPdfExport";
 
 import { AnalyticsKeyMetrics } from "@/components/analytics/AnalyticsKeyMetrics";
 import { AnalyticsCharts } from "@/components/analytics/AnalyticsCharts";
@@ -35,6 +37,7 @@ export default function TeamAnalyticsPage() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [stakesFilter, setStakesFilter] = useState("all");
   const [creatorFilter, setCreatorFilter] = useState("all");
+  const [showReportModal, setShowReportModal] = useState(false);
 
   // Fetch analytics summary
   const { data: analytics, isLoading: analyticsLoading } = useQuery({
@@ -166,8 +169,8 @@ export default function TeamAnalyticsPage() {
             <DropdownMenuItem onClick={exportCSV} disabled={isEmpty}>
               <FileText className="w-4 h-4 mr-2" /> CSV Data
             </DropdownMenuItem>
-            <DropdownMenuItem disabled>
-              <FileText className="w-4 h-4 mr-2" /> PDF Summary (coming soon)
+            <DropdownMenuItem onClick={() => setShowReportModal(true)} disabled={isEmpty}>
+              <FileText className="w-4 h-4 mr-2" /> PDF Summary Report
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -236,6 +239,30 @@ export default function TeamAnalyticsPage() {
           <AnalyticsLeaderboard decisions={filteredDecisions} outcomes={filteredOutcomes} members={activeMembers} />
         </>
       )}
+
+      <TeamReportExportModal
+        open={showReportModal}
+        onOpenChange={setShowReportModal}
+        totalDecisions={filteredDecisions.length}
+        onExport={(range: string, filter: string) => {
+          let exportDecisions = [...decisions];
+          const cutoff = new Date();
+          cutoff.setDate(cutoff.getDate() - parseInt(range));
+          exportDecisions = exportDecisions.filter((d) => new Date(d.created_at) >= cutoff);
+          if (filter === "completed") exportDecisions = exportDecisions.filter((d) => d.status === "completed" || d.status === "resolved");
+          if (filter === "high_stakes") exportDecisions = exportDecisions.filter((d) => d.stakes === "high" || d.stakes === "critical");
+          
+          exportTeamSummaryPDF({
+            teamName: team.name,
+            teamSlug: team.slug,
+            dateRange: range,
+            decisions: exportDecisions,
+            outcomes,
+            members: activeMembers,
+            analytics: analytics || undefined,
+          });
+        }}
+      />
     </div>
   );
 }
