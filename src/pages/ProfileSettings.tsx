@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth, ProfileUpdates } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { ProfileTeamsList } from "@/components/profile/ProfileTeamsList";
 
 const FOCUS_AREAS = [
   { id: "career", label: "Career" },
@@ -391,6 +392,9 @@ export default function ProfileSettings() {
               />
             </div>
           </section>
+
+          {/* Teams */}
+          <ProfileTeamsList />
 
           {/* Privacy Settings */}
           <section className="bg-white rounded-xl border border-[#E5E5E5] p-4 space-y-4">

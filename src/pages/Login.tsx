@@ -28,7 +28,14 @@ export default function Login() {
     if (!authLoading && user) {
       const params = new URLSearchParams(window.location.search);
       const redirect = params.get("redirect");
-      navigate(redirect || "/dashboard", { replace: true });
+      
+      // Check for pending invite token
+      const pendingInvite = localStorage.getItem("pending_invite_token");
+      if (pendingInvite && !redirect) {
+        navigate(`/invite/${pendingInvite}`, { replace: true });
+      } else {
+        navigate(redirect || "/dashboard", { replace: true });
+      }
     }
   }, [user, authLoading, navigate]);
 
@@ -78,7 +85,15 @@ export default function Login() {
             title: "Welcome back",
             description: "Successfully signed in",
           });
-          navigate("/dashboard", { replace: true });
+          // Check for pending invite or redirect param
+          const params = new URLSearchParams(window.location.search);
+          const redirect = params.get("redirect");
+          const pendingInvite = localStorage.getItem("pending_invite_token");
+          if (pendingInvite) {
+            navigate(`/invite/${pendingInvite}`, { replace: true });
+          } else {
+            navigate(redirect || "/dashboard", { replace: true });
+          }
         }
       }
     } finally {
