@@ -1,0 +1,66 @@
+import { Link, useLocation } from "react-router-dom";
+import { cn } from "@/lib/utils";
+import { LayoutDashboard, ListChecks, BarChart3, Users, Settings, X } from "lucide-react";
+
+interface TeamSidebarProps {
+  slug: string;
+  teamName: string;
+  open: boolean;
+  onClose: () => void;
+}
+
+const navItems = (slug: string) => [
+  { label: "Dashboard", icon: LayoutDashboard, href: `/team/${slug}/dashboard` },
+  { label: "Decisions", icon: ListChecks, href: `/team/${slug}/decisions`, placeholder: true },
+  { label: "Analytics", icon: BarChart3, href: `/team/${slug}/analytics`, placeholder: true },
+  { label: "Members", icon: Users, href: `/team/${slug}/members` },
+  { label: "Settings", icon: Settings, href: `/team/${slug}/settings` },
+];
+
+export function TeamSidebar({ slug, teamName, open, onClose }: TeamSidebarProps) {
+  const location = useLocation();
+  const items = navItems(slug);
+
+  return (
+    <>
+      {/* Mobile overlay */}
+      {open && <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={onClose} />}
+      
+      <aside className={cn(
+        "fixed md:sticky top-0 left-0 z-50 md:z-0 h-screen w-64 bg-card border-r border-border flex flex-col transition-transform duration-300",
+        open ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+      )}>
+        <div className="flex items-center justify-between p-4 border-b border-border">
+          <h2 className="font-semibold text-sm truncate text-foreground">{teamName}</h2>
+          <button onClick={onClose} className="md:hidden p-1 rounded hover:bg-muted">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        <nav className="flex-1 p-2 space-y-1">
+          {items.map((item) => {
+            const isActive = location.pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                to={item.href}
+                onClick={onClose}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                  isActive
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                )}
+              >
+                <item.icon className="w-4 h-4 shrink-0" />
+                {item.label}
+                {item.placeholder && (
+                  <span className="ml-auto text-[10px] bg-muted text-muted-foreground px-1.5 py-0.5 rounded">Soon</span>
+                )}
+              </Link>
+            );
+          })}
+        </nav>
+      </aside>
+    </>
+  );
+}

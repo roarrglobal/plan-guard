@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
 import { SnagLogo } from "@/components/SnagLogo";
+import { TeamSwitcher } from "@/components/team/TeamSwitcher";
 
 interface AppTopNavProps {
   onMenuClick: () => void;
@@ -180,7 +181,10 @@ export function AppTopNav({ onMenuClick, sidebarOpen }: AppTopNavProps) {
         </nav>
 
         {/* Right: Usage + Profile */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          {/* Team switcher */}
+          <TeamSwitcher />
+
           {/* Usage indicator - desktop only */}
           <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-muted rounded-full">
             <span className="text-xs font-medium text-muted-foreground">
