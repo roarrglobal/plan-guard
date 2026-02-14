@@ -14,6 +14,7 @@ import type { Team } from "@/hooks/useTeams";
 import { TeamActivityFeed } from "@/components/team/TeamActivityFeed";
 import { DecisionStatusBadge } from "@/components/team/decisions/DecisionStatusBadge";
 import { QuickSnagModal } from "@/components/team/QuickSnagModal";
+import { TeamOnboardingWizard } from "@/components/team/TeamOnboardingWizard";
 
 export default function TeamDashboardPage() {
   const { team } = useOutletContext<{ team: Team }>();
@@ -22,6 +23,7 @@ export default function TeamDashboardPage() {
   const navigate = useNavigate();
   const activeMembers = members.filter((m) => m.status === "active");
   const [quickSnagOpen, setQuickSnagOpen] = useState(false);
+  const [onboardingOpen, setOnboardingOpen] = useState(false);
 
   // Keyboard shortcut
   useEffect(() => {
@@ -72,6 +74,14 @@ export default function TeamDashboardPage() {
     },
     enabled: !!team?.id,
   });
+
+  // Show onboarding wizard for new teams
+  const onboardingCompleted = (team?.settings as any)?.onboarding_completed === true;
+  const showOnboarding = !onboardingCompleted && totalDecisions === 0 && activeMembers.length <= 1;
+
+  useEffect(() => {
+    if (showOnboarding) setOnboardingOpen(true);
+  }, [showOnboarding]);
 
   const { data: usage } = useQuery({
     queryKey: ["team-usage-dash", team?.id],
@@ -272,6 +282,12 @@ export default function TeamDashboardPage() {
         onOpenChange={setQuickSnagOpen}
         teamId={team.id}
         teamSlug={team.slug}
+      />
+
+      <TeamOnboardingWizard
+        open={onboardingOpen}
+        onOpenChange={setOnboardingOpen}
+        team={team}
       />
     </div>
   );
