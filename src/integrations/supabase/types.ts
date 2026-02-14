@@ -1154,6 +1154,7 @@ export type Database = {
           invited_at: string | null
           invited_by: string | null
           joined_at: string | null
+          last_active_at: string | null
           role: Database["public"]["Enums"]["team_member_role"]
           status: Database["public"]["Enums"]["team_member_status"]
           team_id: string
@@ -1164,6 +1165,7 @@ export type Database = {
           invited_at?: string | null
           invited_by?: string | null
           joined_at?: string | null
+          last_active_at?: string | null
           role?: Database["public"]["Enums"]["team_member_role"]
           status?: Database["public"]["Enums"]["team_member_status"]
           team_id: string
@@ -1174,6 +1176,7 @@ export type Database = {
           invited_at?: string | null
           invited_by?: string | null
           joined_at?: string | null
+          last_active_at?: string | null
           role?: Database["public"]["Enums"]["team_member_role"]
           status?: Database["public"]["Enums"]["team_member_status"]
           team_id?: string
@@ -1719,6 +1722,10 @@ export type Database = {
           p_visibilities?: string[]
         }
         Returns: Json
+      }
+      update_member_activity: {
+        Args: { p_team_id: string; p_user_id: string }
+        Returns: undefined
       }
     }
     Enums: {
