@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useTeamMembers, useTeamInvitations, useCurrentTeamRole } from "@/hooks/useTeams";
+import { useTeamMembers, useTeamInvitations } from "@/hooks/useTeams";
+import { useTeamPermissions } from "@/hooks/useTeamPermissions";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,7 @@ export default function TeamMembersPage() {
   const { user } = useAuth();
   const { members, refetch: refetchMembers } = useTeamMembers(team?.id);
   const { invitations, refetch: refetchInvitations } = useTeamInvitations(team?.id);
-  const { isAdmin } = useCurrentTeamRole(team?.id);
+  const { can } = useTeamPermissions(team?.id);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("member");
@@ -76,7 +77,7 @@ export default function TeamMembersPage() {
           <h1 className="text-2xl font-bold text-foreground">Members</h1>
           <p className="text-sm text-muted-foreground">{activeMembers.length} active member{activeMembers.length !== 1 ? "s" : ""}</p>
         </div>
-        {isAdmin && (
+        {can("invite_member") && (
           <Button onClick={() => setInviteOpen(true)} size="sm">
             <UserPlus className="w-4 h-4 mr-2" /> Invite
           </Button>
@@ -101,7 +102,7 @@ export default function TeamMembersPage() {
               <Badge className={roleBadgeClass[m.role] || ""} variant="outline">
                 {m.role}
               </Badge>
-              {isAdmin && m.role !== "owner" && m.user_id !== user?.id && (
+              {can("remove_member") && m.role !== "owner" && m.user_id !== user?.id && (
                 <button onClick={() => handleRemoveMember(m.id, m.display_name || "")} className="p-1.5 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors">
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -112,7 +113,7 @@ export default function TeamMembersPage() {
       </Card>
 
       {/* Pending invitations */}
-      {isAdmin && invitations.length > 0 && (
+      {can("view_invitations") && invitations.length > 0 && (
         <Card>
           <CardHeader><CardTitle className="text-base flex items-center gap-2"><Clock className="w-4 h-4" /> Pending Invitations</CardTitle></CardHeader>
           <CardContent className="p-0 divide-y divide-border">

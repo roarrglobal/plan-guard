@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useOutletContext, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTeamMembers } from "@/hooks/useTeams";
+import { useTeamPermissions } from "@/hooks/useTeamPermissions";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -52,6 +53,7 @@ export default function TeamDecisionsPage() {
   const { team } = useOutletContext<{ team: Team }>();
   const { user } = useAuth();
   const { members } = useTeamMembers(team?.id);
+  const { can } = useTeamPermissions(team?.id);
   const queryClient = useQueryClient();
   const [createOpen, setCreateOpen] = useState(false);
   const [newDecision, setNewDecision] = useState({ text: "", description: "", category: "general", stakes: "medium" });
@@ -111,9 +113,11 @@ export default function TeamDecisionsPage() {
           <h1 className="text-2xl font-bold text-foreground">Team Decisions</h1>
           <p className="text-sm text-muted-foreground">{decisions.length} decision{decisions.length !== 1 ? "s" : ""}</p>
         </div>
-        <Button onClick={() => setCreateOpen(true)} size="sm">
-          <Plus className="w-4 h-4 mr-2" /> New Decision
-        </Button>
+        {can("create_decision") && (
+          <Button onClick={() => setCreateOpen(true)} size="sm">
+            <Plus className="w-4 h-4 mr-2" /> New Decision
+          </Button>
+        )}
       </div>
 
       {/* Filters */}

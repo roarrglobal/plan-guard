@@ -1,29 +1,31 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useOutletContext } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { LayoutDashboard, ListChecks, BarChart3, Users, Settings, X } from "lucide-react";
+import { useTeamPermissions } from "@/hooks/useTeamPermissions";
+import type { Team } from "@/hooks/useTeams";
 
 interface TeamSidebarProps {
   slug: string;
   teamName: string;
   open: boolean;
   onClose: () => void;
+  teamId?: string;
 }
 
-const navItems = (slug: string) => [
-  { label: "Dashboard", icon: LayoutDashboard, href: `/team/${slug}/dashboard` },
-  { label: "Decisions", icon: ListChecks, href: `/team/${slug}/decisions` },
-  { label: "Analytics", icon: BarChart3, href: `/team/${slug}/analytics`, placeholder: true },
-  { label: "Members", icon: Users, href: `/team/${slug}/members` },
-  { label: "Settings", icon: Settings, href: `/team/${slug}/settings` },
-];
-
-export function TeamSidebar({ slug, teamName, open, onClose }: TeamSidebarProps) {
+export function TeamSidebar({ slug, teamName, open, onClose, teamId }: TeamSidebarProps) {
   const location = useLocation();
-  const items = navItems(slug);
+  const { can } = useTeamPermissions(teamId);
+
+  const items = [
+    { label: "Dashboard", icon: LayoutDashboard, href: `/team/${slug}/dashboard`, show: can("view_dashboard") },
+    { label: "Decisions", icon: ListChecks, href: `/team/${slug}/decisions`, show: can("view_decisions") },
+    { label: "Analytics", icon: BarChart3, href: `/team/${slug}/analytics`, show: can("view_analytics") },
+    { label: "Members", icon: Users, href: `/team/${slug}/members`, show: can("view_members") },
+    { label: "Settings", icon: Settings, href: `/team/${slug}/settings`, show: can("view_settings") },
+  ].filter((i) => i.show);
 
   return (
     <>
-      {/* Mobile overlay */}
       {open && <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={onClose} />}
       
       <aside className={cn(
@@ -38,7 +40,7 @@ export function TeamSidebar({ slug, teamName, open, onClose }: TeamSidebarProps)
         </div>
         <nav className="flex-1 p-2 space-y-1">
           {items.map((item) => {
-            const isActive = location.pathname === item.href;
+            const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + "/");
             return (
               <Link
                 key={item.href}
@@ -53,9 +55,6 @@ export function TeamSidebar({ slug, teamName, open, onClose }: TeamSidebarProps)
               >
                 <item.icon className="w-4 h-4 shrink-0" />
                 {item.label}
-                {item.placeholder && (
-                  <span className="ml-auto text-[10px] bg-muted text-muted-foreground px-1.5 py-0.5 rounded">Soon</span>
-                )}
               </Link>
             );
           })}
