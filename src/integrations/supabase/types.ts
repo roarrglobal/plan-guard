@@ -1062,6 +1062,10 @@ export type Database = {
       }
     }
     Functions: {
+      accept_invitation: {
+        Args: { p_token: string; p_user_id: string }
+        Returns: Json
+      }
       auth_user_email: { Args: never; Returns: string }
       can_use_feature: {
         Args: { p_feature: string; p_user_id: string }
@@ -1071,6 +1075,7 @@ export type Database = {
         Args: { p_feature: string; p_user_id: string }
         Returns: Json
       }
+      get_invite_details: { Args: { p_token: string }; Returns: Json }
       get_or_create_usage: {
         Args: { p_user_id: string }
         Returns: {
@@ -1103,6 +1108,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      get_user_teams: { Args: { p_user_id: string }; Returns: Json }
       increment_deep_snags_used: {
         Args: { p_user_id: string }
         Returns: number

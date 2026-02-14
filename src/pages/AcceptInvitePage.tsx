@@ -4,147 +4,126 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { Users, CheckCircle, XCircle, LogIn } from "lucide-react";
+import { Users, CheckCircle, XCircle, LogIn, Clock, UserX } from "lucide-react";
 
-interface InviteData {
-  id: string;
-  team_id: string;
-  email: string;
-  role: string;
-  expires_at: string;
-  accepted_at: string | null;
+interface InviteDetails {
+  found: boolean;
+  error?: string;
+  expired?: boolean;
+  already_accepted?: boolean;
   team_name?: string;
+  inviter_name?: string;
+  role?: string;
+  email?: string;
 }
 
 export default function AcceptInvitePage() {
   const { token } = useParams<{ token: string }>();
   const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const [invite, setInvite] = useState<InviteData | null>(null);
+  const [details, setDetails] = useState<InviteDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAccepting, setIsAccepting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [isDeclining, setIsDeclining] = useState(false);
+  const [declined, setDeclined] = useState(false);
 
-  // Fetch invite details (using edge function or direct query)
+  // Fetch invite details using the public RPC function
   useEffect(() => {
     if (!token) return;
-    const fetchInvite = async () => {
-      // We need to fetch the invitation - but RLS requires the user to be the invitee or admin
-      // For unauthenticated users, we'll show a generic "log in to accept" message
-      if (!user) {
-        setIsLoading(false);
-        return;
+    const fetchDetails = async () => {
+      const { data, error } = await supabase.rpc("get_invite_details", { p_token: token });
+      if (error || !data) {
+        setDetails({ found: false, error: "not_found" });
+      } else {
+        setDetails(data as unknown as InviteDetails);
       }
-
-      const { data, error: fetchError } = await supabase
-        .from("team_invitations")
-        .select("*")
-        .eq("token", token)
-        .maybeSingle();
-
-      if (fetchError || !data) {
-        setError("Invitation not found or has expired.");
-        setIsLoading(false);
-        return;
-      }
-
-      // Fetch team name
-      const { data: team } = await supabase
-        .from("teams")
-        .select("name")
-        .eq("id", data.team_id)
-        .maybeSingle();
-
-      setInvite({
-        ...data,
-        team_name: (team as any)?.name || "Unknown Team",
-      } as InviteData);
       setIsLoading(false);
     };
+    fetchDetails();
+  }, [token]);
 
-    fetchInvite();
-  }, [token, user]);
+  // Auto-accept if user is logged in and came from signup with invite token
+  useEffect(() => {
+    if (!user || !token || !details?.found || details.expired || details.already_accepted) return;
+    
+    const pendingToken = localStorage.getItem("pending_invite_token");
+    if (pendingToken === token) {
+      localStorage.removeItem("pending_invite_token");
+      handleAccept();
+    }
+  }, [user, token, details]);
 
   const handleAccept = async () => {
-    if (!user || !invite) return;
+    if (!user) {
+      // Store token and redirect to login
+      localStorage.setItem("pending_invite_token", token!);
+      navigate(`/login?redirect=/invite/${token}`);
+      return;
+    }
+
     setIsAccepting(true);
+    const { data, error } = await supabase.rpc("accept_invitation", {
+      p_token: token!,
+      p_user_id: user.id,
+    });
 
-    // Check if expired
-    if (new Date(invite.expires_at) < new Date()) {
-      toast.error("This invitation has expired.");
+    if (error) {
+      toast.error(error.message);
       setIsAccepting(false);
       return;
     }
 
-    if (invite.accepted_at) {
-      toast.error("This invitation has already been accepted.");
-      setIsAccepting(false);
-      return;
-    }
-
-    // Check email matches
-    if (user.email?.toLowerCase() !== invite.email.toLowerCase()) {
-      toast.error(`This invitation was sent to ${invite.email}. Please log in with that email.`);
-      setIsAccepting(false);
-      return;
-    }
-
-    // Accept: update invitation, create team member
-    const { error: updateError } = await supabase
-      .from("team_invitations")
-      .update({ accepted_at: new Date().toISOString() })
-      .eq("id", invite.id);
-
-    if (updateError) {
-      toast.error(updateError.message);
-      setIsAccepting(false);
-      return;
-    }
-
-    // Insert team member - need admin to do this, but we use a workaround:
-    // The invitation acceptance creates the member record
-    // We need an RLS policy or function for this. Let's use direct insert with the invited role.
-    const { error: memberError } = await supabase
-      .from("team_members")
-      .insert({
-        team_id: invite.team_id,
-        user_id: user.id,
-        role: invite.role as any,
-        invited_by: null,
-        status: "active",
-        joined_at: new Date().toISOString(),
-      });
-
-    if (memberError) {
-      // Might already be a member
-      if (memberError.message.includes("unique") || memberError.message.includes("duplicate")) {
-        toast.info("You're already a member of this team!");
+    const result = data as any;
+    if (!result.success) {
+      if (result.error === "email_mismatch") {
+        toast.error(result.message);
+      } else if (result.error === "expired") {
+        toast.error("This invitation has expired.");
       } else {
-        toast.error("Failed to join team: " + memberError.message);
-        setIsAccepting(false);
-        return;
+        toast.error(result.message || "Failed to accept invitation");
       }
-    } else {
-      toast.success("You've joined the team!");
+      setIsAccepting(false);
+      return;
     }
 
-    // Fetch team slug for redirect
-    const { data: team } = await supabase
-      .from("teams")
-      .select("slug")
-      .eq("id", invite.team_id)
-      .maybeSingle();
+    if (result.already_member) {
+      toast.info("You're already a member of this team!");
+    } else {
+      toast.success(`You've joined ${result.team_name}!`);
+    }
 
-    navigate(`/team/${(team as any)?.slug || ""}/dashboard`);
+    navigate(`/team/${result.team_slug}/dashboard`);
   };
 
-  if (authLoading || isLoading) {
+  const handleDecline = async () => {
+    if (!user || !token) return;
+    setIsDeclining(true);
+
+    // Find and delete the invitation
+    const { error } = await supabase
+      .from("team_invitations")
+      .delete()
+      .eq("token", token);
+
+    if (error) {
+      toast.error("Failed to decline invitation");
+      setIsDeclining(false);
+      return;
+    }
+
+    setDeclined(true);
+    setIsDeclining(false);
+  };
+
+  if (isLoading || authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <Card className="w-full max-w-md">
           <CardContent className="p-8 space-y-4">
+            <Skeleton className="h-12 w-12 rounded-full mx-auto" />
             <Skeleton className="h-6 w-48 mx-auto" />
             <Skeleton className="h-4 w-64 mx-auto" />
           </CardContent>
@@ -153,21 +132,21 @@ export default function AcceptInvitePage() {
     );
   }
 
-  // Not logged in
-  if (!user) {
+  // Declined state
+  if (declined) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
-              <LogIn className="w-6 h-6 text-primary" />
+            <div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3">
+              <UserX className="w-6 h-6 text-muted-foreground" />
             </div>
-            <CardTitle>Team Invitation</CardTitle>
-            <CardDescription>Log in or sign up to accept this team invitation</CardDescription>
+            <CardTitle>Invitation Declined</CardTitle>
+            <CardDescription>You've declined this team invitation.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={() => navigate(`/login?redirect=/invite/${token}`)} className="w-full">
-              Log In to Accept
+            <Button variant="outline" onClick={() => navigate("/dashboard")} className="w-full">
+              Go to Dashboard
             </Button>
           </CardContent>
         </Card>
@@ -175,8 +154,8 @@ export default function AcceptInvitePage() {
     );
   }
 
-  // Error state
-  if (error) {
+  // Not found
+  if (!details?.found) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <Card className="w-full max-w-md">
@@ -184,8 +163,30 @@ export default function AcceptInvitePage() {
             <div className="mx-auto w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center mb-3">
               <XCircle className="w-6 h-6 text-destructive" />
             </div>
-            <CardTitle>Invalid Invitation</CardTitle>
-            <CardDescription>{error}</CardDescription>
+            <CardTitle>Invitation Not Found</CardTitle>
+            <CardDescription>This invitation link is invalid or has been removed.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button variant="outline" onClick={() => navigate("/dashboard")} className="w-full">
+              Go to Dashboard
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Expired
+  if (details.expired) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="mx-auto w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center mb-3">
+              <Clock className="w-6 h-6 text-destructive" />
+            </div>
+            <CardTitle>Invitation Expired</CardTitle>
+            <CardDescription>This invitation has expired. Please ask the team admin to send a new one.</CardDescription>
           </CardHeader>
           <CardContent>
             <Button variant="outline" onClick={() => navigate("/dashboard")} className="w-full">
@@ -198,7 +199,7 @@ export default function AcceptInvitePage() {
   }
 
   // Already accepted
-  if (invite?.accepted_at) {
+  if (details.already_accepted) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <Card className="w-full max-w-md">
@@ -210,14 +211,47 @@ export default function AcceptInvitePage() {
             <CardDescription>This invitation has already been accepted.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={() => navigate("/dashboard")} className="w-full">Go to Dashboard</Button>
+            <Button onClick={() => navigate("/dashboard")} className="w-full">
+              Go to Dashboard
+            </Button>
           </CardContent>
         </Card>
       </div>
     );
   }
 
-  // Show invitation
+  // Not logged in — show invitation details + login prompt
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+              <Users className="w-6 h-6 text-primary" />
+            </div>
+            <CardTitle>Join {details.team_name}</CardTitle>
+            <CardDescription>
+              {details.inviter_name} invited you to join as{" "}
+              <Badge variant="outline" className="ml-1 capitalize">{details.role}</Badge>
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground text-center">
+              Log in or create an account to accept this invitation.
+            </p>
+            <Button onClick={() => {
+              localStorage.setItem("pending_invite_token", token!);
+              navigate(`/login?redirect=/invite/${token}`);
+            }} className="w-full gap-2">
+              <LogIn className="w-4 h-4" /> Log In to Accept
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Logged in — show full invitation with accept/decline
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md">
@@ -225,17 +259,27 @@ export default function AcceptInvitePage() {
           <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
             <Users className="w-6 h-6 text-primary" />
           </div>
-          <CardTitle>Join {invite?.team_name}</CardTitle>
-          <CardDescription>
-            You've been invited to join as <span className="font-medium text-foreground">{invite?.role}</span>
+          <CardTitle>Join {details.team_name}</CardTitle>
+          <CardDescription className="space-y-2">
+            <span className="block">
+              Invited by <span className="font-medium text-foreground">{details.inviter_name}</span>
+            </span>
+            <span className="block">
+              Role: <Badge variant="outline" className="ml-1 capitalize">{details.role}</Badge>
+            </span>
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           <Button onClick={handleAccept} disabled={isAccepting} className="w-full">
             {isAccepting ? "Joining..." : "Accept Invitation"}
           </Button>
-          <Button variant="outline" onClick={() => navigate("/dashboard")} className="w-full">
-            Decline
+          <Button
+            variant="outline"
+            onClick={handleDecline}
+            disabled={isDeclining}
+            className="w-full text-destructive hover:text-destructive"
+          >
+            {isDeclining ? "Declining..." : "Decline"}
           </Button>
         </CardContent>
       </Card>
