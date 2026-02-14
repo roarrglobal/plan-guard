@@ -53,6 +53,7 @@ import TeamTemplatesPage from "./pages/TeamTemplatesPage";
 import TeamTemplateDetailPage from "./pages/TeamTemplateDetailPage";
 import TeamTemplateNewPage from "./pages/TeamTemplateNewPage";
 import AcceptInvitePage from "./pages/AcceptInvitePage";
+import TeamAdminPage from "./pages/TeamAdminPage";
 import { TeamLayout } from "@/components/team/TeamLayout";
 
 const queryClient = new QueryClient();
@@ -120,6 +121,7 @@ const App = () => {
                 <Route path="templates/new" element={<TeamTemplateNewPage />} />
                 <Route path="templates/:templateId" element={<TeamTemplateDetailPage />} />
                 <Route path="analytics" element={<TeamAnalyticsPage />} />
+                <Route path="admin" element={<TeamAdminPage />} />
               </Route>
 
               <Route path="*" element={<NotFound />} />

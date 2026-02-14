@@ -6,6 +6,7 @@ import { TeamSidebar } from "./TeamSidebar";
 import { Menu } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { KeyboardShortcutsModal } from "./KeyboardShortcutsModal";
+import { TrialBannerTeam } from "./TrialBannerTeam";
 
 export function TeamLayout() {
   const { slug } = useParams<{ slug: string }>();
@@ -65,6 +66,7 @@ export function TeamLayout() {
     <div className="h-screen flex bg-background overflow-hidden theme-business">
       <TeamSidebar slug={team.slug} teamName={team.name} teamId={team.id} open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="flex-1 flex flex-col overflow-hidden">
+        <TrialBannerTeam team={team} />
         {/* Mobile header */}
         <header className="md:hidden flex items-center gap-3 p-3 border-b border-border bg-background">
           <button onClick={() => setSidebarOpen(true)} className="p-2 rounded-lg hover:bg-muted">

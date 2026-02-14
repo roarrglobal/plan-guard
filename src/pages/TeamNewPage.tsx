@@ -27,7 +27,14 @@ export default function TeamNewPage() {
     // Create team
     const { data: team, error: teamError } = await supabase
       .from("teams")
-      .insert({ name: name.trim(), slug, owner_id: user.id })
+      .insert({
+        name: name.trim(),
+        slug,
+        owner_id: user.id,
+        subscription_status: "trialing" as any,
+        subscription_tier: "team" as any,
+        trial_ends_at: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
+      })
       .select()
       .single();
 

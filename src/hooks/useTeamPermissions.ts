@@ -16,7 +16,8 @@ export type TeamPermission =
   | "edit_settings"
   | "delete_team"
   | "view_analytics"
-  | "view_invitations";
+  | "view_invitations"
+  | "view_admin";
 
 const ROLE_PERMISSIONS: Record<string, TeamPermission[]> = {
   owner: [
@@ -24,14 +25,14 @@ const ROLE_PERMISSIONS: Record<string, TeamPermission[]> = {
     "edit_own_decision", "edit_any_decision", "delete_own_decision", "delete_any_decision",
     "view_members", "invite_member", "remove_member", "change_member_role",
     "view_settings", "edit_settings", "delete_team",
-    "view_analytics", "view_invitations",
+    "view_analytics", "view_invitations", "view_admin",
   ],
   admin: [
     "view_dashboard", "view_decisions", "create_decision",
     "edit_own_decision", "edit_any_decision", "delete_own_decision", "delete_any_decision",
     "view_members", "invite_member", "remove_member", "change_member_role",
     "view_settings", "edit_settings",
-    "view_analytics", "view_invitations",
+    "view_analytics", "view_invitations", "view_admin",
   ],
   member: [
     "view_dashboard", "view_decisions", "create_decision",
