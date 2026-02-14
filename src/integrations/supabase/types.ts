@@ -1439,6 +1439,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      get_team_analytics: {
+        Args: { p_days?: number; p_team_id: string }
+        Returns: Json
+      }
       get_user_teams: { Args: { p_user_id: string }; Returns: Json }
       increment_deep_snags_used: {
         Args: { p_user_id: string }
