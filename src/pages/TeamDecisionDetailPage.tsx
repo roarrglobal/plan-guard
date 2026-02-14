@@ -144,7 +144,7 @@ export default function TeamDecisionDetailPage() {
       toast.success("Decision updated");
       queryClient.invalidateQueries({ queryKey: ["team-decision", decisionId] });
       queryClient.invalidateQueries({ queryKey: ["team-decisions", team.id] });
-      // Log status change activity
+      // Log status change activity + notify
       if (status !== decision.status) {
         await supabase.from("team_activity").insert({
           team_id: team.id,
@@ -154,6 +154,22 @@ export default function TeamDecisionDetailPage() {
           entity_id: decision.id,
           metadata: { title: decision.decision_text, old_status: decision.status, new_status: status },
         });
+        // Send notifications for status change
+        try {
+          const senderName = members.find((m) => m.user_id === user!.id)?.display_name || "Team Member";
+          supabase.functions.invoke("send-notification-email", {
+            body: {
+              team_id: team.id,
+              decision_id: decision.id,
+              type: "status_change",
+              actor_name: senderName,
+              new_status: status,
+              old_status: decision.status,
+            },
+          });
+        } catch {
+          // Silent fail
+        }
       }
     }
     setIsSaving(false);
