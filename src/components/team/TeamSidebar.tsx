@@ -1,8 +1,10 @@
-import { Link, useLocation, useOutletContext } from "react-router-dom";
+import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, ListChecks, BarChart3, Users, Settings, X } from "lucide-react";
+import { LayoutDashboard, ListChecks, BarChart3, Users, Settings, X, Keyboard } from "lucide-react";
 import { useTeamPermissions } from "@/hooks/useTeamPermissions";
 import type { Team } from "@/hooks/useTeams";
+import { KeyboardShortcutsModal } from "./KeyboardShortcutsModal";
 
 interface TeamSidebarProps {
   slug: string;
@@ -15,6 +17,7 @@ interface TeamSidebarProps {
 export function TeamSidebar({ slug, teamName, open, onClose, teamId }: TeamSidebarProps) {
   const location = useLocation();
   const { can } = useTeamPermissions(teamId);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
 
   const items = [
     { label: "Dashboard", icon: LayoutDashboard, href: `/team/${slug}/dashboard`, show: can("view_dashboard") },
@@ -59,6 +62,17 @@ export function TeamSidebar({ slug, teamName, open, onClose, teamId }: TeamSideb
             );
           })}
         </nav>
+        <div className="p-2 border-t border-border">
+          <button
+            onClick={() => setShortcutsOpen(true)}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors w-full"
+          >
+            <Keyboard className="w-4 h-4 shrink-0" />
+            Shortcuts
+            <kbd className="ml-auto text-[10px] bg-muted px-1.5 py-0.5 rounded font-mono border border-border">?</kbd>
+          </button>
+        </div>
+        <KeyboardShortcutsModal open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
       </aside>
     </>
   );
