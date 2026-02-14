@@ -20,6 +20,8 @@ import type { Team } from "@/hooks/useTeams";
 import { SnagAnalysisDisplay } from "@/components/team/decisions/SnagAnalysisDisplay";
 import { AnalysisLoadingState } from "@/components/team/decisions/AnalysisLoadingState";
 import type { SnagAnalysis } from "@/components/team/decisions/SnagAnalysisDisplay";
+import { DecisionComments } from "@/components/team/decisions/DecisionComments";
+import { TeamActivityFeed } from "@/components/team/TeamActivityFeed";
 
 const stakesColors: Record<string, string> = {
   low: "bg-muted text-muted-foreground",
@@ -112,6 +114,15 @@ export default function TeamDecisionDetailPage() {
       } else {
         toast.success("Analysis complete!");
         queryClient.invalidateQueries({ queryKey: ["team-decision-analyses", decisionId] });
+        // Log activity
+        await supabase.from("team_activity").insert({
+          team_id: team.id,
+          user_id: user.id,
+          action_type: "analysis_run",
+          entity_type: "decision",
+          entity_id: decision.id,
+          metadata: { title: decision.decision_text, analysis_type: aType },
+        });
       }
     } catch (e: any) {
       toast.error(e.message || "Analysis failed");
@@ -133,6 +144,17 @@ export default function TeamDecisionDetailPage() {
       toast.success("Decision updated");
       queryClient.invalidateQueries({ queryKey: ["team-decision", decisionId] });
       queryClient.invalidateQueries({ queryKey: ["team-decisions", team.id] });
+      // Log status change activity
+      if (status !== decision.status) {
+        await supabase.from("team_activity").insert({
+          team_id: team.id,
+          user_id: user!.id,
+          action_type: "status_changed",
+          entity_type: "decision",
+          entity_id: decision.id,
+          metadata: { title: decision.decision_text, old_status: decision.status, new_status: status },
+        });
+      }
     }
     setIsSaving(false);
   };
@@ -280,6 +302,9 @@ export default function TeamDecisionDetailPage() {
               </CardContent>
             </Card>
           )}
+
+          {/* Comments section */}
+          <DecisionComments decisionId={decisionId!} teamId={team.id} members={members} />
         </TabsContent>
 
         <TabsContent value="analysis" className="space-y-4 mt-4">
@@ -339,12 +364,12 @@ export default function TeamDecisionDetailPage() {
         </TabsContent>
 
         <TabsContent value="activity" className="mt-4">
-          <Card>
-            <CardContent className="p-8 text-center">
-              <Clock className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
-              <p className="text-sm text-muted-foreground">Activity feed coming soon</p>
-            </CardContent>
-          </Card>
+          <TeamActivityFeed
+            teamId={team.id}
+            teamSlug={team.slug}
+            members={members}
+            showHeader={false}
+          />
         </TabsContent>
       </Tabs>
     </div>

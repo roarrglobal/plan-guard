@@ -105,6 +105,15 @@ export default function TeamDecisionNewPage() {
       toast.error(error.message);
     } else {
       toast.success("Decision saved as draft");
+      // Log activity
+      await supabase.from("team_activity").insert({
+        team_id: team.id,
+        user_id: user.id,
+        action_type: "decision_created",
+        entity_type: "decision",
+        entity_id: (data as any).id,
+        metadata: { title: title.trim() },
+      });
       navigate(`/team/${team.slug}/decisions/${(data as any).id}`);
     }
     setIsSaving(false);
@@ -139,6 +148,16 @@ export default function TeamDecisionNewPage() {
       setIsSaving(false);
       return;
     }
+
+    // Log activity
+    await supabase.from("team_activity").insert({
+      team_id: team.id,
+      user_id: user.id,
+      action_type: "decision_created",
+      entity_type: "decision",
+      entity_id: (data as any).id,
+      metadata: { title: title.trim() },
+    });
 
     // Navigate to detail page which will trigger analysis
     navigate(`/team/${team.slug}/decisions/${(data as any).id}?analyze=${analysisType}`);
