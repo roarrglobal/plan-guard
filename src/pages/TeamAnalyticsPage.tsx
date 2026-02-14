@@ -16,6 +16,7 @@ import { AnalyticsCharts } from "@/components/analytics/AnalyticsCharts";
 import { AnalyticsPatterns } from "@/components/analytics/AnalyticsPatterns";
 import { AnalyticsTimeline } from "@/components/analytics/AnalyticsTimeline";
 import { AnalyticsLeaderboard } from "@/components/analytics/AnalyticsLeaderboard";
+import { AnalyticsDepartments } from "@/components/analytics/AnalyticsDepartments";
 
 const DATE_RANGES = [
   { label: "Last 30 days", value: "30" },
@@ -225,10 +226,13 @@ export default function TeamAnalyticsPage() {
           {/* Section 3: Patterns */}
           <AnalyticsPatterns outcomes={filteredOutcomes} decisions={filteredDecisions} />
 
-          {/* Section 4: Timeline */}
+          {/* Section 4: Department Breakdown */}
+          <AnalyticsDepartments decisions={filteredDecisions} outcomes={filteredOutcomes} />
+
+          {/* Section 5: Timeline */}
           <AnalyticsTimeline decisions={decisions} outcomes={outcomes} />
 
-          {/* Section 5: Leaderboard */}
+          {/* Section 6: Leaderboard */}
           <AnalyticsLeaderboard decisions={filteredDecisions} outcomes={filteredOutcomes} members={activeMembers} />
         </>
       )}

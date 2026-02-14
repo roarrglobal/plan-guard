@@ -56,6 +56,62 @@ export type Database = {
         }
         Relationships: []
       }
+      decision_templates: {
+        Row: {
+          blind_spot_library: Json
+          created_at: string
+          created_by: string | null
+          department: Database["public"]["Enums"]["department_type"]
+          description: string | null
+          failure_mode_library: Json
+          id: string
+          input_fields: Json
+          is_system: boolean
+          name: string
+          prompt_additions: string | null
+          team_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          blind_spot_library?: Json
+          created_at?: string
+          created_by?: string | null
+          department: Database["public"]["Enums"]["department_type"]
+          description?: string | null
+          failure_mode_library?: Json
+          id?: string
+          input_fields?: Json
+          is_system?: boolean
+          name: string
+          prompt_additions?: string | null
+          team_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          blind_spot_library?: Json
+          created_at?: string
+          created_by?: string | null
+          department?: Database["public"]["Enums"]["department_type"]
+          description?: string | null
+          failure_mode_library?: Json
+          id?: string
+          input_fields?: Json
+          is_system?: boolean
+          name?: string
+          prompt_additions?: string | null
+          team_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "decision_templates_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       decisions: {
         Row: {
           ai_nudge: string | null
@@ -138,6 +194,47 @@ export type Database = {
             columns: ["deep_snag_id"]
             isOneToOne: false
             referencedRelation: "analyses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      department_insights: {
+        Row: {
+          created_at: string
+          decision_count: number
+          department: Database["public"]["Enums"]["department_type"]
+          id: string
+          insight_data: Json
+          insight_type: Database["public"]["Enums"]["insight_type"]
+          team_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          decision_count?: number
+          department: Database["public"]["Enums"]["department_type"]
+          id?: string
+          insight_data?: Json
+          insight_type: Database["public"]["Enums"]["insight_type"]
+          team_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          decision_count?: number
+          department?: Database["public"]["Enums"]["department_type"]
+          id?: string
+          insight_data?: Json
+          insight_type?: Database["public"]["Enums"]["insight_type"]
+          team_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "department_insights_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
             referencedColumns: ["id"]
           },
         ]
@@ -842,6 +939,7 @@ export type Database = {
           stakes: string | null
           status: string
           team_id: string
+          template_id: string | null
           timeline: string | null
           updated_at: string
           visibility: string | null
@@ -865,6 +963,7 @@ export type Database = {
           stakes?: string | null
           status?: string
           team_id: string
+          template_id?: string | null
           timeline?: string | null
           updated_at?: string
           visibility?: string | null
@@ -888,6 +987,7 @@ export type Database = {
           stakes?: string | null
           status?: string
           team_id?: string
+          template_id?: string | null
           timeline?: string | null
           updated_at?: string
           visibility?: string | null
@@ -898,6 +998,13 @@ export type Database = {
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_decisions_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "decision_templates"
             referencedColumns: ["id"]
           },
         ]
@@ -1479,6 +1586,15 @@ export type Database = {
       is_trial_expired: { Args: { p_user_id: string }; Returns: boolean }
     }
     Enums: {
+      department_type:
+        | "sales"
+        | "finance"
+        | "product"
+        | "hr"
+        | "marketing"
+        | "operations"
+        | "strategy"
+      insight_type: "blind_spot_pattern" | "failure_pattern" | "success_pattern"
       team_invite_role: "admin" | "member" | "viewer"
       team_member_role: "owner" | "admin" | "member" | "viewer"
       team_member_status: "pending" | "active" | "removed"
@@ -1611,6 +1727,20 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      department_type: [
+        "sales",
+        "finance",
+        "product",
+        "hr",
+        "marketing",
+        "operations",
+        "strategy",
+      ],
+      insight_type: [
+        "blind_spot_pattern",
+        "failure_pattern",
+        "success_pattern",
+      ],
       team_invite_role: ["admin", "member", "viewer"],
       team_member_role: ["owner", "admin", "member", "viewer"],
       team_member_status: ["pending", "active", "removed"],

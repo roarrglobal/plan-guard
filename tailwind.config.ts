@@ -86,6 +86,15 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        dept: {
+          sales: "hsl(var(--dept-sales))",
+          finance: "hsl(var(--dept-finance))",
+          product: "hsl(var(--dept-product))",
+          hr: "hsl(var(--dept-hr))",
+          marketing: "hsl(var(--dept-marketing))",
+          operations: "hsl(var(--dept-operations))",
+          strategy: "hsl(var(--dept-strategy))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
