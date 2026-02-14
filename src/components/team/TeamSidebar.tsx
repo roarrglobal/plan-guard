@@ -33,12 +33,13 @@ export function TeamSidebar({ slug, teamName, open, onClose, teamId }: TeamSideb
       {open && <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={onClose} />}
       
       <aside className={cn(
-        "fixed md:sticky top-0 left-0 z-50 md:z-0 h-screen w-64 bg-card border-r border-border flex flex-col transition-transform duration-300",
+        "fixed md:sticky top-0 left-0 z-50 md:z-0 h-screen w-64 flex flex-col transition-transform duration-300",
+        "bg-[hsl(var(--sidebar-background))] text-[hsl(var(--sidebar-foreground))] border-r border-[hsl(var(--sidebar-border))]",
         open ? "translate-x-0" : "-translate-x-full md:translate-x-0"
       )}>
-        <div className="flex items-center justify-between p-4 border-b border-border">
-          <h2 className="font-semibold text-sm truncate text-foreground">{teamName}</h2>
-          <button onClick={onClose} className="md:hidden p-1 rounded hover:bg-muted">
+        <div className="flex items-center justify-between p-4 border-b border-[hsl(var(--sidebar-border))]">
+          <h2 className="font-semibold text-sm truncate text-[hsl(var(--sidebar-foreground))]">{teamName}</h2>
+          <button onClick={onClose} className="md:hidden p-1 rounded hover:bg-white/10">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -53,8 +54,8 @@ export function TeamSidebar({ slug, teamName, open, onClose, teamId }: TeamSideb
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
                   isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                    ? "bg-[hsl(var(--sidebar-primary))]/15 text-[hsl(var(--sidebar-primary))]"
+                    : "text-[hsl(var(--sidebar-foreground))]/60 hover:text-[hsl(var(--sidebar-foreground))] hover:bg-white/5"
                 )}
               >
                 <item.icon className="w-4 h-4 shrink-0" />
@@ -63,14 +64,14 @@ export function TeamSidebar({ slug, teamName, open, onClose, teamId }: TeamSideb
             );
           })}
         </nav>
-        <div className="p-2 border-t border-border">
+        <div className="p-2 border-t border-[hsl(var(--sidebar-border))]">
           <button
             onClick={() => setShortcutsOpen(true)}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors w-full"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[hsl(var(--sidebar-foreground))]/60 hover:text-[hsl(var(--sidebar-foreground))] hover:bg-white/5 transition-colors w-full"
           >
             <Keyboard className="w-4 h-4 shrink-0" />
             Shortcuts
-            <kbd className="ml-auto text-[10px] bg-muted px-1.5 py-0.5 rounded font-mono border border-border">?</kbd>
+            <kbd className="ml-auto text-[10px] bg-white/10 px-1.5 py-0.5 rounded font-mono border border-white/20">?</kbd>
           </button>
         </div>
         <KeyboardShortcutsModal open={shortcutsOpen} onOpenChange={setShortcutsOpen} />

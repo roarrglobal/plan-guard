@@ -62,13 +62,13 @@ export function TeamLayout() {
   }
 
   return (
-    <div className="h-screen flex bg-background overflow-hidden">
+    <div className="h-screen flex bg-background overflow-hidden theme-business">
       <TeamSidebar slug={team.slug} teamName={team.name} teamId={team.id} open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Mobile header */}
         <header className="md:hidden flex items-center gap-3 p-3 border-b border-border bg-background">
           <button onClick={() => setSidebarOpen(true)} className="p-2 rounded-lg hover:bg-muted">
-            <Menu className="w-5 h-5" />
+            <Menu className="w-5 h-5 text-foreground" />
           </button>
           <span className="font-semibold text-sm text-foreground truncate">{team.name}</span>
         </header>
