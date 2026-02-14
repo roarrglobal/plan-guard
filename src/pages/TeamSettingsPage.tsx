@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useOutletContext, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useCurrentTeamRole } from "@/hooks/useTeams";
+import { useTeamPermissions } from "@/hooks/useTeamPermissions";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import type { Team } from "@/hooks/useTeams";
 
 export default function TeamSettingsPage() {
   const { team } = useOutletContext<{ team: Team }>();
-  const { isOwner, isAdmin } = useCurrentTeamRole(team?.id);
+  const { can } = useTeamPermissions(team?.id);
   const navigate = useNavigate();
 
   const [name, setName] = useState(team.name);
@@ -51,14 +51,14 @@ export default function TeamSettingsPage() {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label>Team Name</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} disabled={!isAdmin} />
+            <Input value={name} onChange={(e) => setName(e.target.value)} disabled={!can("edit_settings")} />
           </div>
           <div className="space-y-2">
             <Label>Slug</Label>
-            <Input value={slug} onChange={(e) => setSlug(e.target.value)} disabled={!isAdmin} />
+            <Input value={slug} onChange={(e) => setSlug(e.target.value)} disabled={!can("edit_settings")} />
             <p className="text-xs text-muted-foreground">URL: /team/{slug}</p>
           </div>
-          {isAdmin && (
+          {can("edit_settings") && (
             <Button onClick={handleSave} disabled={isSaving}>
               {isSaving ? "Saving..." : "Save Changes"}
             </Button>
@@ -66,7 +66,7 @@ export default function TeamSettingsPage() {
         </CardContent>
       </Card>
 
-      {isOwner && (
+      {can("delete_team") && (
         <Card className="border-destructive/50">
           <CardHeader>
             <CardTitle className="text-base text-destructive">Danger Zone</CardTitle>

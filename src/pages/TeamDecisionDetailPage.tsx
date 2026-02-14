@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useParams, useOutletContext, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useCurrentTeamRole, useTeamMembers } from "@/hooks/useTeams";
+import { useTeamMembers } from "@/hooks/useTeams";
+import { useTeamPermissions } from "@/hooks/useTeamPermissions";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,7 @@ export default function TeamDecisionDetailPage() {
   const { decisionId } = useParams<{ decisionId: string }>();
   const { team } = useOutletContext<{ team: Team }>();
   const { user } = useAuth();
-  const { isAdmin } = useCurrentTeamRole(team?.id);
+  const { can } = useTeamPermissions(team?.id);
   const { members } = useTeamMembers(team?.id);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -46,7 +47,8 @@ export default function TeamDecisionDetailPage() {
   });
 
   const creatorName = members.find((m) => m.user_id === decision?.created_by)?.display_name || "Team Member";
-  const canEdit = decision?.created_by === user?.id || isAdmin;
+  const canEdit = (decision?.created_by === user?.id && can("edit_own_decision")) || can("edit_any_decision");
+  const canDelete = (decision?.created_by === user?.id && can("delete_own_decision")) || can("delete_any_decision");
 
   const handleSave = async () => {
     if (!decision) return;
@@ -146,9 +148,11 @@ export default function TeamDecisionDetailPage() {
               <Button onClick={handleSave} disabled={isSaving}>
                 {isSaving ? "Saving..." : "Save Changes"}
               </Button>
-              <Button variant="destructive" size="icon" onClick={handleDelete}>
-                <Trash2 className="w-4 h-4" />
-              </Button>
+              {canDelete && (
+                <Button variant="destructive" size="icon" onClick={handleDelete}>
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>

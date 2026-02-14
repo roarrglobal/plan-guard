@@ -38,7 +38,7 @@ export function TeamLayout() {
 
   return (
     <div className="h-screen flex bg-background overflow-hidden">
-      <TeamSidebar slug={team.slug} teamName={team.name} open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <TeamSidebar slug={team.slug} teamName={team.name} teamId={team.id} open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Mobile header */}
         <header className="md:hidden flex items-center gap-3 p-3 border-b border-border bg-background">
