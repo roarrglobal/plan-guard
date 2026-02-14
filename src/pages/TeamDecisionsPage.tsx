@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useOutletContext, Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTeamMembers } from "@/hooks/useTeams";
@@ -9,17 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, ListChecks, Clock, CheckCircle2, AlertTriangle, Search, Eye, Lock, Shield, Zap } from "lucide-react";
+import { Plus, ListChecks, Search, Eye, Lock, Shield, Zap } from "lucide-react";
 import { format } from "date-fns";
 import type { Team } from "@/hooks/useTeams";
 import { useQuery } from "@tanstack/react-query";
-
-const statusConfig: Record<string, { icon: any; color: string; label: string }> = {
-  open: { icon: Clock, color: "bg-primary/10 text-primary", label: "Open" },
-  in_progress: { icon: AlertTriangle, color: "bg-warning/10 text-warning", label: "In Progress" },
-  decided: { icon: Zap, color: "bg-[hsl(215,100%,33%)]/10 text-[hsl(215,100%,33%)]", label: "Decided" },
-  resolved: { icon: CheckCircle2, color: "bg-[hsl(160,84%,39%)]/10 text-[hsl(160,84%,39%)]", label: "Resolved" },
-};
+import { DecisionStatusBadge } from "@/components/team/decisions/DecisionStatusBadge";
+import { QuickSnagModal } from "@/components/team/QuickSnagModal";
 
 const stakesColors: Record<string, string> = {
   low: "bg-muted text-muted-foreground",
@@ -44,6 +39,19 @@ export default function TeamDecisionsPage() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [stakesFilter, setStakesFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [quickSnagOpen, setQuickSnagOpen] = useState(false);
+
+  // Keyboard shortcut
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setQuickSnagOpen(true);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
 
   const { data: decisions = [], isLoading } = useQuery({
     queryKey: ["team-decisions", team?.id],
@@ -54,7 +62,6 @@ export default function TeamDecisionsPage() {
         .select("*")
         .eq("team_id", team.id)
         .order("created_at", { ascending: false });
-
       return (data || []).map((d: any) => {
         const member = members.find((m) => m.user_id === d.created_by);
         return { ...d, creator_name: member?.display_name || "Team Member" };
@@ -63,7 +70,6 @@ export default function TeamDecisionsPage() {
     enabled: !!team?.id,
   });
 
-  // Filtering
   const filtered = decisions.filter((d: any) => {
     if (filter !== "all" && d.status !== filter) return false;
     if (categoryFilter !== "all" && d.category !== categoryFilter) return false;
@@ -72,7 +78,6 @@ export default function TeamDecisionsPage() {
     return true;
   });
 
-  // Usage query
   const { data: usage } = useQuery({
     queryKey: ["team-usage", team?.id],
     queryFn: async () => {
@@ -100,11 +105,16 @@ export default function TeamDecisionsPage() {
             )}
           </p>
         </div>
-        {can("create_decision") && (
-          <Button onClick={() => navigate(`/team/${team.slug}/decisions/new`)} className="bg-primary">
-            <Plus className="w-4 h-4 mr-2" /> New Decision
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setQuickSnagOpen(true)}>
+            <Zap className="w-4 h-4 mr-1" /> Quick Snag
           </Button>
-        )}
+          {can("create_decision") && (
+            <Button onClick={() => navigate(`/team/${team.slug}/decisions/new`)} className="bg-primary">
+              <Plus className="w-4 h-4 mr-2" /> New Decision
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Search & Filters */}
@@ -148,10 +158,12 @@ export default function TeamDecisionsPage() {
       <div className="flex gap-2 flex-wrap">
         {[
           { value: "all", label: "All" },
+          { value: "draft", label: "Draft" },
           { value: "open", label: "Open" },
-          { value: "in_progress", label: "In Progress" },
           { value: "decided", label: "Decided" },
-          { value: "resolved", label: "Resolved" },
+          { value: "tracking", label: "Tracking" },
+          { value: "completed", label: "Completed" },
+          { value: "canceled", label: "Canceled" },
         ].map((f) => (
           <button
             key={f.value}
@@ -184,17 +196,12 @@ export default function TeamDecisionsPage() {
       ) : (
         <div className="space-y-3">
           {filtered.map((d: any) => {
-            const statusCfg = statusConfig[d.status] || statusConfig.open;
-            const StatusIcon = statusCfg.icon;
             const VisIcon = visibilityIcons[d.visibility] || Eye;
             return (
               <Link key={d.id} to={`/team/${team.slug}/decisions/${d.id}`}>
                 <Card className="hover:shadow-md transition-shadow cursor-pointer">
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${statusCfg.color}`}>
-                        <StatusIcon className="w-4 h-4" />
-                      </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-foreground line-clamp-1">{d.decision_text}</p>
                         {d.description && (
@@ -204,6 +211,7 @@ export default function TeamDecisionsPage() {
                           <span className="text-xs text-muted-foreground">{d.creator_name}</span>
                           <span className="text-xs text-muted-foreground">·</span>
                           <span className="text-xs text-muted-foreground">{format(new Date(d.created_at), "MMM d")}</span>
+                          <DecisionStatusBadge status={d.status} />
                           <Badge variant="outline" className={`text-[10px] ${stakesColors[d.stakes] || ""}`}>
                             {d.stakes}
                           </Badge>
@@ -221,6 +229,13 @@ export default function TeamDecisionsPage() {
           })}
         </div>
       )}
+
+      <QuickSnagModal
+        open={quickSnagOpen}
+        onOpenChange={setQuickSnagOpen}
+        teamId={team.id}
+        teamSlug={team.slug}
+      />
     </div>
   );
 }

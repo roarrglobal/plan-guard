@@ -46,6 +46,7 @@ import TeamDecisionsPage from "./pages/TeamDecisionsPage";
 import TeamDecisionDetailPage from "./pages/TeamDecisionDetailPage";
 import TeamDecisionNewPage from "./pages/TeamDecisionNewPage";
 import TeamAnalyticsPage from "./pages/TeamAnalyticsPage";
+import TeamOutcomePage from "./pages/TeamOutcomePage";
 import AcceptInvitePage from "./pages/AcceptInvitePage";
 import { TeamLayout } from "@/components/team/TeamLayout";
 
@@ -107,6 +108,7 @@ const App = () => {
                 <Route path="decisions" element={<TeamDecisionsPage />} />
                 <Route path="decisions/new" element={<TeamDecisionNewPage />} />
                 <Route path="decisions/:decisionId" element={<TeamDecisionDetailPage />} />
+                <Route path="decisions/:decisionId/outcome" element={<TeamOutcomePage />} />
                 <Route path="analytics" element={<TeamAnalyticsPage />} />
               </Route>
 

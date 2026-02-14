@@ -987,6 +987,73 @@ export type Database = {
           },
         ]
       }
+      team_outcomes: {
+        Row: {
+          analysis_id: string | null
+          created_at: string
+          decision_id: string
+          id: string
+          lesson: string | null
+          predictions_hit: Json | null
+          predictions_missed: Json | null
+          result: string
+          satisfaction: number | null
+          team_id: string
+          user_id: string
+          what_happened: string | null
+        }
+        Insert: {
+          analysis_id?: string | null
+          created_at?: string
+          decision_id: string
+          id?: string
+          lesson?: string | null
+          predictions_hit?: Json | null
+          predictions_missed?: Json | null
+          result: string
+          satisfaction?: number | null
+          team_id: string
+          user_id: string
+          what_happened?: string | null
+        }
+        Update: {
+          analysis_id?: string | null
+          created_at?: string
+          decision_id?: string
+          id?: string
+          lesson?: string | null
+          predictions_hit?: Json | null
+          predictions_missed?: Json | null
+          result?: string
+          satisfaction?: number | null
+          team_id?: string
+          user_id?: string
+          what_happened?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_outcomes_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
+            referencedRelation: "team_analyses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_outcomes_decision_id_fkey"
+            columns: ["decision_id"]
+            isOneToOne: false
+            referencedRelation: "team_decisions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_outcomes_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       team_usage: {
         Row: {
           deep_snags_used: number | null
