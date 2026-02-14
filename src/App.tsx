@@ -38,6 +38,11 @@ import PremortemAnalysisPage from "./pages/PremortemAnalysisPage";
 import JournalDetailPage from "./pages/JournalDetailPage";
 import ReportsPage from "./pages/ReportsPage";
 import DecisionOutcomePage from "./pages/DecisionOutcomePage";
+import TeamNewPage from "./pages/TeamNewPage";
+import TeamDashboardPage from "./pages/TeamDashboardPage";
+import TeamMembersPage from "./pages/TeamMembersPage";
+import TeamSettingsPage from "./pages/TeamSettingsPage";
+import { TeamLayout } from "@/components/team/TeamLayout";
 
 const queryClient = new QueryClient();
 
@@ -87,6 +92,16 @@ const App = () => {
                 <Route path="/reports" element={<ReportsPage />} />
               </Route>
               
+              {/* Team routes */}
+              <Route path="/team/new" element={<TeamNewPage />} />
+              <Route path="/team/:slug" element={<TeamLayout />}>
+                <Route path="dashboard" element={<TeamDashboardPage />} />
+                <Route path="members" element={<TeamMembersPage />} />
+                <Route path="settings" element={<TeamSettingsPage />} />
+                <Route path="decisions" element={<div className="p-8 text-muted-foreground">Team Decisions — coming soon</div>} />
+                <Route path="analytics" element={<div className="p-8 text-muted-foreground">Team Analytics — coming soon</div>} />
+              </Route>
+
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

@@ -632,6 +632,130 @@ export type Database = {
           },
         ]
       }
+      team_invitations: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          email: string
+          expires_at: string | null
+          id: string
+          invited_by: string
+          role: Database["public"]["Enums"]["team_invite_role"]
+          team_id: string
+          token: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string | null
+          id?: string
+          invited_by: string
+          role?: Database["public"]["Enums"]["team_invite_role"]
+          team_id: string
+          token?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string | null
+          id?: string
+          invited_by?: string
+          role?: Database["public"]["Enums"]["team_invite_role"]
+          team_id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_invitations_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_members: {
+        Row: {
+          id: string
+          invited_at: string | null
+          invited_by: string | null
+          joined_at: string | null
+          role: Database["public"]["Enums"]["team_member_role"]
+          status: Database["public"]["Enums"]["team_member_status"]
+          team_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          invited_at?: string | null
+          invited_by?: string | null
+          joined_at?: string | null
+          role?: Database["public"]["Enums"]["team_member_role"]
+          status?: Database["public"]["Enums"]["team_member_status"]
+          team_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          invited_at?: string | null
+          invited_by?: string | null
+          joined_at?: string | null
+          role?: Database["public"]["Enums"]["team_member_role"]
+          status?: Database["public"]["Enums"]["team_member_status"]
+          team_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          owner_id: string
+          settings: Json | null
+          slug: string
+          subscription_status: Database["public"]["Enums"]["team_subscription_status"]
+          subscription_tier: Database["public"]["Enums"]["team_subscription_tier"]
+          trial_ends_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          owner_id: string
+          settings?: Json | null
+          slug: string
+          subscription_status?: Database["public"]["Enums"]["team_subscription_status"]
+          subscription_tier?: Database["public"]["Enums"]["team_subscription_tier"]
+          trial_ends_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          owner_id?: string
+          settings?: Json | null
+          slug?: string
+          subscription_status?: Database["public"]["Enums"]["team_subscription_status"]
+          subscription_tier?: Database["public"]["Enums"]["team_subscription_tier"]
+          trial_ends_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       tier_limits: {
         Row: {
           analyses_monthly: number
@@ -936,10 +1060,22 @@ export type Database = {
         Returns: undefined
       }
       increment_retros_used: { Args: { p_user_id: string }; Returns: number }
+      is_team_admin: {
+        Args: { p_team_id: string; p_user_id: string }
+        Returns: boolean
+      }
+      is_team_member: {
+        Args: { p_team_id: string; p_user_id: string }
+        Returns: boolean
+      }
       is_trial_expired: { Args: { p_user_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      team_invite_role: "admin" | "member" | "viewer"
+      team_member_role: "owner" | "admin" | "member" | "viewer"
+      team_member_status: "pending" | "active" | "removed"
+      team_subscription_status: "trialing" | "active" | "past_due" | "canceled"
+      team_subscription_tier: "team" | "business" | "enterprise"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1066,6 +1202,12 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      team_invite_role: ["admin", "member", "viewer"],
+      team_member_role: ["owner", "admin", "member", "viewer"],
+      team_member_status: ["pending", "active", "removed"],
+      team_subscription_status: ["trialing", "active", "past_due", "canceled"],
+      team_subscription_tier: ["team", "business", "enterprise"],
+    },
   },
 } as const
