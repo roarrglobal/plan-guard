@@ -206,8 +206,8 @@ export function AppTopNav({ onMenuClick, sidebarOpen }: AppTopNavProps) {
           {/* Notifications */}
           <NotificationBell />
 
-          {/* Team switcher */}
-          <TeamSwitcher />
+          {/* Team switcher - only for business users */}
+          {userType === "business" && <TeamSwitcher />}
 
           {/* Usage indicator - desktop only */}
           <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-muted rounded-full">
