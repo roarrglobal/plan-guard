@@ -35,9 +35,9 @@ export default function ForgotPassword() {
     <div className="min-h-screen bg-muted flex flex-col items-center justify-center px-4 py-8">
       <div className="w-full max-w-sm">
         <div className="bg-card rounded-xl p-8 border border-border shadow-card">
-          <div className="flex justify-center mb-6">
+          <Link to="/" className="flex justify-center mb-6">
             <SnagLogo size="lg" />
-          </div>
+          </Link>
 
           {emailSent ? (
             <div className="text-center">
