@@ -20,6 +20,7 @@ import {
   Calendar, Shield, ShieldCheck, Eye, Clock, ArrowRight, Search,
   Download, Mail
 } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { format, differenceInDays, isPast } from "date-fns";
 import type { Team } from "@/hooks/useTeams";
 
@@ -125,6 +126,39 @@ export default function TeamAdminPage() {
         counts[d.created_by] = (counts[d.created_by] || 0) + 1;
       });
       return counts;
+    },
+    enabled: !!team?.id,
+  });
+
+  // Activity over time (decisions per week, last 8 weeks)
+  const { data: activityData = [] } = useQuery({
+    queryKey: ["admin-activity-chart", team?.id],
+    queryFn: async () => {
+      const eightWeeksAgo = new Date();
+      eightWeeksAgo.setDate(eightWeeksAgo.getDate() - 56);
+      const { data } = await supabase
+        .from("team_decisions")
+        .select("created_at")
+        .eq("team_id", team.id)
+        .gte("created_at", eightWeeksAgo.toISOString())
+        .order("created_at", { ascending: true });
+
+      // Group by week
+      const weeks: Record<string, number> = {};
+      for (let i = 7; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i * 7);
+        const key = format(d, "MMM d");
+        weeks[key] = 0;
+      }
+      (data || []).forEach((d: any) => {
+        const date = new Date(d.created_at);
+        const weekStart = new Date(date);
+        weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+        const key = format(weekStart, "MMM d");
+        if (key in weeks) weeks[key]++;
+      });
+      return Object.entries(weeks).map(([week, count]) => ({ week, decisions: count }));
     },
     enabled: !!team?.id,
   });
@@ -483,6 +517,25 @@ export default function TeamAdminPage() {
               </div>
             ))}
           </div>
+          {activityData.length > 0 && (
+            <div className="mt-6">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">Activity Over Time</p>
+              <div className="h-48">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={activityData}>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                    <XAxis dataKey="week" tick={{ fontSize: 10 }} className="text-muted-foreground" />
+                    <YAxis allowDecimals={false} tick={{ fontSize: 10 }} className="text-muted-foreground" />
+                    <Tooltip
+                      contentStyle={{ fontSize: 12, borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))" }}
+                      labelStyle={{ color: "hsl(var(--foreground))" }}
+                    />
+                    <Line type="monotone" dataKey="decisions" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 3 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
