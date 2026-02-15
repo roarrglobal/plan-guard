@@ -21,6 +21,7 @@ import { TrialBadge } from "@/components/softlaunch/TrialBadge";
 import { UsageCounter } from "@/components/softlaunch/UsageCounter";
 import { DashboardPatterns } from "@/components/dashboard/DashboardPatterns";
 import { DashboardPendingOutcomes } from "@/components/dashboard/DashboardPendingOutcomes";
+import { CosmicInsightsSection } from "@/components/dashboard/CosmicInsightsSection";
 import type { Json } from "@/integrations/supabase/types";
 
 interface SavedAnalysis {
@@ -216,6 +217,9 @@ export function IndividualDashboard({ displayName, greeting, softLaunch }: Indiv
 
       {/* Pending Outcomes */}
       <DashboardPendingOutcomes />
+
+      {/* Cosmic Insights - Premium Mystical Services */}
+      <CosmicInsightsSection />
 
       {/* My Patterns */}
       <DashboardPatterns />
