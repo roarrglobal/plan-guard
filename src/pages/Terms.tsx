@@ -1,160 +1,225 @@
-import { ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { LegalPageLayout, type LegalSection } from "@/components/marketing/LegalPageLayout";
+
+const sections: LegalSection[] = [
+  {
+    id: "acceptance",
+    title: "1. Acceptance of Terms",
+    content: <p>By accessing or using Snag ("the Service"), you agree to be bound by these Terms of Service ("Terms"). If you disagree with any part of the Terms, you may not access the Service.</p>,
+  },
+  {
+    id: "description",
+    title: "2. Description of Service",
+    content: (
+      <>
+        <p>Snag is a decision intelligence platform that provides:</p>
+        <ul className="list-disc pl-6 space-y-1">
+          <li>AI-powered pre-mortem analysis</li>
+          <li>Decision tracking and journaling</li>
+          <li>Outcome tracking and pattern recognition</li>
+          <li>Team collaboration features</li>
+        </ul>
+      </>
+    ),
+  },
+  {
+    id: "registration",
+    title: "3. Account Registration",
+    content: (
+      <>
+        <p>To use the Service, you must:</p>
+        <ul className="list-disc pl-6 space-y-1">
+          <li>Provide accurate and complete information</li>
+          <li>Maintain the security of your account credentials</li>
+          <li>Be at least 16 years of age</li>
+          <li>Have one account per person (no shared accounts)</li>
+        </ul>
+        <p>You are responsible for all activity under your account.</p>
+      </>
+    ),
+  },
+  {
+    id: "payment",
+    title: "4. Subscription and Payment",
+    content: (
+      <>
+        <p className="font-semibold">4.1 Free Tier</p>
+        <ul className="list-disc pl-6 space-y-1 mb-3">
+          <li>Limited features as described on our pricing page</li>
+          <li>No payment required</li>
+          <li>May be modified or discontinued</li>
+        </ul>
+        <p className="font-semibold">4.2 Paid Plans</p>
+        <ul className="list-disc pl-6 space-y-1 mb-3">
+          <li>Billed monthly or annually as selected</li>
+          <li>Prices are in USD unless otherwise stated</li>
+          <li>Payment processed via secure third-party provider</li>
+          <li>Auto-renewal unless canceled</li>
+        </ul>
+        <p className="font-semibold">4.3 Price Changes</p>
+        <ul className="list-disc pl-6 space-y-1">
+          <li>We may change prices with 30 days notice</li>
+          <li>Price changes apply to next billing cycle</li>
+        </ul>
+      </>
+    ),
+  },
+  {
+    id: "cancellation",
+    title: "5. Cancellation and Refunds",
+    content: (
+      <ul className="list-disc pl-6 space-y-1">
+        <li>You may cancel your subscription at any time</li>
+        <li>Access continues until end of current billing period</li>
+        <li>30-day money-back guarantee on first payment (see <a href="/refund" className="text-primary hover:underline">/refund</a>)</li>
+        <li>No partial refunds for mid-cycle cancellations after 30 days</li>
+      </ul>
+    ),
+  },
+  {
+    id: "acceptable-use",
+    title: "6. Acceptable Use",
+    content: (
+      <>
+        <p>You agree NOT to:</p>
+        <ul className="list-disc pl-6 space-y-1">
+          <li>Use the Service for any illegal purpose</li>
+          <li>Upload malicious content or malware</li>
+          <li>Attempt to breach or test our security</li>
+          <li>Resell or redistribute the Service</li>
+          <li>Use automated systems without permission</li>
+          <li>Harass, abuse, or harm others</li>
+          <li>Impersonate any person or entity</li>
+          <li>Interfere with the Service's operation</li>
+        </ul>
+      </>
+    ),
+  },
+  {
+    id: "ip",
+    title: "7. Intellectual Property",
+    content: (
+      <>
+        <p className="font-semibold">7.1 Our Property</p>
+        <ul className="list-disc pl-6 space-y-1 mb-3">
+          <li>Snag owns all platform IP (code, design, trademarks)</li>
+          <li>The SNAG Framework™ is our proprietary methodology</li>
+          <li>You may not copy, modify, or distribute our IP</li>
+        </ul>
+        <p className="font-semibold">7.2 Your Content</p>
+        <ul className="list-disc pl-6 space-y-1">
+          <li>You retain ownership of your content (decisions, analyses, journals)</li>
+          <li>You grant us license to process your content to provide the Service</li>
+          <li>You may export your content at any time</li>
+        </ul>
+      </>
+    ),
+  },
+  {
+    id: "ai-content",
+    title: "8. AI-Generated Content",
+    content: (
+      <>
+        <p className="font-semibold">Important disclaimers:</p>
+        <ul className="list-disc pl-6 space-y-1">
+          <li>Analyses are AI-generated suggestions, not professional advice</li>
+          <li>You are solely responsible for decisions you make</li>
+          <li>We do not guarantee accuracy of predictions</li>
+          <li>Always apply professional judgment</li>
+          <li>For legal, financial, or medical decisions, consult appropriate professionals</li>
+        </ul>
+      </>
+    ),
+  },
+  {
+    id: "teams",
+    title: "9. Team Accounts",
+    content: (
+      <ul className="list-disc pl-6 space-y-1">
+        <li>The account owner is responsible for team member conduct</li>
+        <li>Team visibility settings determine who can see what</li>
+        <li>Removing a member revokes their access immediately</li>
+        <li>Team data belongs to the team, not individual members</li>
+      </ul>
+    ),
+  },
+  {
+    id: "liability",
+    title: "10. Limitation of Liability",
+    content: (
+      <>
+        <p className="font-semibold uppercase">THE SERVICE IS PROVIDED "AS IS" WITHOUT WARRANTIES OF ANY KIND.</p>
+        <p className="font-semibold">WE ARE NOT LIABLE FOR:</p>
+        <ul className="list-disc pl-6 space-y-1">
+          <li>Decisions made based on our analyses</li>
+          <li>Business losses or damages</li>
+          <li>Service interruptions or data loss</li>
+          <li>Third-party actions</li>
+        </ul>
+        <p className="font-semibold">MAXIMUM LIABILITY: Limited to fees paid in the prior 12 months.</p>
+      </>
+    ),
+  },
+  {
+    id: "indemnification",
+    title: "11. Indemnification",
+    content: (
+      <>
+        <p>You agree to indemnify Snag against claims arising from:</p>
+        <ul className="list-disc pl-6 space-y-1">
+          <li>Your use of the Service</li>
+          <li>Your violation of these Terms</li>
+          <li>Your content</li>
+          <li>Your violation of any third-party rights</li>
+        </ul>
+      </>
+    ),
+  },
+  {
+    id: "termination",
+    title: "12. Termination",
+    content: (
+      <>
+        <p>We may terminate or suspend accounts that:</p>
+        <ul className="list-disc pl-6 space-y-1">
+          <li>Violate these Terms</li>
+          <li>Engage in fraudulent activity</li>
+          <li>Fail to pay for subscribed services</li>
+          <li>Are inactive for extended periods (with notice)</li>
+        </ul>
+        <p>You may terminate by canceling your subscription and deleting your account.</p>
+      </>
+    ),
+  },
+  {
+    id: "disputes",
+    title: "13. Dispute Resolution",
+    content: (
+      <ul className="list-disc pl-6 space-y-1">
+        <li>Disputes will be resolved through binding arbitration</li>
+        <li>Class action waiver applies</li>
+        <li>Small claims court remains available</li>
+      </ul>
+    ),
+  },
+  {
+    id: "governing-law",
+    title: "14. Governing Law",
+    content: <p>These Terms are governed by applicable laws, without regard to conflict of law provisions.</p>,
+  },
+  {
+    id: "changes",
+    title: "15. Changes to Terms",
+    content: <p>We may modify these Terms at any time. Material changes will be communicated via email. Continued use constitutes acceptance.</p>,
+  },
+  {
+    id: "contact",
+    title: "16. Contact",
+    content: (
+      <p>For legal questions: <a href="mailto:hello@snagme.app" className="text-primary hover:underline">hello@snagme.app</a></p>
+    ),
+  },
+];
 
 export default function Terms() {
-  const navigate = useNavigate();
-
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-background border-b border-border">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            <button
-              onClick={() => navigate(-1)}
-              className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <span className="text-2xl font-bold text-cobalt">Snag</span>
-            <div className="w-9" />
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-8 max-w-3xl">
-        <h1 className="text-h1 mb-2">Terms of Service</h1>
-        <p className="text-small text-muted-foreground mb-8">Last updated: January 2026</p>
-
-        <div className="prose prose-gray max-w-none space-y-8">
-          <section>
-            <h2 className="text-h2 mb-4">1. Acceptance of Terms</h2>
-            <p className="text-body text-foreground">
-              By accessing or using Snag ("the Service"), you agree to these Terms of Service. If you do not agree, do not use the Service.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-h2 mb-4">2. What Snag Is</h2>
-            <p className="text-body text-foreground">
-              Snag is a decision-support tool that uses artificial intelligence to generate pre-mortem analyses of plans and decisions. The Service identifies potential blind spots, failure modes, warning signals, and questions for consideration.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-h2 mb-4">3. What Snag Is Not</h2>
-            <p className="text-body text-foreground mb-4">Snag is NOT:</p>
-            <ul className="list-disc pl-6 space-y-2 text-body text-foreground">
-              <li>A substitute for professional advice (legal, financial, medical, or otherwise)</li>
-              <li>A predictor of outcomes</li>
-              <li>A decision-maker</li>
-              <li>A guarantee of success or failure</li>
-            </ul>
-            <p className="text-body text-foreground mt-4">
-              The analyses provided are possibilities and considerations, not predictions or recommendations.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-h2 mb-4">4. Limitation of Liability — Important</h2>
-            <p className="text-body text-foreground font-semibold mb-4">
-              THE SERVICE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND.
-            </p>
-            <p className="text-body text-foreground mb-4">You expressly understand and agree that:</p>
-            <ul className="list-disc pl-6 space-y-3 text-body text-foreground">
-              <li>Snag analyses are generated by artificial intelligence and may contain errors, omissions, or inaccuracies.</li>
-              <li>You are solely responsible for any decisions you make. Snag does not make decisions for you.</li>
-              <li>You should not rely exclusively on Snag analyses. Always consider multiple sources of information, consult qualified professionals where appropriate, and apply your own judgment.</li>
-              <li>Roarr Consulting Group, its officers, employees, and affiliates shall not be liable for any direct, indirect, incidental, consequential, or punitive damages arising from your use of or inability to use the Service, any decisions made based on Snag analyses, any errors or omissions in the analyses, or any outcomes resulting from actions taken or not taken based on the analyses.</li>
-              <li>In no event shall our total liability exceed the amount you paid for the Service in the 12 months preceding the claim.</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="text-h2 mb-4">5. Your Responsibilities</h2>
-            <p className="text-body text-foreground mb-4">By using Snag, you agree to:</p>
-            <ul className="list-disc pl-6 space-y-2 text-body text-foreground">
-              <li>Use the Service for lawful purposes only</li>
-              <li>Provide accurate information when submitting plans for analysis</li>
-              <li>Exercise independent judgment when making decisions</li>
-              <li>Seek professional advice for matters requiring specialized expertise (legal, medical, financial, etc.)</li>
-              <li>Not hold Snag or Roarr Consulting Group responsible for the outcomes of your decisions</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="text-h2 mb-4">6. Intellectual Property</h2>
-            <p className="text-body text-foreground mb-4">
-              The Service, including its design, features, and underlying technology, is owned by Roarr Consulting Group. You may not copy, modify, or reverse-engineer any part of the Service.
-            </p>
-            <p className="text-body text-foreground">
-              Analyses generated for you are yours to use, share, and retain. However, the analytical framework and methodology remain the property of Roarr Consulting Group.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-h2 mb-4">7. Payment and Subscriptions</h2>
-            <ul className="list-disc pl-6 space-y-2 text-body text-foreground">
-              <li>Free tier: 3 analyses total</li>
-              <li>Pro tier: ₹499/month for unlimited analyses</li>
-              <li>Payments processed via Razorpay</li>
-              <li>Subscriptions renew automatically until cancelled</li>
-              <li>No refunds for partial months</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="text-h2 mb-4">8. Data and Privacy</h2>
-            <p className="text-body text-foreground">
-              Your use of data is governed by our Privacy Policy. By using the Service, you consent to the collection and use of information as described therein.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-h2 mb-4">9. Termination</h2>
-            <p className="text-body text-foreground">
-              We reserve the right to suspend or terminate your access to the Service at any time, for any reason, without notice.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-h2 mb-4">10. Changes to Terms</h2>
-            <p className="text-body text-foreground">
-              We may update these Terms at any time. Continued use of the Service after changes constitutes acceptance of the new Terms.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-h2 mb-4">11. Governing Law</h2>
-            <p className="text-body text-foreground">
-              These Terms are governed by the laws of India. Any disputes shall be resolved in the courts of Hyderabad, Telangana.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-h2 mb-4">12. Contact</h2>
-            <p className="text-body text-foreground">
-              For questions about these Terms:<br />
-              Email: legal@roarrconsulting.com
-            </p>
-          </section>
-
-          <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-lg mt-8">
-            <p className="text-body text-foreground font-medium">
-              BY USING SNAG, YOU ACKNOWLEDGE THAT YOU HAVE READ, UNDERSTOOD, AND AGREE TO THESE TERMS, INCLUDING THE LIMITATION OF LIABILITY.
-            </p>
-          </div>
-        </div>
-      </main>
-
-      {/* Footer */}
-      <footer className="bg-[#1A1A1A] py-8 mt-12">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-small text-[#666666]">
-            © 2026 Roarr Consulting Group. All rights reserved.
-          </p>
-        </div>
-      </footer>
-    </div>
-  );
+  return <LegalPageLayout title="Terms of Service" lastUpdated="February 2026" sections={sections} />;
 }
