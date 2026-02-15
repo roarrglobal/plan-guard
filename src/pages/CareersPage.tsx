@@ -2,23 +2,14 @@ import { MarketingHeader } from "@/components/marketing/MarketingHeader";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
-import { MapPin, Briefcase, Zap, Heart, Globe, Brain } from "lucide-react";
+import { Globe, MessageSquare, Target, BookOpen, Mail } from "lucide-react";
 
-const perks = [
+const cultureValues = [
   { icon: Globe, title: "Remote-first", desc: "Work from anywhere. We judge output, not office hours." },
-  { icon: Brain, title: "Decision culture", desc: "We use Snag internally. Every big call gets a pre-mortem." },
-  { icon: Heart, title: "Generous benefits", desc: "Health, dental, vision, and a learning stipend." },
-  { icon: Zap, title: "Ship fast", desc: "Small team, big impact. Your work reaches users in days, not quarters." },
-];
-
-const openings = [
-  { title: "Senior Full-Stack Engineer", dept: "Engineering", location: "Remote", type: "Full-time" },
-  { title: "AI/ML Engineer", dept: "Engineering", location: "Remote", type: "Full-time" },
-  { title: "Product Designer", dept: "Design", location: "Remote", type: "Full-time" },
-  { title: "Growth Marketing Manager", dept: "Marketing", location: "Remote", type: "Full-time" },
-  { title: "Customer Success Lead", dept: "Customer Success", location: "Remote", type: "Full-time" },
+  { icon: MessageSquare, title: "Async communication", desc: "Deep work over meetings. Write it down, share it openly." },
+  { icon: Target, title: "Outcome-focused", desc: "We care about results, not hours logged." },
+  { icon: BookOpen, title: "Learning culture", desc: "Every decision teaches something. We bake that into how we work." },
 ];
 
 export default function CareersPage() {
@@ -34,78 +25,66 @@ export default function CareersPage() {
               animate={{ opacity: 1, y: 0 }}
               className="text-4xl md:text-5xl font-bold text-foreground mb-6"
             >
-              Help the world decide better
+              Join the team
             </motion.h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-              We're building the decision intelligence platform that every professional and team deserves. Join us.
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Help us build the decision layer for every company.
             </p>
-            <Button
-              size="lg"
-              onClick={() => document.getElementById("openings")?.scrollIntoView({ behavior: "smooth" })}
-            >
-              View Open Roles
-            </Button>
           </div>
         </section>
 
-        {/* Perks */}
-        <section className="py-20 px-4 bg-secondary">
-          <div className="max-w-5xl mx-auto">
-            <h2 className="text-3xl font-bold text-foreground text-center mb-12">Why Snag</h2>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              {perks.map((p, i) => (
+        {/* Coming Soon */}
+        <section className="pb-12 px-4">
+          <div className="max-w-2xl mx-auto">
+            <Card>
+              <CardContent className="pt-8 pb-8 text-center">
+                <h2 className="text-xl font-semibold text-foreground mb-3">
+                  We're not actively hiring yet, but we're always looking for exceptional people.
+                </h2>
+                <p className="text-muted-foreground">
+                  If you're passionate about decision science, AI, or building great products, we'd love to hear from you.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+
+        {/* Culture Values */}
+        <section className="py-16 px-4 bg-secondary">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-2xl font-bold text-foreground text-center mb-10">How We Work</h2>
+            <div className="grid sm:grid-cols-2 gap-6">
+              {cultureValues.map((v, i) => (
                 <motion.div
-                  key={p.title}
+                  key={v.title}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1 }}
-                  className="text-center"
+                  className="p-6 rounded-xl border border-border bg-card"
                 >
-                  <p.icon className="w-10 h-10 text-primary mx-auto mb-4" />
-                  <h3 className="font-semibold text-foreground mb-2">{p.title}</h3>
-                  <p className="text-sm text-muted-foreground">{p.desc}</p>
+                  <v.icon className="w-7 h-7 text-primary mb-3" />
+                  <h3 className="font-semibold text-foreground mb-1">{v.title}</h3>
+                  <p className="text-sm text-muted-foreground">{v.desc}</p>
                 </motion.div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Open Roles */}
-        <section id="openings" className="py-20 px-4">
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl font-bold text-foreground text-center mb-12">Open Roles</h2>
-            <div className="space-y-4">
-              {openings.map((job, i) => (
-                <motion.div
-                  key={job.title}
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.05 }}
-                >
-                  <Card className="hover:shadow-md transition-shadow cursor-pointer">
-                    <CardContent className="py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <div>
-                        <h3 className="font-semibold text-foreground">{job.title}</h3>
-                        <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
-                          <span className="flex items-center gap-1"><Briefcase className="w-3.5 h-3.5" /> {job.dept}</span>
-                          <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /> {job.location}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Badge variant="secondary">{job.type}</Badge>
-                        <Button size="sm" variant="outline">Apply</Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
-            <p className="text-center text-muted-foreground mt-10">
-              Don't see your role? Send us a note at{" "}
-              <a href="mailto:careers@snag.ai" className="text-primary hover:underline">careers@snag.ai</a>
+        {/* Contact CTA */}
+        <section className="py-20 px-4">
+          <div className="max-w-xl mx-auto text-center">
+            <h2 className="text-2xl font-bold text-foreground mb-4">Interested?</h2>
+            <p className="text-muted-foreground mb-6">
+              Send us a note at{" "}
+              <a href="mailto:careers@snagme.app" className="text-primary hover:underline">careers@snagme.app</a>
             </p>
+            <a href="mailto:careers@snagme.app">
+              <Button size="lg" className="gap-2">
+                <Mail className="w-4 h-4" /> Send an email
+              </Button>
+            </a>
           </div>
         </section>
       </main>

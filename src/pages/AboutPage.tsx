@@ -1,24 +1,23 @@
 import { MarketingHeader } from "@/components/marketing/MarketingHeader";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Target, Brain, TrendingUp, Shield, Users, Lightbulb } from "lucide-react";
+import { Target, TrendingUp, Eye, BookOpen, Linkedin, ExternalLink } from "lucide-react";
 
 const values = [
-  { icon: Target, title: "Decisions over opinions", desc: "We believe every decision deserves structured analysis, not just gut instinct." },
-  { icon: Brain, title: "Intelligence that compounds", desc: "Every decision you track makes our analysis smarter about your patterns." },
-  { icon: Shield, title: "Brutal honesty", desc: "We'd rather tell you something you don't want to hear than let you walk into a trap." },
-  { icon: TrendingUp, title: "Outcomes over activity", desc: "We measure success by decisions that worked, not features shipped." },
-  { icon: Users, title: "Accessible expertise", desc: "McKinsey-grade thinking shouldn't require McKinsey-grade budgets." },
-  { icon: Lightbulb, title: "The unasked question", desc: "The most important question is the one nobody thought to ask." },
+  { icon: Target, title: "Decisions over opinions", desc: "We believe in structured thinking over gut instinct." },
+  { icon: TrendingUp, title: "Outcomes over activity", desc: "We track what actually happens, not just what we planned." },
+  { icon: Eye, title: "Clarity over comfort", desc: "We surface uncomfortable truths before they become costly mistakes." },
+  { icon: BookOpen, title: "Learning over blame", desc: "Every outcome—good or bad—teaches something." },
 ];
 
 const timeline = [
   { year: "2024", event: "Founded after watching yet another team burn $2M on a decision that a 30-minute pre-mortem could have caught." },
   { year: "2024", event: "Launched the SNAG Framework — Surface, Neglect, Assume, Gaps — the core of every analysis." },
   { year: "2025", event: "Expanded to team decision intelligence with department-specific templates and shared learning." },
-  { year: "Today", event: "Helping thousands of professionals and teams make better decisions every day." },
+  { year: "Today", event: "Helping professionals and teams make better decisions every day." },
 ];
 
 export default function AboutPage() {
@@ -84,11 +83,45 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Our Values */}
+        {/* The Team */}
         <section className="py-20 px-4">
-          <div className="max-w-5xl mx-auto">
-            <h2 className="text-3xl font-bold text-foreground text-center mb-12">What We Believe</h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-3xl font-bold text-foreground text-center mb-12">The Team</h2>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="flex justify-center"
+            >
+              <Card className="max-w-xs w-full text-center">
+                <CardContent className="pt-8 pb-6">
+                  <div className="w-24 h-24 rounded-full bg-muted mx-auto mb-4 flex items-center justify-center text-3xl font-bold text-muted-foreground">
+                    MI
+                  </div>
+                  <h3 className="text-xl font-semibold text-foreground">Mahesh Iyer</h3>
+                  <p className="text-muted-foreground mb-4">Advisory & Flaw Finder</p>
+                  <a
+                    href="https://www.linkedin.com/in/iyerrmahesh/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+                  >
+                    <Linkedin className="w-4 h-4" /> LinkedIn
+                  </a>
+                </CardContent>
+              </Card>
+            </motion.div>
+            <p className="text-center text-muted-foreground mt-8">
+              We're a small, focused team. More coming soon.
+            </p>
+          </div>
+        </section>
+
+        {/* Our Values */}
+        <section className="py-20 px-4 bg-secondary">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-3xl font-bold text-foreground text-center mb-12">Our Values</h2>
+            <div className="grid sm:grid-cols-2 gap-8">
               {values.map((v, i) => (
                 <motion.div
                   key={v.title}
@@ -108,7 +141,7 @@ export default function AboutPage() {
         </section>
 
         {/* Timeline */}
-        <section className="py-20 px-4 bg-secondary">
+        <section className="py-20 px-4">
           <div className="max-w-3xl mx-auto">
             <h2 className="text-3xl font-bold text-foreground text-center mb-12">Our Journey</h2>
             <div className="space-y-8">
@@ -133,25 +166,35 @@ export default function AboutPage() {
           </div>
         </section>
 
+        {/* Backed By */}
+        <section className="py-20 px-4 bg-secondary">
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-3xl font-bold text-foreground mb-6">Backed By</h2>
+            <p className="text-xl text-foreground font-semibold mb-4">
+              Snag is a Roarr Consulting Group venture.
+            </p>
+            <p className="text-muted-foreground max-w-xl mx-auto mb-6">
+              Roarr Consulting Group is a management consulting firm specializing in strategic advisory,
+              operational excellence, and digital transformation for businesses across industries.
+            </p>
+            <a
+              href="https://roarrconsulting.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-primary hover:underline font-medium"
+            >
+              Visit roarrconsulting.com <ExternalLink className="w-4 h-4" />
+            </a>
+          </div>
+        </section>
+
         {/* CTA */}
         <section className="py-20 px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl font-bold text-foreground mb-4">Join us in building the decision layer</h2>
-            <p className="text-lg text-muted-foreground mb-8">
-              Whether you're making personal choices or leading a team, Snag helps you decide with confidence.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/signup?type=individual">
-                <Button className="bg-[hsl(349,57%,47%)] hover:bg-[hsl(349,57%,42%)] text-white" size="lg">
-                  Start Free — Personal
-                </Button>
-              </Link>
-              <Link to="/signup?type=team">
-                <Button className="bg-cobalt hover:bg-cobalt-hover text-white" size="lg">
-                  Start Free — Teams
-                </Button>
-              </Link>
-            </div>
+            <h2 className="text-3xl font-bold text-foreground mb-4">Want to learn more? Get in touch.</h2>
+            <Link to="/contact">
+              <Button size="lg">Contact Us</Button>
+            </Link>
           </div>
         </section>
       </main>
