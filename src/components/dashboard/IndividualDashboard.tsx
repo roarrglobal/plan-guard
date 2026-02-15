@@ -110,6 +110,8 @@ export function IndividualDashboard({ displayName, greeting, softLaunch }: Indiv
         </div>
 
         {/* Personal Focus CTA */}
+
+        {/* Personal Focus CTA */}
         <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-background">
           <CardContent className="p-5">
             <div className="flex items-center gap-2 mb-2">

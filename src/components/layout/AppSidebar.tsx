@@ -21,7 +21,8 @@ import {
   Lock,
   Users,
   Image,
-  FileUp
+  FileUp,
+  StickyNote
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -32,6 +33,7 @@ import { UsageBadge } from "@/components/subscription/UsageCounter";
 import { useState } from "react";
 import { FeatureUpgradeModal } from "@/components/subscription/FeatureUpgradeModal";
 import { SnagLogo } from "@/components/SnagLogo";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface AppSidebarProps {
   open: boolean;
@@ -49,60 +51,107 @@ interface NavItem {
   showUsage?: boolean;
 }
 
-const quickActions = [
-  { label: "New Journal Entry", href: "/journal/new", icon: <Plus className="w-4 h-4" /> },
-  { label: "Capture Decision", href: "/decisions/new", icon: <Zap className="w-4 h-4" /> },
-  { label: "Deep Snag", href: "/analyze", icon: <Target className="w-4 h-4" />, feature: "deep_snag" as const },
-  { label: "Post-Mortem", href: "/post-mortem/new", icon: <Search className="w-4 h-4" />, feature: "post_mortem" as const },
-];
+const getQuickActions = (userType: string) => {
+  if (userType === "business") {
+    return [
+      { label: "New Note", href: "/journal/new", icon: <StickyNote className="w-4 h-4" /> },
+      { label: "Capture Decision", href: "/decisions/new", icon: <Zap className="w-4 h-4" /> },
+      { label: "Pre-Mortem", href: "/analyze", icon: <Target className="w-4 h-4" />, feature: "deep_snag" as const },
+      { label: "Post-Mortem", href: "/post-mortem/new", icon: <Search className="w-4 h-4" />, feature: "post_mortem" as const },
+    ];
+  }
+  return [
+    { label: "New Journal Entry", href: "/journal/new", icon: <Plus className="w-4 h-4" /> },
+    { label: "Capture Decision", href: "/decisions/new", icon: <Zap className="w-4 h-4" /> },
+    { label: "Deep Snag", href: "/analyze", icon: <Target className="w-4 h-4" />, feature: "deep_snag" as const },
+    { label: "Quick Retro", href: "/quick-retro", icon: <Search className="w-4 h-4" /> },
+  ];
+};
 
-const navItems: NavItem[] = [
-  { label: "Dashboard", href: "/dashboard", icon: <Home className="w-4 h-4" /> },
-  { 
-    label: "Journal", 
-    href: "/journal", 
-    icon: <BookOpen className="w-4 h-4" />,
-    children: [
-      { label: "All Entries", href: "/journal", icon: <FileText className="w-4 h-4" /> },
-      { label: "Gratitude", href: "/journal?type=gratitude", icon: <Heart className="w-4 h-4" /> },
-      { label: "Manifestation", href: "/journal?type=manifestation", icon: <Sparkles className="w-4 h-4" /> },
-      { label: "Habits", href: "/habits", icon: <CheckSquare className="w-4 h-4" /> },
-    ]
-  },
-  { 
-    label: "Decisions", 
-    href: "/decisions", 
-    icon: <Zap className="w-4 h-4" />,
-    children: [
-      { label: "Captured", href: "/decisions?status=pending", icon: <PenLine className="w-4 h-4" /> },
-      { label: "Pending Outcomes", href: "/decisions?status=made", icon: <Clock className="w-4 h-4" /> },
-      { label: "Completed", href: "/decisions?status=completed", icon: <CheckCircle2 className="w-4 h-4" /> },
-    ]
-  },
-  { 
-    label: "Frameworks", 
-    href: "/frameworks", 
-    icon: <Target className="w-4 h-4" />,
-    children: [
-      { label: "Deep Snag", href: "/analyze", icon: <Target className="w-4 h-4" />, feature: "deep_snag", showUsage: true },
-      { label: "Post-Mortem", href: "/post-mortem", icon: <Search className="w-4 h-4" />, feature: "post_mortem", showUsage: true },
-      { label: "SWOT", href: "/frameworks/swot/new", icon: <BarChart3 className="w-4 h-4" />, feature: "framework" },
-      { label: "Porter's 5 Forces", href: "/frameworks/porter/new", icon: <Target className="w-4 h-4" />, feature: "framework" },
-      { label: "Pre-Mortem", href: "/frameworks/premortem/new", icon: <Lightbulb className="w-4 h-4" />, feature: "framework" },
-    ]
-  },
-  { label: "Reports", href: "/reports", icon: <FileText className="w-4 h-4" /> },
-  { label: "Visual Exports", href: "/visual-exports", icon: <Image className="w-4 h-4" />, feature: "visual_export" },
-  { label: "Document Upload", href: "/upload", icon: <FileUp className="w-4 h-4" />, feature: "document_upload" },
-  { label: "Patterns & Insights", href: "/patterns", icon: <Lightbulb className="w-4 h-4" />, feature: "patterns" },
-  { label: "Team Workspace", href: "/team", icon: <Users className="w-4 h-4" />, feature: "team_workspace" },
-  { label: "Settings", href: "/settings", icon: <Settings className="w-4 h-4" /> },
-];
+const getNavItems = (userType: string): NavItem[] => {
+  const common: NavItem[] = [
+    { label: "Dashboard", href: "/dashboard", icon: <Home className="w-4 h-4" /> },
+  ];
+
+  if (userType === "business") {
+    return [
+      ...common,
+      { label: "Notes", href: "/journal", icon: <StickyNote className="w-4 h-4" /> },
+      { 
+        label: "Decisions", 
+        href: "/decisions", 
+        icon: <Zap className="w-4 h-4" />,
+        children: [
+          { label: "Captured", href: "/decisions?status=pending", icon: <PenLine className="w-4 h-4" /> },
+          { label: "Pending Outcomes", href: "/decisions?status=made", icon: <Clock className="w-4 h-4" /> },
+          { label: "Completed", href: "/decisions?status=completed", icon: <CheckCircle2 className="w-4 h-4" /> },
+        ]
+      },
+      { 
+        label: "Frameworks", 
+        href: "/frameworks", 
+        icon: <Target className="w-4 h-4" />,
+        children: [
+          { label: "Pre-Mortem", href: "/analyze", icon: <Target className="w-4 h-4" />, feature: "deep_snag", showUsage: true },
+          { label: "Post-Mortem", href: "/post-mortem", icon: <Search className="w-4 h-4" />, feature: "post_mortem", showUsage: true },
+          { label: "SWOT", href: "/frameworks/swot/new", icon: <BarChart3 className="w-4 h-4" />, feature: "framework" },
+          { label: "Porter's 5 Forces", href: "/frameworks/porter/new", icon: <Target className="w-4 h-4" />, feature: "framework" },
+        ]
+      },
+      { label: "Reports", href: "/reports", icon: <FileText className="w-4 h-4" /> },
+      { label: "Team Workspace", href: "/team", icon: <Users className="w-4 h-4" />, feature: "team_workspace" },
+      { label: "Settings", href: "/settings", icon: <Settings className="w-4 h-4" /> },
+    ];
+  }
+
+  // Individual / B2C
+  return [
+    ...common,
+    { 
+      label: "Journal", 
+      href: "/journal", 
+      icon: <BookOpen className="w-4 h-4" />,
+      children: [
+        { label: "All Entries", href: "/journal", icon: <FileText className="w-4 h-4" /> },
+        { label: "Gratitude", href: "/journal?type=gratitude", icon: <Heart className="w-4 h-4" /> },
+        { label: "Manifestation", href: "/journal?type=manifestation", icon: <Sparkles className="w-4 h-4" /> },
+        { label: "Habits", href: "/habits", icon: <CheckSquare className="w-4 h-4" /> },
+      ]
+    },
+    { 
+      label: "Decisions", 
+      href: "/decisions", 
+      icon: <Zap className="w-4 h-4" />,
+      children: [
+        { label: "Captured", href: "/decisions?status=pending", icon: <PenLine className="w-4 h-4" /> },
+        { label: "Pending Outcomes", href: "/decisions?status=made", icon: <Clock className="w-4 h-4" /> },
+        { label: "Completed", href: "/decisions?status=completed", icon: <CheckCircle2 className="w-4 h-4" /> },
+      ]
+    },
+    { 
+      label: "Analysis", 
+      href: "/analyze", 
+      icon: <Target className="w-4 h-4" />,
+      children: [
+        { label: "Deep Snag", href: "/analyze", icon: <Target className="w-4 h-4" />, feature: "deep_snag", showUsage: true },
+        { label: "Post-Mortem", href: "/post-mortem", icon: <Search className="w-4 h-4" />, feature: "post_mortem", showUsage: true },
+        { label: "Quick Retro", href: "/quick-retro", icon: <Lightbulb className="w-4 h-4" /> },
+      ]
+    },
+    { label: "Reports", href: "/reports", icon: <FileText className="w-4 h-4" /> },
+    { label: "Patterns & Insights", href: "/patterns", icon: <Lightbulb className="w-4 h-4" />, feature: "patterns" },
+    { label: "Settings", href: "/settings", icon: <Settings className="w-4 h-4" /> },
+  ];
+};
 
 export function AppSidebar({ open, onClose, collapsed, onToggleCollapse }: AppSidebarProps) {
   const location = useLocation();
   const { isFree, hasProFeatures, hasTeamFeatures } = useTierCheck();
   const { usage } = useUsage();
+  const { profile } = useAuth();
+  const userType = profile?.user_type || "individual";
+  const quickActions = getQuickActions(userType);
+  const navItems = getNavItems(userType);
 
   const isActive = (href: string) => {
     if (href === "/dashboard") return location.pathname === "/dashboard";
@@ -272,7 +321,7 @@ function QuickActionItem({
   usage,
   onNavigate 
 }: { 
-  action: typeof quickActions[0]; 
+  action: ReturnType<typeof getQuickActions>[0]; 
   isFree: boolean; 
   usage: any;
   onNavigate?: () => void;

@@ -103,12 +103,6 @@ export function BusinessDashboard({ displayName, greeting, softLaunch }: Busines
             limit={softLaunch.limits.deepSnags.limit} 
             label="Pre-mortems used" 
           />
-          <span className="text-border">•</span>
-          <UsageCounter 
-            used={softLaunch.limits.journalsPerDay.used} 
-            limit={softLaunch.limits.journalsPerDay.limit} 
-            label="today" 
-          />
         </div>
 
         {/* Business Focus CTA */}
@@ -247,21 +241,6 @@ export function BusinessDashboard({ displayName, greeting, softLaunch }: Busines
       {/* Team Patterns */}
       <DashboardPatterns />
 
-      {/* Team Teaser */}
-      <section>
-        <Card className="border-dashed border-cobalt/30">
-          <CardContent className="p-5 text-center">
-            <Users className="w-8 h-8 text-cobalt mx-auto mb-3" />
-            <h3 className="font-semibold text-foreground mb-1">Team Features Coming Soon</h3>
-            <p className="text-sm text-muted-foreground mb-3">
-              Invite team members, share pre-mortems, and build collective decision intelligence.
-            </p>
-            <span className="inline-block text-xs font-medium bg-cobalt/10 text-cobalt px-3 py-1 rounded-full">
-              On the roadmap
-            </span>
-          </CardContent>
-        </Card>
-      </section>
     </div>
   );
 }
