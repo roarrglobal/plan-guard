@@ -184,7 +184,8 @@ serve(async (req) => {
     }
     
     const plan = planValidation.value;
-    console.log("Plan validated, length:", plan.length);
+    const cosmicData = body?.cosmic_data || null;
+    console.log("Plan validated, length:", plan.length, "cosmic_data:", !!cosmicData);
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -197,6 +198,30 @@ serve(async (req) => {
 
     console.log("Calling Lovable AI Gateway for plan analysis...");
 
+    // Build cosmic timing supplement for the prompt
+    let cosmicSupplement = "";
+    if (cosmicData) {
+      cosmicSupplement = `\n\nADDITIONAL CONTEXT - COSMIC TIMING DATA (User has purchased mystical readings):
+The user wants cosmic timing insights integrated into the analysis. Based on their birth data and readings, add a "cosmic_timing" field to the JSON output with this structure:
+{
+  "cosmic_timing": {
+    "planetary_transits": [{ "transit": "string", "relevance": "how it relates to this decision", "influence": "favorable|neutral|unfavorable" }],
+    "numerology_timing": { "personal_year": number, "personal_month": number, "interpretation": "string" },
+    "favorable_periods": [{ "period": "string", "reason": "string" }],
+    "unfavorable_periods": [{ "period": "string", "reason": "string" }],
+    "timing_recommendation": "Overall recommendation for decision timing based on cosmic factors"
+  }
+}
+
+User's reading data: ${JSON.stringify(cosmicData).substring(0, 3000)}
+
+Make the cosmic timing section specific to this decision. Reference the actual transits, dasha periods, or numerology data from their readings. This section is SUPPLEMENTARY to the main analysis.`;
+    }
+
+    const enhancedSystemPrompt = cosmicData 
+      ? systemPrompt + cosmicSupplement 
+      : systemPrompt;
+
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -206,7 +231,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "google/gemini-2.5-pro",
         messages: [
-          { role: "system", content: systemPrompt },
+          { role: "system", content: enhancedSystemPrompt },
           { role: "user", content: `Analyze this plan and identify potential problems:\n\n${sanitizeForPrompt(plan)}` },
         ],
       }),
