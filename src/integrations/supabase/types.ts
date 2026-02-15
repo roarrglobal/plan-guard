@@ -1842,6 +1842,7 @@ export type Database = {
         Args: { p_feature: string; p_user_id: string }
         Returns: Json
       }
+      custom_auth_email_hook: { Args: { event: Json }; Returns: Json }
       get_invite_details: { Args: { p_token: string }; Returns: Json }
       get_or_create_email_preferences: {
         Args: { p_user_id: string }
