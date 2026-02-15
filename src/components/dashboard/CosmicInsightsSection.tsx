@@ -1,5 +1,8 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Moon, 
   Sun, 
@@ -251,6 +254,8 @@ function CosmicServiceCard({
   service: CosmicService; 
   locked: boolean;
 }) {
+  const navigate = useNavigate();
+
   return (
     <Card className={cn(
       "overflow-hidden transition-all hover:shadow-md border-border/50",
@@ -284,6 +289,7 @@ function CosmicServiceCard({
             variant={locked ? "outline" : "default"}
             className="w-full gap-2"
             disabled={locked}
+            onClick={() => navigate(`/reading/new?type=${service.readingType}`)}
           >
             {locked ? (
               <>
