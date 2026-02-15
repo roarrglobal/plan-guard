@@ -57,9 +57,9 @@ export function MarketingHeader() {
                   <div className="bg-white rounded-xl shadow-lg border border-border py-2 min-w-[220px]">
                     {solutionsItems.map((item) => (
                       <div key={item.href}>
-                        <Link
+                      <Link
                           to={item.href}
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#1A1A1A] hover:bg-muted transition-colors"
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-muted transition-colors"
                           onClick={() => setSolutionsOpen(false)}
                         >
                           <item.icon className="w-4 h-4 text-muted-foreground" />
@@ -97,7 +97,7 @@ export function MarketingHeader() {
                   <div className="bg-white rounded-xl shadow-lg border border-border py-2 min-w-[200px]">
                     <Link
                       to="/signup?type=individual"
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#1A1A1A] hover:bg-muted transition-colors"
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-muted transition-colors"
                       onClick={() => setGetStartedOpen(false)}
                     >
                       <User className="w-4 h-4 text-crimson" />
@@ -105,7 +105,7 @@ export function MarketingHeader() {
                     </Link>
                     <Link
                       to="/signup?type=team"
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#1A1A1A] hover:bg-muted transition-colors"
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-muted transition-colors"
                       onClick={() => setGetStartedOpen(false)}
                     >
                       <Users className="w-4 h-4 text-cobalt" />
@@ -128,7 +128,7 @@ export function MarketingHeader() {
       {mobileOpen && (
         <div className="lg:hidden bg-white border-t border-border shadow-lg">
           <div className="px-4 py-6 space-y-4">
-            <Link to="/product" className="block text-base font-medium text-[#1A1A1A] py-2" onClick={() => setMobileOpen(false)}>
+          <Link to="/product" className="block text-base font-medium text-foreground py-2" onClick={() => setMobileOpen(false)}>
               Product
             </Link>
             <div>
@@ -137,7 +137,7 @@ export function MarketingHeader() {
                 <Link
                   key={item.href}
                   to={item.href}
-                  className="flex items-center gap-3 py-2 text-sm text-[#1A1A1A]"
+                  className="flex items-center gap-3 py-2 text-sm text-foreground"
                   onClick={() => setMobileOpen(false)}
                 >
                   <item.icon className="w-4 h-4 text-muted-foreground" />
@@ -145,14 +145,14 @@ export function MarketingHeader() {
                 </Link>
               ))}
             </div>
-            <Link to="/pricing" className="block text-base font-medium text-[#1A1A1A] py-2" onClick={() => setMobileOpen(false)}>
+            <Link to="/pricing" className="block text-base font-medium text-foreground py-2" onClick={() => setMobileOpen(false)}>
               Pricing
             </Link>
-            <Link to="/about" className="block text-base font-medium text-[#1A1A1A] py-2" onClick={() => setMobileOpen(false)}>
+            <Link to="/about" className="block text-base font-medium text-foreground py-2" onClick={() => setMobileOpen(false)}>
               About
             </Link>
             <div className="border-t border-border pt-4 space-y-3">
-              <Link to="/login" className="block text-base font-medium text-[#1A1A1A] py-2" onClick={() => setMobileOpen(false)}>
+              <Link to="/login" className="block text-base font-medium text-foreground py-2" onClick={() => setMobileOpen(false)}>
                 Log in
               </Link>
               <Link to="/signup?type=individual" onClick={() => setMobileOpen(false)}>

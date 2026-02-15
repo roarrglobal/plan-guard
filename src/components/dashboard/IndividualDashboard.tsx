@@ -122,7 +122,7 @@ export function IndividualDashboard({ displayName, greeting, softLaunch }: Indiv
   }, []);
 
   const handleQuickSnag = () => {
-    if (quickInput.trim().length >= 20) {
+    if (quickInput.trim().length >= 200) {
       sessionStorage.setItem("snag_input", quickInput);
       navigate("/analyze");
     }
@@ -210,20 +210,25 @@ export function IndividualDashboard({ displayName, greeting, softLaunch }: Indiv
             <h2 className="text-base font-semibold text-foreground">Quick Snag</h2>
           </div>
           <div className="flex gap-2">
-            <input
+            <textarea
               value={quickInput}
               onChange={(e) => setQuickInput(e.target.value)}
-              placeholder="What's on your mind? Type a quick decision..."
-              className="flex-1 bg-muted border border-border rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-              onKeyDown={(e) => e.key === "Enter" && handleQuickSnag()}
+              placeholder="Describe your decision in detail — what are you weighing?"
+              className="flex-1 bg-muted border border-border rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all min-h-[80px]"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleQuickSnag();
+              }}
             />
-            <button
-              onClick={handleQuickSnag}
-              disabled={quickInput.trim().length < 20}
-              className="w-12 h-12 rounded-xl bg-gradient-to-r from-[hsl(263,78%,60%)] to-[hsl(326,81%,55%)] flex items-center justify-center text-white disabled:opacity-40 transition-opacity hover:shadow-lg hover:shadow-primary/20"
-            >
-              <Send className="w-5 h-5" />
-            </button>
+            <div className="flex flex-col items-end gap-1">
+              <button
+                onClick={handleQuickSnag}
+                disabled={quickInput.trim().length < 200}
+                className="w-12 h-12 rounded-xl bg-gradient-to-r from-[hsl(263,78%,60%)] to-[hsl(326,81%,55%)] flex items-center justify-center text-white disabled:opacity-40 transition-opacity hover:shadow-lg hover:shadow-primary/20"
+              >
+                <Send className="w-5 h-5" />
+              </button>
+              <span className="text-[10px] text-muted-foreground">{quickInput.length}/200 min</span>
+            </div>
           </div>
         </div>
       </section>
@@ -300,6 +305,48 @@ export function IndividualDashboard({ displayName, greeting, softLaunch }: Indiv
           >
             Run Your First Snag ✨
           </button>
+        </section>
+      )}
+
+      {/* Share Your Snag */}
+      {analyses.length > 0 && (
+        <section className="rounded-2xl bg-card border border-border p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <Share2 className="w-5 h-5 text-accent" />
+            <h2 className="text-base font-semibold text-foreground">Share Your Insights</h2>
+          </div>
+          <p className="text-sm text-muted-foreground mb-4">
+            Share your latest snag analysis on social media and inspire others to make better decisions.
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                const text = encodeURIComponent(`Just stress-tested a decision with @snagapp 🎯 Found ${stats.analyses} blind spots I would've missed.\n\nTry it free → https://snagme.app`);
+                window.open(`https://twitter.com/intent/tweet?text=${text}`, "_blank");
+              }}
+              className="flex items-center gap-2 bg-foreground/10 hover:bg-foreground/15 text-foreground rounded-xl px-4 py-2.5 text-sm font-medium transition-colors"
+            >
+              𝕏 Post
+            </button>
+            <button
+              onClick={() => {
+                const text = encodeURIComponent(`I've been using Snag to stress-test my decisions before committing — it finds blind spots and failure modes I would've missed. Check it out: https://snagme.app`);
+                window.open(`https://www.linkedin.com/sharing/share-offsite/?url=https://snagme.app&summary=${text}`, "_blank");
+              }}
+              className="flex items-center gap-2 bg-[hsl(216,100%,34%)]/10 hover:bg-[hsl(216,100%,34%)]/20 text-foreground rounded-xl px-4 py-2.5 text-sm font-medium transition-colors"
+            >
+              LinkedIn
+            </button>
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText("https://snagme.app");
+                import("sonner").then(({ toast }) => toast.success("Link copied!"));
+              }}
+              className="flex items-center gap-2 bg-muted hover:bg-muted/80 text-foreground rounded-xl px-4 py-2.5 text-sm font-medium transition-colors"
+            >
+              Copy Link
+            </button>
+          </div>
         </section>
       )}
 

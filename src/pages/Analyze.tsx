@@ -243,12 +243,12 @@ export default function Analyze() {
 
   return (
     <>
-      <div className="min-h-screen bg-white flex flex-col">
+      <div className="min-h-screen bg-background flex flex-col">
         {/* Header */}
-        <header className="flex items-center justify-between px-4 py-3 border-b border-[#E5E5E5]">
+        <header className="flex items-center justify-between px-4 py-3 border-b border-border">
           <button
             onClick={() => navigate("/")}
-            className="p-2 -ml-2 text-[#666666] hover:text-[#1A1A1A] transition-colors"
+            className="p-2 -ml-2 text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
