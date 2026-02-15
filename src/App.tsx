@@ -8,6 +8,8 @@ import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import MarketingHome from "./pages/MarketingHome";
+import ProductPage from "./pages/ProductPage";
+import PricingPage from "./pages/PricingPage";
 import Analyze from "./pages/Analyze";
 import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -71,6 +73,8 @@ const App = () => {
             <Routes>
               {/* Public routes */}
               <Route path="/" element={<MarketingHome />} />
+              <Route path="/product" element={<ProductPage />} />
+              <Route path="/pricing" element={<PricingPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
