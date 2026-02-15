@@ -3,6 +3,7 @@ import { Outlet, useLocation, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { AppSidebar } from "./AppSidebar";
 import { AppTopNav } from "./AppTopNav";
+import { HelpChatbot } from "@/components/chat/HelpChatbot";
 import { cn } from "@/lib/utils";
 
 export function AppLayout() {
@@ -66,6 +67,9 @@ export function AppLayout() {
           onClick={() => setSidebarOpen(false)}
         />
       )}
+
+      {/* Help Chatbot */}
+      <HelpChatbot />
     </div>
   );
 }
