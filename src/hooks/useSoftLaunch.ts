@@ -59,17 +59,21 @@ export function useSoftLaunch() {
     staleTime: 60000, // 1 minute
   });
 
-  // Calculate trial status from profile
+  // Calculate trial status from profile using trial_ends_at (15-day trial)
   const trialStartDate = profile?.trial_start_date 
     ? new Date(profile.trial_start_date) 
     : null;
   
-  const trialDaysRemaining = trialStartDate
-    ? Math.max(0, Math.ceil(3 - (Date.now() - trialStartDate.getTime()) / (1000 * 60 * 60 * 24)))
+  const trialEndsAt = profile?.trial_ends_at
+    ? new Date(profile.trial_ends_at)
+    : null;
+  
+  const trialDaysRemaining = trialEndsAt
+    ? Math.max(0, Math.ceil((trialEndsAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
     : 0;
   
-  const isTrialExpired = trialStartDate 
-    ? (Date.now() - trialStartDate.getTime()) > (3 * 24 * 60 * 60 * 1000)
+  const isTrialExpired = trialEndsAt 
+    ? Date.now() > trialEndsAt.getTime()
     : false;
 
   const deepSnagsUsed = profile?.deep_snags_used ?? 0;
