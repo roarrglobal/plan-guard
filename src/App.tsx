@@ -37,6 +37,9 @@ import ProfileSettings from "./pages/ProfileSettings";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Disclaimer from "./pages/Disclaimer";
+import RefundPage from "./pages/RefundPage";
+import GDPRPage from "./pages/GDPRPage";
+import SecurityPage from "./pages/SecurityPage";
 import NotFound from "./pages/NotFound";
 import JournalPage from "./pages/JournalPage";
 import JournalNewPage from "./pages/JournalNewPage";
@@ -107,6 +110,9 @@ const App = () => {
               <Route path="/terms" element={<Terms />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/disclaimer" element={<Disclaimer />} />
+              <Route path="/refund" element={<RefundPage />} />
+              <Route path="/gdpr" element={<GDPRPage />} />
+              <Route path="/security" element={<SecurityPage />} />
               <Route path="/invite/:token" element={<AcceptInvitePage />} />
               <Route path="/unsubscribe" element={<UnsubscribePage />} />
               
