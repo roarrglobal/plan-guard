@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Linkedin, Twitter } from "lucide-react";
+import snagLogo from "@/assets/snag-logo-full.png";
 
 const footerLinks = {
   Product: [
@@ -62,9 +63,10 @@ export function MarketingFooter() {
         </div>
 
         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-white/50">
-            © 2026 Snag. A Roarr Consulting Group venture.
-          </p>
+          <div className="flex items-center gap-4">
+            <img src={snagLogo} alt="Snag" className="h-8 w-auto brightness-0 invert opacity-70" />
+            <p className="text-sm text-white/50">© 2026 Snag. A Roarr Consulting Group venture.</p>
+          </div>
           <div className="flex items-center gap-4">
             <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-white/50 hover:text-white transition-colors">
               <Linkedin className="w-5 h-5" />

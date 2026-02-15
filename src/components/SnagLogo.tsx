@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import snagLogo from "@/assets/snag-logo.svg";
+import snagLogo from "@/assets/snag-logo-full.png";
 
 interface SnagLogoProps {
   className?: string;
