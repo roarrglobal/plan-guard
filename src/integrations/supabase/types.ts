@@ -665,6 +665,74 @@ export type Database = {
           },
         ]
       }
+      mystical_purchases: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          currency: string
+          id: string
+          product_type: string
+          status: string
+          stripe_payment_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          currency?: string
+          id?: string
+          product_type: string
+          status?: string
+          stripe_payment_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          product_type?: string
+          status?: string
+          stripe_payment_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      mystical_readings: {
+        Row: {
+          created_at: string
+          decision_id: string | null
+          id: string
+          reading_data: Json
+          reading_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          decision_id?: string | null
+          id?: string
+          reading_data?: Json
+          reading_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          decision_id?: string | null
+          id?: string
+          reading_data?: Json
+          reading_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mystical_readings_decision_id_fkey"
+            columns: ["decision_id"]
+            isOneToOne: false
+            referencedRelation: "decisions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           actor_id: string | null
