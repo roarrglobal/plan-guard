@@ -1,5 +1,6 @@
 import { MarketingHeader } from "@/components/marketing/MarketingHeader";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
+import { usePageSEO } from "@/hooks/usePageSEO";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -39,6 +40,7 @@ const sampleBlindSpots = [
 ];
 
 export default function SolutionPersonalPage() {
+  usePageSEO({ title: "Personal Decision Intelligence — Snag", description: "Make better personal decisions. Career moves, life choices, and major purchases — stress-test them all." });
   return (
     <div className="min-h-screen bg-white">
       <MarketingHeader />

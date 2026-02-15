@@ -1,5 +1,6 @@
 import { MarketingHeader } from "@/components/marketing/MarketingHeader";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
+import { usePageSEO } from "@/hooks/usePageSEO";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -30,6 +31,7 @@ export default function SolutionTeamPage({
   title, subtitle, stats, templateName, templateDesc, blindSpots,
   useCases, roiExample, roiTagline, ctaText = "Start Free Trial",
 }: SolutionTeamPageProps) {
+  usePageSEO({ title: `${title} — Snag`, description: subtitle });
   return (
     <div className="min-h-screen bg-white">
       <MarketingHeader />

@@ -1,5 +1,6 @@
 import { MarketingHeader } from "@/components/marketing/MarketingHeader";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
+import { usePageSEO } from "@/hooks/usePageSEO";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { HelpCircle, Mail, BookOpen, CreditCard, FileText, Code, Link as LinkIcon } from "lucide-react";
@@ -13,6 +14,7 @@ const quickLinks = [
 ];
 
 export default function HelpPage() {
+  usePageSEO({ title: "Help Center", description: "Find answers and get support for Snag's decision intelligence platform." });
   return (
     <div className="min-h-screen bg-background">
       <MarketingHeader />

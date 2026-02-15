@@ -1,5 +1,6 @@
 import { MarketingHeader } from "@/components/marketing/MarketingHeader";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
+import { usePageSEO } from "@/hooks/usePageSEO";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -15,6 +16,7 @@ const teamCards = [
 ];
 
 export default function SolutionsPage() {
+  usePageSEO({ title: "Solutions — Snag", description: "Decision intelligence for every role. Personal use, Sales, Finance, Product, HR, Marketing, and Operations." });
   return (
     <div className="min-h-screen bg-white">
       <MarketingHeader />

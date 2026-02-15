@@ -1,5 +1,6 @@
 import { MarketingHeader } from "@/components/marketing/MarketingHeader";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
+import { usePageSEO } from "@/hooks/usePageSEO";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
@@ -13,6 +14,7 @@ const cultureValues = [
 ];
 
 export default function CareersPage() {
+  usePageSEO({ title: "Careers at Snag", description: "Help us build the decision layer for every company. Remote-first, outcome-focused." });
   return (
     <div className="min-h-screen bg-background">
       <MarketingHeader />

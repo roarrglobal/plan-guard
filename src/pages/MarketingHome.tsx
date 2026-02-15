@@ -1,5 +1,6 @@
 import { MarketingHeader } from "@/components/marketing/MarketingHeader";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
+import { usePageSEO } from "@/hooks/usePageSEO";
 import { HeroSection } from "@/components/marketing/sections/HeroSection";
 import { AudienceSection } from "@/components/marketing/sections/AudienceSection";
 import { ProblemSection } from "@/components/marketing/sections/ProblemSection";
@@ -13,6 +14,7 @@ import { PricingPreviewSection } from "@/components/marketing/sections/PricingPr
 import { FinalCtaSection } from "@/components/marketing/sections/FinalCtaSection";
 
 export default function MarketingHome() {
+  usePageSEO({ title: "Snag — Find the flaw before reality does", description: "Stress-test any plan in 2 minutes. Surface blind spots, failure modes, and warning signs with AI-powered pre-mortem analysis." });
   return (
     <div className="min-h-screen bg-white">
       <MarketingHeader />

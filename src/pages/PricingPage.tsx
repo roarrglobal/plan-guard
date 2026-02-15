@@ -1,5 +1,6 @@
 import { MarketingHeader } from "@/components/marketing/MarketingHeader";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
+import { usePageSEO } from "@/hooks/usePageSEO";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Check, X, Minus } from "lucide-react";
@@ -127,6 +128,7 @@ const faqs = [
 ];
 
 export default function PricingPage() {
+  usePageSEO({ title: "Pricing — Snag", description: "Free to start, powerful at scale. Plans for individuals and teams from $0 to enterprise." });
   const [tab, setTab] = useState<"teams" | "individual">("teams");
   const plans = tab === "individual" ? individualPlans : teamPlans;
 

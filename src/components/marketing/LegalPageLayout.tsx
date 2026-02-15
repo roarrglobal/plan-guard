@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { MarketingHeader } from "@/components/marketing/MarketingHeader";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
+import { usePageSEO } from "@/hooks/usePageSEO";
 import { cn } from "@/lib/utils";
 
 export interface LegalSection {
@@ -16,6 +17,7 @@ interface LegalPageLayoutProps {
 }
 
 export function LegalPageLayout({ title, lastUpdated, sections }: LegalPageLayoutProps) {
+  usePageSEO({ title: `${title} — Snag`, description: `${title} for Snag decision intelligence platform. Last updated ${lastUpdated}.` });
   const [activeId, setActiveId] = useState(sections[0]?.id || "");
 
   useEffect(() => {
