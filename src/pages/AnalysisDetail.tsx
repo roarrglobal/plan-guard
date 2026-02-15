@@ -59,6 +59,7 @@ export default function AnalysisDetail() {
       originalInput={analysis.original_input}
       onNewAnalysis={() => navigate("/analyze")}
       isLoggedIn={!!user}
+      analysisId={id}
     />
   );
 }

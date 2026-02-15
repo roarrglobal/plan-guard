@@ -1050,6 +1050,47 @@ export type Database = {
           },
         ]
       }
+      shared_snags: {
+        Row: {
+          analysis_id: string | null
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          share_config: Json | null
+          short_code: string
+          user_id: string
+          view_count: number | null
+        }
+        Insert: {
+          analysis_id?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          share_config?: Json | null
+          short_code?: string
+          user_id: string
+          view_count?: number | null
+        }
+        Update: {
+          analysis_id?: string | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          share_config?: Json | null
+          short_code?: string
+          user_id?: string
+          view_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_snags_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
+            referencedRelation: "analyses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shares: {
         Row: {
           analysis_id: string | null
@@ -1896,6 +1937,10 @@ export type Database = {
         Returns: undefined
       }
       increment_retros_used: { Args: { p_user_id: string }; Returns: number }
+      increment_share_view: {
+        Args: { p_short_code: string }
+        Returns: undefined
+      }
       increment_team_snag_usage: {
         Args: { p_team_id: string; p_type: string }
         Returns: undefined

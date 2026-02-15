@@ -453,3 +453,95 @@
 .animate-delay-300 { animation-delay: 300ms; }
 .animate-delay-400 { animation-delay: 400ms; }
 .animate-delay-500 { animation-delay: 500ms; }
+
+/* Instagram-style Individual Theme Utilities */
+@layer components {
+  .card-gradient {
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.1), hsl(var(--accent) / 0.1));
+    border: 1px solid hsl(var(--border));
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+  }
+
+  .verdict-green {
+    background: linear-gradient(135deg, hsl(160 84% 39%), hsl(174 100% 40%));
+    box-shadow: 0 0 20px hsl(160 84% 39% / 0.4);
+  }
+
+  .verdict-yellow {
+    background: linear-gradient(135deg, hsl(38 92% 50%), hsl(25 95% 53%));
+    box-shadow: 0 0 20px hsl(38 92% 50% / 0.4);
+  }
+
+  .verdict-red {
+    background: linear-gradient(135deg, hsl(0 72% 51%), hsl(0 84% 60%));
+    box-shadow: 0 0 20px hsl(0 72% 51% / 0.4);
+  }
+
+  .verdict-blue {
+    background: linear-gradient(135deg, hsl(199 89% 65%), hsl(174 100% 50%));
+    box-shadow: 0 0 20px hsl(199 89% 65% / 0.4);
+  }
+
+  .progress-ring-bg {
+    stroke: hsl(var(--muted));
+    fill: none;
+    stroke-width: 3;
+  }
+
+  .progress-ring-fill {
+    stroke: hsl(var(--primary));
+    fill: none;
+    stroke-width: 3;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+    transition: stroke-dasharray 0.6s ease;
+  }
+
+  .story-circle {
+    @apply rounded-full p-[2px] bg-gradient-to-br from-primary to-accent;
+  }
+
+  .story-circle-inner {
+    @apply rounded-full bg-background p-[2px];
+  }
+}
+
+/* Scrollbar hide utility */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Slide-up stagger animation */
+@keyframes slide-up-fade {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up-fade 0.5s ease-out forwards;
+}
+
+/* Shimmer skeleton loader */
+.skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.skeleton-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.08), transparent);
+  animation: shimmer 2s infinite;
+}

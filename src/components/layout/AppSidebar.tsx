@@ -138,8 +138,9 @@ const getNavItems = (userType: string): NavItem[] => {
         { label: "Quick Retro", href: "/quick-retro", icon: <Lightbulb className="w-4 h-4" /> },
       ]
     },
+    { label: "Cosmic Insights", href: "/dashboard#cosmic-section", icon: <Sparkles className="w-4 h-4" /> },
+    { label: "Patterns & Insights", href: "/patterns", icon: <BarChart3 className="w-4 h-4" />, feature: "patterns" },
     { label: "Reports", href: "/reports", icon: <FileText className="w-4 h-4" /> },
-    { label: "Patterns & Insights", href: "/patterns", icon: <Lightbulb className="w-4 h-4" />, feature: "patterns" },
     { label: "Settings", href: "/settings", icon: <Settings className="w-4 h-4" /> },
   ];
 };
