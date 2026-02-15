@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronUp, Sparkles } from "lucide-react";
 import { AnalysisInput } from "@/components/AnalysisInput";
 import { AnalysisLoading } from "@/components/analysis/AnalysisLoading";
 import { AnalysisResults, type AnalysisResult } from "@/components/analysis/AnalysisResults";
@@ -14,6 +14,7 @@ import { useSoftLaunch } from "@/hooks/useSoftLaunch";
 import { WaitlistModal } from "@/components/softlaunch/WaitlistModal";
 import LimitReachedModal from "@/components/usage/LimitReachedModal";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Switch } from "@/components/ui/switch";
 
 export default function Analyze() {
   const navigate = useNavigate();
@@ -34,6 +35,25 @@ export default function Analyze() {
   const [stakes, setStakes] = useState("medium");
   const [timeline, setTimeline] = useState("short");
   const [showOptions, setShowOptions] = useState(false);
+  const [includeCosmicInsights, setIncludeCosmicInsights] = useState(false);
+  const [userReadings, setUserReadings] = useState<any[]>([]);
+  const [hasReadings, setHasReadings] = useState(false);
+
+  // Check if user has purchased readings
+  useEffect(() => {
+    if (!user) return;
+    const fetchReadings = async () => {
+      const { data } = await supabase
+        .from("mystical_readings")
+        .select("reading_type, reading_data")
+        .eq("user_id", user.id);
+      if (data && data.length > 0) {
+        setUserReadings(data);
+        setHasReadings(true);
+      }
+    };
+    fetchReadings();
+  }, [user]);
 
   useEffect(() => {
     // Check for prefilled content from journal or decision
@@ -101,8 +121,17 @@ export default function Analyze() {
     setIsLoading(true);
 
     try {
+      // Build cosmic data if toggle is on and user has readings
+      let cosmicData: any = undefined;
+      if (includeCosmicInsights && hasReadings && userReadings.length > 0) {
+        cosmicData = {};
+        for (const r of userReadings) {
+          cosmicData[r.reading_type] = r.reading_data;
+        }
+      }
+
       const { data, error } = await supabase.functions.invoke('analyze-plan', {
-        body: { plan: text }
+        body: { plan: text, cosmic_data: cosmicData }
       });
 
       if (error) {
@@ -254,7 +283,7 @@ export default function Analyze() {
                   </>
                 )}
               </CollapsibleTrigger>
-              <CollapsibleContent className="mt-4">
+              <CollapsibleContent className="mt-4 space-y-4">
                 <AnalysisInputSelectors
                   category={category}
                   onCategoryChange={setCategory}
@@ -263,6 +292,23 @@ export default function Analyze() {
                   timeline={timeline}
                   onTimelineChange={setTimeline}
                 />
+                
+                {/* Cosmic Insights Toggle */}
+                {hasReadings && (
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-gradient-to-r from-indigo-500/5 via-purple-500/5 to-amber-500/5 border border-primary/20">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-primary" />
+                      <div>
+                        <p className="text-sm font-medium text-foreground">Include cosmic insights</p>
+                        <p className="text-xs text-muted-foreground">Add timing guidance from your readings</p>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={includeCosmicInsights}
+                      onCheckedChange={setIncludeCosmicInsights}
+                    />
+                  </div>
+                )}
               </CollapsibleContent>
             </Collapsible>
           </div>

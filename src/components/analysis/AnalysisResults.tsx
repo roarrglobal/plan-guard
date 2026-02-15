@@ -7,6 +7,7 @@ import { AnalysisDisclaimer } from "./AnalysisDisclaimer";
 import { FirstUseAcknowledgment, useFirstUseAcknowledgment } from "./FirstUseAcknowledgment";
 import { ShareModal } from "@/components/sharing/ShareModal";
 import { BottomLineSection, type BottomLine } from "./BottomLineSection";
+import { CosmicTimingSection, type CosmicTiming } from "./CosmicTimingSection";
 import { exportPreMortemPDF, type PreMortemData } from "@/lib/pdfExport";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -44,6 +45,7 @@ export interface AnalysisResult {
   unasked_question: string;
   bottom_line?: BottomLine;
   category?: string;
+  cosmic_timing?: CosmicTiming;
 }
 
 interface AnalysisResultsProps {
@@ -368,6 +370,11 @@ export function AnalysisResults({
         {/* Bottom Line */}
         {result.bottom_line && (
           <BottomLineSection bottomLine={result.bottom_line} />
+        )}
+
+        {/* Cosmic Timing - supplementary section */}
+        {result.cosmic_timing && (
+          <CosmicTimingSection cosmicTiming={result.cosmic_timing} />
         )}
 
         {/* Disclaimer */}
