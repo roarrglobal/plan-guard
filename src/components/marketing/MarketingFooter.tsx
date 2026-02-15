@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Linkedin, Twitter } from "lucide-react";
 import snagLogo from "@/assets/snag-logo-full.png";
+import { MarketingChatbot } from "@/components/chat/MarketingChatbot";
 
 const footerLinks = {
   Product: [
@@ -39,6 +40,7 @@ const footerLinks = {
 
 export function MarketingFooter() {
   return (
+    <>
     <footer className="bg-[#1A1A1A] text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 mb-12">
@@ -79,5 +81,7 @@ export function MarketingFooter() {
         </div>
       </div>
     </footer>
+    <MarketingChatbot />
+    </>
   );
 }
