@@ -20,6 +20,7 @@ import {
   Calendar, Shield, ShieldCheck, Eye, Clock, ArrowRight, Search,
   Download, Mail
 } from "lucide-react";
+import { logAuditEvent } from "@/lib/auditLog";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { format, differenceInDays, isPast } from "date-fns";
 import type { Team } from "@/hooks/useTeams";
@@ -213,6 +214,11 @@ export default function TeamAdminPage() {
         entity_type: "invitation",
         metadata: { count: sent },
       });
+      logAuditEvent({
+        teamId: team.id, userId: user.id,
+        eventType: "member.invited", entityType: "member",
+        eventData: { count: sent, role: inviteRole, emails: emails.join(", ") },
+      });
       setInviteEmails("");
       setInviteMessage("");
       setInviteOpen(false);
@@ -222,12 +228,19 @@ export default function TeamAdminPage() {
   };
 
   const handleChangeRole = async (memberId: string, newRole: string) => {
+    const member = activeMembers.find(m => m.id === memberId);
+    const oldRole = member?.role || "unknown";
     const { error } = await supabase
       .from("team_members")
       .update({ role: newRole as any })
       .eq("id", memberId);
     if (error) toast.error(error.message);
     else {
+      logAuditEvent({
+        teamId: team.id, userId: user!.id,
+        eventType: "member.role_changed", entityType: "member", entityId: memberId,
+        eventData: { member_name: member?.display_name, previous_role: oldRole, new_role: newRole },
+      });
       toast.success("Role updated");
       refetchMembers();
     }
@@ -238,6 +251,11 @@ export default function TeamAdminPage() {
     const { error } = await supabase.from("team_members").delete().eq("id", memberId);
     if (error) toast.error(error.message);
     else {
+      logAuditEvent({
+        teamId: team.id, userId: user!.id,
+        eventType: "member.removed", entityType: "member", entityId: memberId,
+        eventData: { member_name: memberName },
+      });
       toast.success("Member removed");
       refetchMembers();
     }
@@ -549,7 +567,7 @@ export default function TeamAdminPage() {
             {[
               { label: "Invite Members", icon: UserPlus, action: () => setInviteOpen(true) },
               { label: "All Decisions", icon: ListChecks, action: () => navigate(`/team/${team.slug}/decisions`) },
-              { label: "Team Analytics", icon: BarChart3, action: () => navigate(`/team/${team.slug}/analytics`) },
+              { label: "Audit Log", icon: Shield, action: () => navigate(`/team/${team.slug}/audit-log`) },
               { label: "Team Settings", icon: Settings, action: () => navigate(`/team/${team.slug}/settings`) },
             ].map((item) => (
               <button

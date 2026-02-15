@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 import { ArrowLeft, ArrowRight, Save, Zap, FileText, X } from "lucide-react";
+import { logAuditEvent } from "@/lib/auditLog";
 import { DepartmentBadge } from "@/components/templates/DepartmentBadge";
 import { TemplateSelectorModal } from "@/components/templates/TemplateSelectorModal";
 import { useDecisionTemplates, type DecisionTemplate } from "@/hooks/useDecisionTemplates";
@@ -170,6 +171,11 @@ export default function TeamDecisionNewPage() {
         entity_id: (data as any).id,
         metadata: { title: title.trim() },
       });
+      logAuditEvent({
+        teamId: team.id, userId: user.id,
+        eventType: "decision.created", entityType: "decision", entityId: (data as any).id,
+        eventData: { title: title.trim(), category, stakes, visibility },
+      });
       navigate(`/team/${team.slug}/decisions/${(data as any).id}`);
     }
     setIsSaving(false);
@@ -212,6 +218,11 @@ export default function TeamDecisionNewPage() {
       entity_type: "decision",
       entity_id: (data as any).id,
       metadata: { title: title.trim() },
+    });
+    logAuditEvent({
+      teamId: team.id, userId: user.id,
+      eventType: "decision.created", entityType: "decision", entityId: (data as any).id,
+      eventData: { title: title.trim(), category, stakes, visibility },
     });
 
     // Increment template usage count
