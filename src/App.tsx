@@ -25,6 +25,7 @@ import SolutionMarketingPage from "./pages/SolutionMarketingPage";
 import SolutionOperationsPage from "./pages/SolutionOperationsPage";
 import Analyze from "./pages/Analyze";
 import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
@@ -105,6 +106,7 @@ const App = () => {
               <Route path="/careers" element={<CareersPage />} />
               <Route path="/help" element={<HelpPage />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/terms" element={<Terms />} />
