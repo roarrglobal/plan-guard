@@ -10,6 +10,14 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import MarketingHome from "./pages/MarketingHome";
 import ProductPage from "./pages/ProductPage";
 import PricingPage from "./pages/PricingPage";
+import SolutionsPage from "./pages/SolutionsPage";
+import SolutionPersonalPage from "./pages/SolutionPersonalPage";
+import SolutionSalesPage from "./pages/SolutionSalesPage";
+import SolutionFinancePage from "./pages/SolutionFinancePage";
+import SolutionProductPage from "./pages/SolutionProductPage";
+import SolutionHRPage from "./pages/SolutionHRPage";
+import SolutionMarketingPage from "./pages/SolutionMarketingPage";
+import SolutionOperationsPage from "./pages/SolutionOperationsPage";
 import Analyze from "./pages/Analyze";
 import Login from "./pages/Login";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -75,6 +83,14 @@ const App = () => {
               <Route path="/" element={<MarketingHome />} />
               <Route path="/product" element={<ProductPage />} />
               <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/solutions" element={<SolutionsPage />} />
+              <Route path="/solutions/personal" element={<SolutionPersonalPage />} />
+              <Route path="/solutions/sales" element={<SolutionSalesPage />} />
+              <Route path="/solutions/finance" element={<SolutionFinancePage />} />
+              <Route path="/solutions/product" element={<SolutionProductPage />} />
+              <Route path="/solutions/hr" element={<SolutionHRPage />} />
+              <Route path="/solutions/marketing" element={<SolutionMarketingPage />} />
+              <Route path="/solutions/operations" element={<SolutionOperationsPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
