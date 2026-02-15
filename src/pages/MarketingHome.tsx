@@ -2,6 +2,7 @@ import { MarketingHeader } from "@/components/marketing/MarketingHeader";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { usePageSEO } from "@/hooks/usePageSEO";
 import { HeroSection } from "@/components/marketing/sections/HeroSection";
+import { LiveCountersSection } from "@/components/marketing/sections/LiveCountersSection";
 import { AudienceSection } from "@/components/marketing/sections/AudienceSection";
 import { ProblemSection } from "@/components/marketing/sections/ProblemSection";
 import { HowItWorksSection } from "@/components/marketing/sections/HowItWorksSection";
@@ -20,6 +21,7 @@ export default function MarketingHome() {
       <MarketingHeader />
       <main>
         <HeroSection />
+        <LiveCountersSection />
         <AudienceSection />
         <ProblemSection />
         <HowItWorksSection />

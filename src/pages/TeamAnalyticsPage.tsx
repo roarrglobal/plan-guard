@@ -19,6 +19,7 @@ import { AnalyticsPatterns } from "@/components/analytics/AnalyticsPatterns";
 import { AnalyticsTimeline } from "@/components/analytics/AnalyticsTimeline";
 import { AnalyticsLeaderboard } from "@/components/analytics/AnalyticsLeaderboard";
 import { AnalyticsDepartments } from "@/components/analytics/AnalyticsDepartments";
+import { AnalyticsHeatmap } from "@/components/analytics/AnalyticsHeatmap";
 
 const DATE_RANGES = [
   { label: "Last 30 days", value: "30" },
@@ -152,9 +153,9 @@ export default function TeamAnalyticsPage() {
   const isEmpty = decisions.length === 0;
 
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-6">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-gradient-to-r from-cobalt/5 to-purple-500/5 rounded-2xl p-6 border border-border">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Team Analytics</h1>
           <p className="text-sm text-muted-foreground mt-1">Decision patterns, accuracy metrics, and insights</p>
@@ -232,8 +233,11 @@ export default function TeamAnalyticsPage() {
           {/* Section 4: Department Breakdown */}
           <AnalyticsDepartments decisions={filteredDecisions} outcomes={filteredOutcomes} />
 
-          {/* Section 5: Timeline */}
-          <AnalyticsTimeline decisions={decisions} outcomes={outcomes} />
+          {/* Section 5: Heatmap + Timeline */}
+          <div className="grid md:grid-cols-2 gap-6">
+            <AnalyticsHeatmap decisions={filteredDecisions} />
+            <AnalyticsTimeline decisions={decisions} outcomes={outcomes} />
+          </div>
 
           {/* Section 6: Leaderboard */}
           <AnalyticsLeaderboard decisions={filteredDecisions} outcomes={filteredOutcomes} members={activeMembers} />
