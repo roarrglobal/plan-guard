@@ -29,8 +29,10 @@ export function HelpArticleRenderer({ content }: Props) {
 
     // Heading ###
     if (line.startsWith("### ")) {
+      const text = line.slice(4).replace(/\*\*/g, "");
+      const headingId = text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
       elements.push(
-        <h3 key={i} className="text-base font-semibold text-foreground mt-5 mb-2">
+        <h3 key={i} id={headingId} className="text-base font-semibold text-foreground mt-5 mb-2 scroll-mt-24">
           {renderInline(line.slice(4))}
         </h3>
       );

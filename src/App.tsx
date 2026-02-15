@@ -14,7 +14,9 @@ import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import BlogPage from "./pages/BlogPage";
 import CareersPage from "./pages/CareersPage";
-import HelpPage from "./pages/HelpPage";
+import HelpIndexPage from "./pages/HelpIndexPage";
+import HelpSectionPage from "./pages/HelpSectionPage";
+import HelpArticlePage from "./pages/HelpArticlePage";
 import SolutionsPage from "./pages/SolutionsPage";
 import SolutionPersonalPage from "./pages/SolutionPersonalPage";
 import SolutionSalesPage from "./pages/SolutionSalesPage";
@@ -104,7 +106,9 @@ const App = () => {
               <Route path="/contact" element={<ContactPage />} />
               <Route path="/blog" element={<BlogPage />} />
               <Route path="/careers" element={<CareersPage />} />
-              <Route path="/help" element={<HelpPage />} />
+              <Route path="/help" element={<HelpIndexPage />} />
+              <Route path="/help/:sectionId" element={<HelpSectionPage />} />
+              <Route path="/help/:sectionId/:articleId" element={<HelpArticlePage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />

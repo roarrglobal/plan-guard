@@ -8,6 +8,7 @@ export interface HelpSection {
   id: string;
   number: number;
   title: string;
+  description: string;
   icon: string; // lucide icon name
   articles: HelpArticle[];
 }
@@ -17,6 +18,7 @@ export const helpSections: HelpSection[] = [
     id: "getting-started",
     number: 1,
     title: "Getting Started",
+    description: "New to Snag? Start here",
     icon: "Rocket",
     articles: [
       {
@@ -145,6 +147,7 @@ If someone invited you:
     id: "deep-snag",
     number: 2,
     title: "Deep Snag Analysis",
+    description: "Full pre-mortem analysis",
     icon: "Search",
     articles: [
       {
@@ -256,6 +259,7 @@ The analysis is only valuable if you act on it:
     id: "quick-snag",
     number: 3,
     title: "Quick Snag",
+    description: "30-second decision checks",
     icon: "Zap",
     articles: [
       {
@@ -305,6 +309,7 @@ If Quick Snag reveals something concerning:
     id: "outcome-tracking",
     number: 4,
     title: "Outcome Tracking (TRACE)",
+    description: "Track results and learn from decisions",
     icon: "Target",
     articles: [
       {
@@ -380,6 +385,7 @@ You'll see:
     id: "templates",
     number: 5,
     title: "Templates (Teams)",
+    description: "Department-specific frameworks",
     icon: "LayoutTemplate",
     articles: [
       {
@@ -441,6 +447,7 @@ Your custom templates will appear in the template dropdown for all team members.
     id: "team-management",
     number: 6,
     title: "Team Management",
+    description: "Invites, roles, and collaboration",
     icon: "Users",
     articles: [
       {
@@ -495,6 +502,7 @@ Note: You cannot remove yourself or (if not Owner) the Owner.
     id: "billing",
     number: 7,
     title: "Account & Billing",
+    description: "Pricing, upgrades, and invoices",
     icon: "CreditCard",
     articles: [
       {
@@ -564,6 +572,7 @@ Go to **Settings → Billing → Billing History** to download invoices. They're
     id: "journal",
     number: 8,
     title: "Journal",
+    description: "Daily decision journaling",
     icon: "BookOpen",
     articles: [
       {
@@ -602,6 +611,7 @@ Go to **Settings → Billing → Billing History** to download invoices. They're
     id: "habits",
     number: 9,
     title: "Habits",
+    description: "Build consistent decision practices",
     icon: "Flame",
     articles: [
       {
@@ -628,6 +638,7 @@ Go to **Settings → Billing → Billing History** to download invoices. They're
     id: "settings",
     number: 10,
     title: "Settings & Preferences",
+    description: "Profile, notifications, and data",
     icon: "Settings",
     articles: [
       {
@@ -667,6 +678,7 @@ Note: If you're a Team Owner, transfer ownership first.`,
     id: "faq",
     number: 11,
     title: "FAQ",
+    description: "Common questions answered",
     icon: "HelpCircle",
     articles: [
       {
@@ -741,6 +753,7 @@ Yes. See our GDPR page for details.`,
     id: "troubleshooting",
     number: 12,
     title: "Troubleshooting",
+    description: "Fix common issues",
     icon: "Wrench",
     articles: [
       {
