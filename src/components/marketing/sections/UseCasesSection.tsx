@@ -66,9 +66,9 @@ export function UseCasesSection() {
   const tab = tabs.find((t) => t.id === active)!;
 
   return (
-    <section className="py-20 md:py-28 bg-[#F9FAFB]">
+    <section className="py-20 md:py-28 bg-muted/30">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-3xl md:text-4xl font-bold text-[#1A1A1A] text-center mb-12">
+        <h2 className="text-3xl md:text-4xl font-bold text-foreground text-center mb-12">
           Built for decisions that matter
         </h2>
 
@@ -80,8 +80,8 @@ export function UseCasesSection() {
               onClick={() => setActive(t.id)}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                 active === t.id
-                  ? "bg-[#1A1A1A] text-white"
-                  : "bg-white text-muted-foreground border border-border hover:text-[#1A1A1A]"
+                  ? "bg-foreground text-background"
+                  : "bg-card text-muted-foreground border border-border hover:text-foreground"
               }`}
             >
               {t.label}
@@ -97,16 +97,16 @@ export function UseCasesSection() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.3 }}
-            className="bg-white rounded-2xl border border-border p-8 md:p-12"
+            className="bg-card rounded-2xl border border-border p-8 md:p-12"
           >
             <div className="grid md:grid-cols-2 gap-10">
               <div>
-                <h3 className="text-2xl font-bold text-[#1A1A1A] mb-6">{tab.headline}</h3>
+                <h3 className="text-2xl font-bold text-foreground mb-6">{tab.headline}</h3>
                 <div className="mb-6">
                   <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Decision Types</p>
                   <div className="flex flex-wrap gap-2">
                     {tab.decisions.map((d) => (
-                      <span key={d} className="text-sm px-3 py-1.5 bg-[#F9FAFB] rounded-lg border border-border text-[#1A1A1A]">{d}</span>
+                      <span key={d} className="text-sm px-3 py-1.5 bg-muted rounded-lg border border-border text-foreground">{d}</span>
                     ))}
                   </div>
                 </div>
@@ -114,7 +114,7 @@ export function UseCasesSection() {
                   <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Blind Spots We Catch</p>
                   <ul className="space-y-2">
                     {tab.blindSpots.map((b) => (
-                      <li key={b} className="flex items-center gap-2 text-sm text-[#1A1A1A]">
+                      <li key={b} className="flex items-center gap-2 text-sm text-foreground">
                         <span className="w-1.5 h-1.5 rounded-full bg-crimson" />
                         {b}
                       </li>
@@ -123,7 +123,7 @@ export function UseCasesSection() {
                 </div>
               </div>
               <div className="flex flex-col justify-between">
-                <div className="bg-[#F9FAFB] rounded-xl p-6 border border-border mb-6">
+                <div className="bg-muted rounded-xl p-6 border border-border mb-6">
                   <p className="text-sm text-muted-foreground italic leading-relaxed">"{tab.stat}"</p>
                 </div>
                 <Link

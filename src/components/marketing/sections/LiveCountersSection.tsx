@@ -62,10 +62,10 @@ export function LiveCountersSection() {
   ];
 
   return (
-    <section className="py-16 md:py-20 bg-white">
+    <section className="py-16 md:py-20 bg-background">
       <div className="max-w-4xl mx-auto px-4 text-center">
         <motion.h2
-          className="text-2xl md:text-3xl font-bold text-[#1A1A1A] mb-12"
+          className="text-2xl md:text-3xl font-bold text-foreground mb-12"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -81,7 +81,7 @@ export function LiveCountersSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.15 }}
-              className="bg-white rounded-2xl p-8 border border-border shadow-card hover:shadow-card-hover transition-shadow text-center"
+              className="bg-card rounded-2xl p-8 border border-border shadow-card hover:shadow-card-hover transition-shadow text-center"
               whileHover={{ y: -4 }}
             >
               <div className={`w-12 h-12 rounded-xl ${i === 0 ? 'bg-crimson' : i === 1 ? 'bg-cobalt' : 'bg-gradient-to-br from-crimson to-cobalt'} flex items-center justify-center mx-auto mb-4`}>

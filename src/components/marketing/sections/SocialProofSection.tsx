@@ -9,7 +9,7 @@ const testimonials = [
 
 export function SocialProofSection() {
   return (
-    <section className="py-20 md:py-28 bg-white">
+    <section className="py-20 md:py-28 bg-background">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div 
           className="text-center mb-12"
@@ -18,7 +18,7 @@ export function SocialProofSection() {
           viewport={{ once: true }}
         >
           <span className="inline-block text-xs font-semibold uppercase tracking-widest text-cobalt bg-cobalt/5 px-3 py-1.5 rounded-full mb-4">Beta</span>
-          <h2 className="text-3xl md:text-4xl font-bold text-[#1A1A1A] mb-4">Join the beta</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Join the beta</h2>
           <p className="text-lg text-muted-foreground">50+ teams already making better decisions</p>
         </motion.div>
 
@@ -34,13 +34,13 @@ export function SocialProofSection() {
               whileHover={{ y: -4 }}
             >
               <Quote className="w-8 h-8 text-cobalt/10 mb-4" />
-              <p className="text-sm text-[#1A1A1A] leading-relaxed mb-6">"{t.quote}"</p>
+              <p className="text-sm text-foreground leading-relaxed mb-6">"{t.quote}"</p>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cobalt to-purple-500 flex items-center justify-center text-white font-bold text-sm">
                   {t.name.charAt(0)}
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-[#1A1A1A]">{t.name}</p>
+                  <p className="text-sm font-semibold text-foreground">{t.name}</p>
                   <p className="text-xs text-muted-foreground">{t.title}, {t.company}</p>
                 </div>
               </div>
@@ -55,7 +55,7 @@ export function SocialProofSection() {
           viewport={{ once: true }}
         >
           {["TechCorp", "FinanceIO", "ProductLab", "ScaleUp", "DataFlow"].map((c) => (
-            <span key={c} className="text-lg font-bold text-[#1A1A1A]">{c}</span>
+            <span key={c} className="text-lg font-bold text-foreground">{c}</span>
           ))}
         </motion.div>
       </div>

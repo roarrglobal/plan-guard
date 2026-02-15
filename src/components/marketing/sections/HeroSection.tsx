@@ -18,7 +18,7 @@ export function HeroSection() {
   }, []);
 
   return (
-    <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-20 bg-white">
+    <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-20 bg-background">
       {/* Funky accent shapes */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-crimson/5 rounded-full blur-[100px] -translate-y-1/3 translate-x-1/3" />
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-cobalt/5 rounded-full blur-[100px] translate-y-1/3 -translate-x-1/3" />
