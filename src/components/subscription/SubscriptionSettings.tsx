@@ -28,6 +28,7 @@ export function SubscriptionSettings() {
   const tierName = tierDisplayNames[tier] || "Free";
   const subscriptionStatus = (profile as any)?.subscription_status || "active";
   const isTrialing = subscriptionStatus === "trialing";
+  const isIndividual = profile?.user_type === "individual" || !profile?.user_type;
 
   return (
     <div className="space-y-6">
@@ -157,7 +158,7 @@ export function SubscriptionSettings() {
                 <ArrowUpRight className="w-4 h-4" />
               </Button>
             )}
-            {(isFree || isPro) && (
+            {!isIndividual && (isFree || isPro) && (
               <Button 
                 variant="outline" 
                 className="w-full justify-between"
@@ -167,7 +168,7 @@ export function SubscriptionSettings() {
                 <ArrowUpRight className="w-4 h-4" />
               </Button>
             )}
-            {(isFree || isPro || isTeam) && (
+            {!isIndividual && (isFree || isPro || isTeam) && (
               <Button 
                 variant="outline" 
                 className="w-full justify-between"
