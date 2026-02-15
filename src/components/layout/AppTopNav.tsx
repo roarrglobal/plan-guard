@@ -33,6 +33,7 @@ export function AppTopNav({ onMenuClick, sidebarOpen }: AppTopNavProps) {
   const location = useLocation();
   const { user, profile, signOut } = useAuth();
   const { usage } = useUsage();
+  const userType = profile?.user_type || "individual";
 
   const displayName = profile?.display_name || user?.email?.split("@")[0] || "User";
   const initials = displayName
@@ -104,7 +105,7 @@ export function AppTopNav({ onMenuClick, sidebarOpen }: AppTopNavProps) {
                 : "text-muted-foreground hover:text-foreground hover:bg-muted"
             )}
           >
-            Journal
+            {userType === "business" ? "Notes" : "Journal"}
           </Link>
 
           <Link
@@ -119,7 +120,7 @@ export function AppTopNav({ onMenuClick, sidebarOpen }: AppTopNavProps) {
             Decisions
           </Link>
 
-          {/* Frameworks Dropdown */}
+          {/* Frameworks Dropdown - B2B gets full frameworks, B2C gets simplified analysis */}
           <NavigationMenu>
             <NavigationMenuList>
               <NavigationMenuItem>
@@ -131,7 +132,7 @@ export function AppTopNav({ onMenuClick, sidebarOpen }: AppTopNavProps) {
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
-                  Frameworks
+                  {userType === "business" ? "Frameworks" : "Analysis"}
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <ul className="grid w-[280px] gap-1 p-2">
@@ -141,7 +142,9 @@ export function AppTopNav({ onMenuClick, sidebarOpen }: AppTopNavProps) {
                           to="/analyze"
                           className="block select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-muted focus:bg-muted"
                         >
-                          <div className="text-sm font-medium text-foreground">🎯 Pre-Mortem (Deep Snag)</div>
+                          <div className="text-sm font-medium text-foreground">
+                            🎯 {userType === "business" ? "Pre-Mortem (Deep Snag)" : "Deep Snag"}
+                          </div>
                           <p className="text-xs text-muted-foreground mt-1">
                             Stress-test a plan before you commit
                           </p>
@@ -161,19 +164,36 @@ export function AppTopNav({ onMenuClick, sidebarOpen }: AppTopNavProps) {
                         </Link>
                       </NavigationMenuLink>
                     </li>
-                    <li>
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to="/frameworks"
-                          className="block select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-muted focus:bg-muted"
-                        >
-                          <div className="text-sm font-medium text-foreground">📊 Business Frameworks</div>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            SWOT, Porter's Five Forces, MEDDPICC, and more
-                          </p>
-                        </Link>
-                      </NavigationMenuLink>
-                    </li>
+                    {userType === "business" && (
+                      <li>
+                        <NavigationMenuLink asChild>
+                          <Link
+                            to="/frameworks"
+                            className="block select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-muted focus:bg-muted"
+                          >
+                            <div className="text-sm font-medium text-foreground">📊 Business Frameworks</div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              SWOT, Porter's Five Forces, and more
+                            </p>
+                          </Link>
+                        </NavigationMenuLink>
+                      </li>
+                    )}
+                    {userType !== "business" && (
+                      <li>
+                        <NavigationMenuLink asChild>
+                          <Link
+                            to="/quick-retro"
+                            className="block select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-muted focus:bg-muted"
+                          >
+                            <div className="text-sm font-medium text-foreground">💡 Quick Retro</div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Capture lessons from recent experiences
+                            </p>
+                          </Link>
+                        </NavigationMenuLink>
+                      </li>
+                    )}
                   </ul>
                 </NavigationMenuContent>
               </NavigationMenuItem>
