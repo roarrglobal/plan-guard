@@ -10,44 +10,57 @@ const rows = [
   { feature: "Cost per decision",        gut: "Free", chatgpt: "Free", consultants: "$10,000+", snag: "~$3" },
 ];
 
-function Cell({ value }: { value: boolean | null | string }) {
-  if (typeof value === "string") return <span className="text-sm font-medium text-[#1A1A1A]">{value}</span>;
+function Cell({ value, highlight }: { value: boolean | null | string; highlight?: boolean }) {
+  if (typeof value === "string") return <span className={`text-sm font-medium ${highlight ? "text-white" : "text-[#1A1A1A]"}`}>{value}</span>;
   if (value === null) return <Minus className="w-4 h-4 text-muted-foreground mx-auto" />;
-  return value ? <Check className="w-5 h-5 text-emerald-600 mx-auto" /> : <X className="w-5 h-5 text-red-400 mx-auto" />;
+  return value ? (
+    <div className={`w-6 h-6 rounded-full ${highlight ? "bg-success/20" : "bg-success/10"} flex items-center justify-center mx-auto`}>
+      <Check className="w-4 h-4 text-success" />
+    </div>
+  ) : (
+    <div className="w-6 h-6 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">
+      <X className="w-4 h-4 text-destructive/50" />
+    </div>
+  );
 }
 
 export function ComparisonSection() {
   return (
     <section className="py-20 md:py-28 bg-white">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-3xl md:text-4xl font-bold text-[#1A1A1A] text-center mb-12">
+        <motion.h2 
+          className="text-3xl md:text-4xl font-bold text-[#1A1A1A] text-center mb-12"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
           Not another AI chatbot
-        </h2>
+        </motion.h2>
 
         <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="overflow-x-auto"
+          className="overflow-x-auto rounded-2xl border border-border"
         >
           <table className="w-full text-left">
             <thead>
-              <tr className="border-b border-border">
-                <th className="py-4 pr-4 text-sm font-medium text-muted-foreground">What you need</th>
+              <tr className="border-b border-border bg-[#F9FAFB]">
+                <th className="py-4 pr-4 pl-6 text-sm font-medium text-muted-foreground">What you need</th>
                 <th className="py-4 px-4 text-sm font-medium text-muted-foreground text-center">Gut Feel</th>
                 <th className="py-4 px-4 text-sm font-medium text-muted-foreground text-center">ChatGPT</th>
                 <th className="py-4 px-4 text-sm font-medium text-muted-foreground text-center">Consultants</th>
-                <th className="py-4 px-4 text-sm font-semibold text-cobalt text-center bg-cobalt/5 rounded-t-lg">Snag</th>
+                <th className="py-4 px-6 text-sm font-semibold text-white text-center bg-gradient-to-b from-cobalt to-[#003D94] rounded-tr-xl">Snag</th>
               </tr>
             </thead>
             <tbody>
-              {rows.map((row) => (
-                <tr key={row.feature} className="border-b border-border/50">
-                  <td className="py-4 pr-4 text-sm text-[#1A1A1A] font-medium">{row.feature}</td>
+              {rows.map((row, i) => (
+                <tr key={row.feature} className={`border-b border-border/50 ${i === rows.length - 1 ? "border-b-0" : ""}`}>
+                  <td className="py-4 pr-4 pl-6 text-sm text-[#1A1A1A] font-medium">{row.feature}</td>
                   <td className="py-4 px-4 text-center"><Cell value={row.gut} /></td>
                   <td className="py-4 px-4 text-center"><Cell value={row.chatgpt} /></td>
                   <td className="py-4 px-4 text-center"><Cell value={row.consultants} /></td>
-                  <td className="py-4 px-4 text-center bg-cobalt/5"><Cell value={row.snag} /></td>
+                  <td className="py-4 px-6 text-center bg-cobalt/5"><Cell value={row.snag} highlight /></td>
                 </tr>
               ))}
             </tbody>

@@ -39,7 +39,7 @@ export function AnalyticsTimeline({ decisions, outcomes }: Props) {
   });
 
   return (
-    <div className="grid md:grid-cols-2 gap-6">
+    <div className="space-y-6">
       {/* Activity line chart */}
       <Card>
         <CardHeader className="pb-2"><CardTitle className="text-base">Decision Activity (6 months)</CardTitle></CardHeader>

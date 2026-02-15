@@ -31,7 +31,7 @@ export function MarketingHeader() {
     <header
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-        scrolled ? "bg-white shadow-sm border-b border-border" : "bg-transparent"
+        scrolled ? "bg-white/80 backdrop-blur-lg shadow-sm border-b border-border" : "bg-transparent"
       )}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -43,13 +43,13 @@ export function MarketingHeader() {
 
           {/* Desktop Nav */}
           <nav className="hidden lg:flex items-center gap-8">
-            <Link to="/product" className="text-sm font-medium text-[#1A1A1A] hover:text-cobalt transition-colors">
+            <Link to="/product" className={cn("text-sm font-medium transition-colors", scrolled ? "text-[#1A1A1A] hover:text-cobalt" : "text-white/80 hover:text-white")}>
               Product
             </Link>
 
             {/* Solutions Dropdown */}
             <div className="relative" onMouseEnter={() => setSolutionsOpen(true)} onMouseLeave={() => setSolutionsOpen(false)}>
-              <button className="flex items-center gap-1 text-sm font-medium text-[#1A1A1A] hover:text-cobalt transition-colors">
+              <button className={cn("flex items-center gap-1 text-sm font-medium transition-colors", scrolled ? "text-[#1A1A1A] hover:text-cobalt" : "text-white/80 hover:text-white")}>
                 Solutions <ChevronDown className="w-3.5 h-3.5" />
               </button>
               {solutionsOpen && (
@@ -73,17 +73,17 @@ export function MarketingHeader() {
               )}
             </div>
 
-            <Link to="/pricing" className="text-sm font-medium text-[#1A1A1A] hover:text-cobalt transition-colors">
+            <Link to="/pricing" className={cn("text-sm font-medium transition-colors", scrolled ? "text-[#1A1A1A] hover:text-cobalt" : "text-white/80 hover:text-white")}>
               Pricing
             </Link>
-            <Link to="/about" className="text-sm font-medium text-[#1A1A1A] hover:text-cobalt transition-colors">
+            <Link to="/about" className={cn("text-sm font-medium transition-colors", scrolled ? "text-[#1A1A1A] hover:text-cobalt" : "text-white/80 hover:text-white")}>
               About
             </Link>
           </nav>
 
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center gap-4">
-            <Link to="/login" className="text-sm font-medium text-[#1A1A1A] hover:text-cobalt transition-colors">
+            <Link to="/login" className={cn("text-sm font-medium transition-colors", scrolled ? "text-[#1A1A1A] hover:text-cobalt" : "text-white/80 hover:text-white")}>
               Log in
             </Link>
 
