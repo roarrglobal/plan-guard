@@ -56,9 +56,9 @@ export function LiveCountersSection() {
   }, []);
 
   const counters = [
-    { icon: Target, value: stats.decisions, label: "Decisions Snagged", gradient: "from-cobalt to-purple-500" },
-    { icon: Users, value: stats.teams, label: "Teams Snagging", gradient: "from-purple-500 to-crimson" },
-    { icon: Building2, value: stats.companies, label: "Companies Using Snag", gradient: "from-crimson to-warning" },
+    { icon: Target, value: stats.decisions, label: "Decisions Snagged" },
+    { icon: Users, value: stats.teams, label: "Teams Snagging" },
+    { icon: Building2, value: stats.companies, label: "Companies Using Snag" },
   ];
 
   return (
@@ -84,11 +84,11 @@ export function LiveCountersSection() {
               className="bg-white rounded-2xl p-8 border border-border shadow-card hover:shadow-card-hover transition-shadow text-center"
               whileHover={{ y: -4 }}
             >
-              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${c.gradient} flex items-center justify-center mx-auto mb-4`}>
+              <div className={`w-12 h-12 rounded-xl ${i === 0 ? 'bg-crimson' : i === 1 ? 'bg-cobalt' : 'bg-gradient-to-br from-crimson to-cobalt'} flex items-center justify-center mx-auto mb-4`}>
                 <c.icon className="w-6 h-6 text-white" />
               </div>
               <p className="text-4xl md:text-5xl font-bold mb-2">
-                <span className="hero-gradient-text" style={{ background: "linear-gradient(135deg, #0047AB, #764ba2)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                <span className="bg-gradient-to-r from-crimson to-cobalt bg-clip-text text-transparent">
                   <AnimatedCounter value={c.value} />
                 </span>
               </p>
