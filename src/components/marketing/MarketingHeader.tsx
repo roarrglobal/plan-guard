@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X, ChevronDown, Users, User, Building2, DollarSign, Package, Heart, Megaphone, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import snagLogo from "@/assets/snag-logo-full.png";
 import { cn } from "@/lib/utils";
 
 const solutionsItems = [
@@ -36,8 +37,8 @@ export function MarketingHeader() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <Link to="/" className="text-2xl font-bold tracking-tight text-[#1A1A1A]">
-            SNAG
+          <Link to="/" className="flex items-center">
+            <img src={snagLogo} alt="Snag - Spot the flaw first" className="h-12 w-auto" />
           </Link>
 
           {/* Desktop Nav */}
