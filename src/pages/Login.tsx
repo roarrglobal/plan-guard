@@ -99,9 +99,9 @@ export default function Login() {
     <div className="min-h-screen bg-muted flex flex-col items-center justify-center px-4 py-8">
       <div className="w-full max-w-sm">
         <div className="bg-card rounded-xl p-8 border border-border shadow-card">
-          <div className="flex justify-center mb-6">
+          <Link to="/" className="flex justify-center mb-6">
             <SnagLogo size="lg" />
-          </div>
+          </Link>
 
           <h2 className="text-h3 font-bold text-foreground text-center mb-2">Welcome back</h2>
           <p className="text-body-small text-muted-foreground text-center mb-8">

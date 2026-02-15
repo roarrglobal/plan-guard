@@ -82,9 +82,9 @@ export default function Signup() {
     return (
       <div className="min-h-screen bg-muted flex flex-col items-center justify-center px-4 py-8">
         <div className="w-full max-w-2xl">
-          <div className="flex justify-center mb-8">
+          <Link to="/" className="flex justify-center mb-8">
             <SnagLogo size="lg" />
-          </div>
+          </Link>
           <h2 className="text-h2 font-bold text-foreground text-center mb-2">
             How will you use Snag?
           </h2>
@@ -146,7 +146,9 @@ export default function Signup() {
           isPersonal ? "bg-crimson" : "bg-cobalt"
         )}
       >
-        <SnagLogo size="lg" className="brightness-0 invert mb-8" />
+        <Link to="/">
+          <SnagLogo size="lg" className="brightness-0 invert mb-8" />
+        </Link>
         <h2 className="text-h2 font-bold text-white mb-6">
           {isPersonal ? "Start your free trial" : "Start your team trial"}
         </h2>
