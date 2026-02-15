@@ -10,6 +10,11 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import MarketingHome from "./pages/MarketingHome";
 import ProductPage from "./pages/ProductPage";
 import PricingPage from "./pages/PricingPage";
+import AboutPage from "./pages/AboutPage";
+import ContactPage from "./pages/ContactPage";
+import BlogPage from "./pages/BlogPage";
+import CareersPage from "./pages/CareersPage";
+import HelpPage from "./pages/HelpPage";
 import SolutionsPage from "./pages/SolutionsPage";
 import SolutionPersonalPage from "./pages/SolutionPersonalPage";
 import SolutionSalesPage from "./pages/SolutionSalesPage";
@@ -91,6 +96,11 @@ const App = () => {
               <Route path="/solutions/hr" element={<SolutionHRPage />} />
               <Route path="/solutions/marketing" element={<SolutionMarketingPage />} />
               <Route path="/solutions/operations" element={<SolutionOperationsPage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/blog" element={<BlogPage />} />
+              <Route path="/careers" element={<CareersPage />} />
+              <Route path="/help" element={<HelpPage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
