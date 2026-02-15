@@ -24,6 +24,7 @@ import { DashboardPendingOutcomes } from "@/components/dashboard/DashboardPendin
 import { IndividualDashboard } from "@/components/dashboard/IndividualDashboard";
 import { BusinessDashboard } from "@/components/dashboard/BusinessDashboard";
 import { usePendingInvitations } from "@/hooks/usePendingInvitations";
+import { IndividualProfileWizard } from "@/components/onboarding/IndividualProfileWizard";
 
 interface SavedAnalysis {
   id: string;
@@ -156,6 +157,9 @@ export default function Dashboard() {
   // Determine user type for dashboard layout
   const userType = profile?.user_type || "individual";
 
+  // Check if individual user needs profile onboarding
+  const showProfileWizard = userType === "individual" && profile && profile.profile_completed !== true;
+
   // Recent analyses for quick view
   const recentAnalyses = analyses.slice(0, 3);
 
@@ -163,6 +167,10 @@ export default function Dashboard() {
   const softLaunchData = {
     limits: softLaunch.limits,
   };
+
+  if (showProfileWizard) {
+    return <IndividualProfileWizard onComplete={() => {}} />;
+  }
 
 
   return (

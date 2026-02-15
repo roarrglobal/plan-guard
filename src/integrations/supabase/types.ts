@@ -789,19 +789,27 @@ export type Database = {
           allow_connections: boolean | null
           avatar_url: string | null
           bio: string | null
+          birth_place: string | null
+          birth_time: string | null
           created_at: string
+          date_of_birth: string | null
           deep_snags_used: number | null
           discount_code: string | null
           discoverable: boolean | null
           display_name: string | null
           focus_areas: string[] | null
+          hobbies: string[] | null
           id: string
+          interests: string[] | null
+          life_goals: string[] | null
+          life_path_number: number | null
           lifetime_deep_snags_used: number | null
           lifetime_frameworks_used: number | null
           lifetime_post_mortems_used: number | null
           linkedin_url: string | null
           location: string | null
           preferences: Json | null
+          profile_completed: boolean | null
           retros_used: number | null
           role: string | null
           show_snags: boolean | null
@@ -817,24 +825,35 @@ export type Database = {
           visibility: string | null
           waitlist_joined: boolean | null
           waitlist_joined_at: string | null
+          zodiac_chinese: string | null
+          zodiac_vedic: string | null
+          zodiac_western: string | null
         }
         Insert: {
           allow_connections?: boolean | null
           avatar_url?: string | null
           bio?: string | null
+          birth_place?: string | null
+          birth_time?: string | null
           created_at?: string
+          date_of_birth?: string | null
           deep_snags_used?: number | null
           discount_code?: string | null
           discoverable?: boolean | null
           display_name?: string | null
           focus_areas?: string[] | null
+          hobbies?: string[] | null
           id?: string
+          interests?: string[] | null
+          life_goals?: string[] | null
+          life_path_number?: number | null
           lifetime_deep_snags_used?: number | null
           lifetime_frameworks_used?: number | null
           lifetime_post_mortems_used?: number | null
           linkedin_url?: string | null
           location?: string | null
           preferences?: Json | null
+          profile_completed?: boolean | null
           retros_used?: number | null
           role?: string | null
           show_snags?: boolean | null
@@ -850,24 +869,35 @@ export type Database = {
           visibility?: string | null
           waitlist_joined?: boolean | null
           waitlist_joined_at?: string | null
+          zodiac_chinese?: string | null
+          zodiac_vedic?: string | null
+          zodiac_western?: string | null
         }
         Update: {
           allow_connections?: boolean | null
           avatar_url?: string | null
           bio?: string | null
+          birth_place?: string | null
+          birth_time?: string | null
           created_at?: string
+          date_of_birth?: string | null
           deep_snags_used?: number | null
           discount_code?: string | null
           discoverable?: boolean | null
           display_name?: string | null
           focus_areas?: string[] | null
+          hobbies?: string[] | null
           id?: string
+          interests?: string[] | null
+          life_goals?: string[] | null
+          life_path_number?: number | null
           lifetime_deep_snags_used?: number | null
           lifetime_frameworks_used?: number | null
           lifetime_post_mortems_used?: number | null
           linkedin_url?: string | null
           location?: string | null
           preferences?: Json | null
+          profile_completed?: boolean | null
           retros_used?: number | null
           role?: string | null
           show_snags?: boolean | null
@@ -883,6 +913,9 @@ export type Database = {
           visibility?: string | null
           waitlist_joined?: boolean | null
           waitlist_joined_at?: string | null
+          zodiac_chinese?: string | null
+          zodiac_vedic?: string | null
+          zodiac_western?: string | null
         }
         Relationships: []
       }

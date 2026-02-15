@@ -35,6 +35,18 @@ export interface Profile {
   discount_code: string | null;
   // User type
   user_type: string | null;
+  // Extended profile fields
+  date_of_birth: string | null;
+  birth_time: string | null;
+  birth_place: string | null;
+  hobbies: string[] | null;
+  interests: string[] | null;
+  life_goals: string[] | null;
+  zodiac_western: string | null;
+  zodiac_chinese: string | null;
+  zodiac_vedic: string | null;
+  life_path_number: number | null;
+  profile_completed: boolean | null;
 }
 
 export type ProfileUpdates = Partial<Omit<Profile, 'id' | 'user_id' | 'preferences'>>;
