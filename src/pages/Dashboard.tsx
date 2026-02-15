@@ -191,7 +191,7 @@ export default function Dashboard() {
         <MonthlyRecapModal analyses={analyses} onClose={closeRecap} />
       )}
 
-      <div className="min-h-screen bg-background">
+      <div className={cn("min-h-screen bg-background", userType === "individual" && "theme-individual")}>
         <PullToRefresh onRefresh={handleRefresh}>
           <main className="px-4 py-6 max-w-4xl mx-auto w-full min-h-full">
             <ProfileCompletionBanner />
