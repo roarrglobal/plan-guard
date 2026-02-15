@@ -85,6 +85,57 @@
     --dept-strategy: 349 57% 47%;
   }
 
+  /* Individual/Personal Theme - Instagram-style dark vibrant */
+  .theme-individual {
+    --background: 240 33% 8%;
+    --background-alt: 240 33% 11%;
+    --foreground: 0 0% 100%;
+
+    --card: 240 33% 14%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 240 33% 14%;
+    --popover-foreground: 0 0% 100%;
+
+    /* Purple-Violet Primary */
+    --primary: 263 78% 60%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 263 78% 55%;
+
+    --secondary: 240 33% 18%;
+    --secondary-foreground: 0 0% 90%;
+    --secondary-hover: 240 33% 22%;
+
+    --muted: 240 33% 16%;
+    --muted-foreground: 240 10% 60%;
+
+    --accent: 326 81% 65%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 350 80% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 10%;
+
+    --success: 160 84% 45%;
+    --success-foreground: 0 0% 100%;
+
+    --border: 240 20% 22%;
+    --divider: 240 20% 20%;
+    --input: 240 33% 18%;
+    --ring: 263 78% 60%;
+
+    --sidebar-background: 240 33% 8%;
+    --sidebar-foreground: 0 0% 90%;
+    --sidebar-primary: 263 78% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 263 78% 60%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 240 20% 18%;
+    --sidebar-ring: 263 78% 60%;
+  }
+
   /* B2B Theme - Cobalt primary, dark sidebar, professional feel */
   .theme-business {
     /* Cobalt Primary */

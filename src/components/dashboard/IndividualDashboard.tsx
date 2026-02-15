@@ -9,16 +9,18 @@ import {
   Target, 
   Clock, 
   BarChart3,
-  Heart,
   Sparkles,
-  TrendingUp
+  TrendingUp,
+  Share2,
+  Flame,
+  Eye,
+  Send,
+  ArrowRight,
+  Star,
+  Zap
 } from "lucide-react";
-import { format, formatDistanceToNow } from "date-fns";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
-import { TrialBadge } from "@/components/softlaunch/TrialBadge";
-import { UsageCounter } from "@/components/softlaunch/UsageCounter";
 import { DashboardPatterns } from "@/components/dashboard/DashboardPatterns";
 import { DashboardPendingOutcomes } from "@/components/dashboard/DashboardPendingOutcomes";
 import { CosmicInsightsSection } from "@/components/dashboard/CosmicInsightsSection";
@@ -44,22 +46,24 @@ interface IndividualDashboardProps {
   };
 }
 
-const CATEGORY_COLORS: Record<string, { bg: string; text: string }> = {
-  career: { bg: "bg-primary/10", text: "text-primary" },
-  business: { bg: "bg-emerald-500/10", text: "text-emerald-600" },
-  personal: { bg: "bg-violet-500/10", text: "text-violet-600" },
-  travel: { bg: "bg-amber-500/10", text: "text-amber-600" },
-  other: { bg: "bg-muted", text: "text-muted-foreground" },
+const VERDICT_MAP: Record<string, { label: string; color: string; emoji: string }> = {
+  proceed_confidently: { label: "Proceed with Confidence", color: "from-emerald-500 to-green-400", emoji: "🟢" },
+  proceed_carefully: { label: "Proceed with Caution", color: "from-amber-500 to-yellow-400", emoji: "🟡" },
+  investigate_first: { label: "Investigate Further", color: "from-blue-500 to-cyan-400", emoji: "🔵" },
+  reconsider_seriously: { label: "Reconsider", color: "from-red-500 to-rose-400", emoji: "🔴" },
 };
 
 export function IndividualDashboard({ displayName, greeting, softLaunch }: IndividualDashboardProps) {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [analyses, setAnalyses] = useState<SavedAnalysis[]>([]);
+  const [quickInput, setQuickInput] = useState("");
+  const [stats, setStats] = useState({ analyses: 0, accuracy: 0, outcomes: 0, streak: 0 });
 
   useEffect(() => {
     if (user) {
       fetchAnalyses();
+      fetchStats();
     }
   }, [user]);
 
@@ -68,144 +72,208 @@ export function IndividualDashboard({ displayName, greeting, softLaunch }: Indiv
       .from("analyses")
       .select("*")
       .order("created_at", { ascending: false })
-      .limit(3);
-    
+      .limit(5);
     if (data) setAnalyses(data);
   }, []);
 
+  const fetchStats = useCallback(async () => {
+    const [analysesRes, outcomesRes, successRes] = await Promise.all([
+      supabase.from("analyses").select("*", { count: "exact", head: true }),
+      supabase.from("decisions").select("*", { count: "exact", head: true }).not("outcome_status", "is", null),
+      supabase.from("decisions").select("*", { count: "exact", head: true }).in("outcome_result", ["better", "expected"]),
+    ]);
+
+    const totalOutcomes = outcomesRes.count || 0;
+    const successOutcomes = successRes.count || 0;
+    const accuracy = totalOutcomes > 0 ? Math.round((successOutcomes / totalOutcomes) * 100) : 0;
+
+    // Calculate streak
+    const { data: recentAnalyses } = await supabase
+      .from("analyses")
+      .select("created_at")
+      .order("created_at", { ascending: false })
+      .limit(30);
+
+    let streak = 0;
+    if (recentAnalyses && recentAnalyses.length > 0) {
+      const dates = recentAnalyses
+        .map(a => new Date(a.created_at).toDateString())
+        .filter((d, i, s) => s.indexOf(d) === i);
+      const today = new Date().toDateString();
+      const yesterday = new Date(Date.now() - 86400000).toDateString();
+      if (dates[0] === today || dates[0] === yesterday) {
+        for (let i = 0; i < dates.length; i++) {
+          const expected = new Date();
+          expected.setDate(expected.getDate() - streak - (dates[0] === yesterday ? 1 : 0));
+          if (new Date(dates[i]).toDateString() === expected.toDateString()) {
+            streak++;
+          } else break;
+        }
+      }
+    }
+
+    setStats({
+      analyses: analysesRes.count || 0,
+      accuracy,
+      outcomes: totalOutcomes,
+      streak,
+    });
+  }, []);
+
+  const handleQuickSnag = () => {
+    if (quickInput.trim().length >= 20) {
+      sessionStorage.setItem("snag_input", quickInput);
+      navigate("/analyze");
+    }
+  };
+
   return (
-    <div className="space-y-8 animate-in fade-in duration-300">
-      {/* Hero Section with Crimson accent */}
-      <section className="space-y-4">
-        <div className="flex items-start justify-between">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <Heart className="w-5 h-5 text-primary" />
-              <span className="text-xs font-medium text-primary uppercase tracking-wide">
-                Personal Account
-              </span>
+    <div className="space-y-6 animate-fade-in-up">
+      {/* Greeting Header */}
+      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[hsl(263,78%,60%)] via-[hsl(280,70%,50%)] to-[hsl(326,81%,55%)] p-6">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIyMCIgY3k9IjIwIiByPSIxIiBmaWxsPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDUpIi8+PC9zdmc+')] opacity-50" />
+        <div className="relative z-10">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-white">
+                {greeting}, {displayName} ✨
+              </h1>
+              <div className="flex items-center gap-2 mt-2">
+                {stats.streak > 0 && (
+                  <span className="flex items-center gap-1.5 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1 text-sm font-medium text-white">
+                    <Flame className="w-4 h-4 text-orange-300" />
+                    {stats.streak} day streak
+                  </span>
+                )}
+              </div>
             </div>
-            <h1 className="text-2xl font-bold text-foreground">
-              {greeting}, {displayName}
-            </h1>
-            <p className="text-muted-foreground text-sm mt-1">
-              {format(new Date(), "EEEE, MMMM d, yyyy")}
-            </p>
           </div>
-          <TrialBadge />
         </div>
-        
-        {/* Usage counters */}
-        <div className="flex items-center gap-4 text-xs">
-          <UsageCounter 
-            used={softLaunch.limits.deepSnags.used} 
-            limit={softLaunch.limits.deepSnags.limit} 
-            label="Deep Snag used" 
+      </section>
+
+      {/* Stories-Style Horizontal Scroll */}
+      <section className="overflow-hidden -mx-4">
+        <div className="flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide">
+          <StoryButton 
+            emoji="➕" 
+            label="New Snag" 
+            gradient="from-[hsl(263,78%,55%)] to-[hsl(326,81%,55%)]"
+            onClick={() => navigate("/analyze")}
+            isNew
           />
-          <span className="text-border">•</span>
-          <UsageCounter 
-            used={softLaunch.limits.journalsPerDay.used} 
-            limit={softLaunch.limits.journalsPerDay.limit} 
-            label="journals today" 
+          <StoryButton 
+            emoji="📊" 
+            label="Weekly Review" 
+            gradient="from-[hsl(199,89%,65%)] to-[hsl(174,100%,50%)]"
+            onClick={() => navigate("/analyses")}
+          />
+          <StoryButton 
+            emoji="🎯" 
+            label="Goals Check" 
+            gradient="from-[hsl(38,92%,50%)] to-[hsl(25,95%,53%)]"
+            onClick={() => navigate("/decisions")}
+          />
+          <StoryButton 
+            emoji="✨" 
+            label="Cosmic" 
+            gradient="from-[hsl(280,70%,50%)] to-[hsl(320,80%,55%)]"
+            onClick={() => {
+              const el = document.getElementById("cosmic-section");
+              el?.scrollIntoView({ behavior: "smooth" });
+            }}
+          />
+          <StoryButton 
+            emoji="📔" 
+            label="Journal" 
+            gradient="from-[hsl(160,84%,39%)] to-[hsl(145,60%,45%)]"
+            onClick={() => navigate("/journal/new")}
+          />
+          <StoryButton 
+            emoji="📈" 
+            label="Patterns" 
+            gradient="from-[hsl(217,91%,60%)] to-[hsl(240,80%,65%)]"
+            onClick={() => {
+              const el = document.getElementById("patterns-section");
+              el?.scrollIntoView({ behavior: "smooth" });
+            }}
           />
         </div>
-
-        {/* Personal Focus CTA */}
-
-        {/* Personal Focus CTA */}
-        <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-background">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-2 mb-2">
-              <Sparkles className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium text-foreground">What's on your mind today?</span>
-            </div>
-            <p className="text-sm text-muted-foreground mb-4">
-              Stress-test a decision before you commit, or reflect on your journey.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <Button 
-                onClick={() => navigate("/analyze")} 
-                className="gap-2"
-              >
-                <Target className="w-4 h-4" />
-                Deep Snag
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => navigate("/journal/new")}
-                className="gap-2"
-              >
-                <PenLine className="w-4 h-4" />
-                Daily Journal
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => navigate("/decisions/new")}
-                className="gap-2"
-              >
-                <Plus className="w-4 h-4" />
-                Track Decision
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
       </section>
 
-      {/* Personal Stats */}
-      <section>
-        <IndividualQuickStats />
+      {/* Quick Snag Input */}
+      <section className="relative rounded-2xl bg-card border border-border p-5 overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-[hsl(263,78%,60%)/0.1] to-transparent rounded-bl-full" />
+        <div className="relative z-10">
+          <div className="flex items-center gap-2 mb-3">
+            <Zap className="w-5 h-5 text-accent" />
+            <h2 className="text-base font-semibold text-foreground">Quick Snag</h2>
+          </div>
+          <div className="flex gap-2">
+            <input
+              value={quickInput}
+              onChange={(e) => setQuickInput(e.target.value)}
+              placeholder="What's on your mind? Type a quick decision..."
+              className="flex-1 bg-muted border border-border rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+              onKeyDown={(e) => e.key === "Enter" && handleQuickSnag()}
+            />
+            <button
+              onClick={handleQuickSnag}
+              disabled={quickInput.trim().length < 20}
+              className="w-12 h-12 rounded-xl bg-gradient-to-r from-[hsl(263,78%,60%)] to-[hsl(326,81%,55%)] flex items-center justify-center text-white disabled:opacity-40 transition-opacity hover:shadow-lg hover:shadow-primary/20"
+            >
+              <Send className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
       </section>
 
-      {/* Personal Growth Prompts */}
-      <section>
-        <Card className="border-dashed">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <TrendingUp className="w-5 h-5 text-primary" />
-              <h3 className="font-semibold text-foreground">Personal Growth Focus</h3>
-            </div>
-            <div className="space-y-2">
-              <PromptSuggestion 
-                text="What career decision am I avoiding?"
-                onClick={() => {
-                  sessionStorage.setItem("snag_input", "Should I pursue this career change I've been considering?");
-                  navigate("/analyze");
-                }}
-              />
-              <PromptSuggestion 
-                text="Am I ready for this big life change?"
-                onClick={() => {
-                  sessionStorage.setItem("snag_input", "Am I ready to make this major life decision?");
-                  navigate("/analyze");
-                }}
-              />
-              <PromptSuggestion 
-                text="Reflect on last week's wins and lessons"
-                onClick={() => navigate("/journal/new")}
-              />
-            </div>
-          </CardContent>
-        </Card>
+      {/* Stats Cards - Horizontal Scroll */}
+      <section className="overflow-hidden -mx-4">
+        <div className="flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide">
+          <StatCard 
+            value={stats.analyses} 
+            label="Decisions Made" 
+            icon={Target}
+            gradient="from-[hsl(263,78%,55%)] to-[hsl(280,70%,50%)]"
+          />
+          <StatCard 
+            value={stats.accuracy > 0 ? `${stats.accuracy}%` : "—"} 
+            label="Accuracy Rate" 
+            icon={Eye}
+            gradient="from-[hsl(326,81%,55%)] to-[hsl(350,80%,55%)]"
+          />
+          <StatCard 
+            value={stats.outcomes} 
+            label="Outcomes Tracked" 
+            icon={BarChart3}
+            gradient="from-[hsl(199,89%,65%)] to-[hsl(174,100%,50%)]"
+          />
+          <StatCard 
+            value={stats.streak > 0 ? `🔥 ${stats.streak}` : "0"} 
+            label="Streak Days" 
+            icon={Flame}
+            gradient="from-[hsl(38,92%,50%)] to-[hsl(25,95%,53%)]"
+          />
+        </div>
       </section>
 
-      {/* Recent Analyses */}
+      {/* Recent Snags */}
       {analyses.length > 0 && (
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-foreground">Recent Analyses</h2>
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <h2 className="text-base font-semibold text-foreground flex items-center gap-2">
+              📱 Recent Snags
+            </h2>
+            <button 
               onClick={() => navigate("/analyses")}
-              className="text-primary"
+              className="text-sm font-medium text-primary hover:text-primary/80 transition-colors flex items-center gap-1"
             >
-              View all
-              <ChevronRight className="w-4 h-4 ml-1" />
-            </Button>
+              See All <ArrowRight className="w-3.5 h-3.5" />
+            </button>
           </div>
           <div className="space-y-3">
-            {analyses.map((analysis) => (
-              <RecentAnalysisCard 
+            {analyses.slice(0, 3).map((analysis) => (
+              <RecentSnagCard 
                 key={analysis.id} 
                 analysis={analysis} 
                 onClick={() => navigate(`/analysis/${analysis.id}`)}
@@ -215,131 +283,144 @@ export function IndividualDashboard({ displayName, greeting, softLaunch }: Indiv
         </section>
       )}
 
+      {/* Empty State */}
+      {analyses.length === 0 && (
+        <section className="text-center py-10">
+          <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-[hsl(263,78%,60%)/0.2] to-[hsl(326,81%,55%)/0.2] flex items-center justify-center mb-4">
+            <Target className="w-10 h-10 text-primary" />
+          </div>
+          <h3 className="text-lg font-semibold text-foreground mb-2">No snags yet</h3>
+          <p className="text-sm text-muted-foreground mb-6 max-w-xs mx-auto">
+            What decision is keeping you up at night? Let's stress-test it.
+          </p>
+          <button
+            onClick={() => navigate("/analyze")}
+            className="bg-gradient-to-r from-[hsl(263,78%,60%)] to-[hsl(326,81%,55%)] text-white rounded-xl px-8 py-3.5 text-sm font-semibold hover:shadow-lg hover:shadow-primary/25 transition-all"
+          >
+            Run Your First Snag ✨
+          </button>
+        </section>
+      )}
+
       {/* Pending Outcomes */}
       <DashboardPendingOutcomes />
 
-      {/* Cosmic Insights - Premium Mystical Services */}
-      <CosmicInsightsSection />
+      {/* Cosmic Insights */}
+      <div id="cosmic-section">
+        <CosmicInsightsSection />
+      </div>
 
-      {/* My Patterns */}
-      <DashboardPatterns />
+      {/* Patterns */}
+      <div id="patterns-section">
+        <DashboardPatterns />
+      </div>
     </div>
   );
 }
 
-function IndividualQuickStats() {
-  const { user } = useAuth();
-  const [stats, setStats] = useState({
-    analyses: 0,
-    journalEntries: 0,
-    decisions: 0,
-    outcomes: 0,
-  });
+// ── Sub-components ────────────────────────────────────────────────
 
-  useEffect(() => {
-    if (user) fetchStats();
-  }, [user]);
-
-  const fetchStats = async () => {
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
-    startOfMonth.setHours(0, 0, 0, 0);
-
-    const [analysesRes, journalRes, decisionsRes, outcomesRes] = await Promise.all([
-      supabase.from("analyses").select("*", { count: "exact", head: true }),
-      supabase.from("journal_entries").select("*", { count: "exact", head: true }),
-      supabase.from("decisions").select("*", { count: "exact", head: true })
-        .gte("created_at", startOfMonth.toISOString()),
-      supabase.from("decisions").select("*", { count: "exact", head: true })
-        .not("outcome_status", "is", null),
-    ]);
-
-    setStats({
-      analyses: analysesRes.count || 0,
-      journalEntries: journalRes.count || 0,
-      decisions: decisionsRes.count || 0,
-      outcomes: outcomesRes.count || 0,
-    });
-  };
-
-  const items = [
-    { label: "Deep Snags", value: stats.analyses, icon: Target, color: "text-primary" },
-    { label: "Journal Entries", value: stats.journalEntries, icon: PenLine, color: "text-violet-600" },
-    { label: "Decisions Tracked", value: stats.decisions, icon: Clock, color: "text-amber-600" },
-    { label: "Outcomes Logged", value: stats.outcomes, icon: BarChart3, color: "text-emerald-600" },
-  ];
-
-  return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-      {items.map((item) => {
-        const Icon = item.icon;
-        return (
-          <Card key={item.label} className="border-border/50">
-            <CardContent className="p-4">
-              <Icon className={cn("w-5 h-5 mb-2", item.color)} />
-              <p className="text-2xl font-bold text-foreground">{item.value}</p>
-              <p className="text-xs text-muted-foreground">{item.label}</p>
-            </CardContent>
-          </Card>
-        );
-      })}
-    </div>
-  );
-}
-
-function PromptSuggestion({ text, onClick }: { text: string; onClick: () => void }) {
+function StoryButton({ 
+  emoji, 
+  label, 
+  gradient, 
+  onClick,
+  isNew = false
+}: { 
+  emoji: string; 
+  label: string; 
+  gradient: string; 
+  onClick: () => void;
+  isNew?: boolean;
+}) {
   return (
     <button
       onClick={onClick}
-      className="w-full text-left text-sm text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg p-2 transition-colors flex items-center gap-2"
+      className="flex flex-col items-center gap-1.5 flex-shrink-0"
     >
-      <ChevronRight className="w-4 h-4 text-primary" />
-      {text}
+      <div className={cn(
+        "w-16 h-16 rounded-full bg-gradient-to-br flex items-center justify-center text-2xl",
+        gradient,
+        isNew && "ring-2 ring-accent ring-offset-2 ring-offset-background"
+      )}>
+        {emoji}
+      </div>
+      <span className="text-[11px] font-medium text-muted-foreground whitespace-nowrap">
+        {label}
+      </span>
     </button>
   );
 }
 
-function RecentAnalysisCard({ 
+function StatCard({ 
+  value, 
+  label, 
+  icon: Icon,
+  gradient,
+}: { 
+  value: string | number; 
+  label: string; 
+  icon: typeof Target;
+  gradient: string;
+}) {
+  return (
+    <div className="min-w-[140px] flex-shrink-0 rounded-2xl bg-card border border-border p-4 relative overflow-hidden group hover:border-primary/30 transition-all">
+      <div className={cn(
+        "absolute top-0 right-0 w-16 h-16 rounded-bl-3xl bg-gradient-to-bl opacity-20 group-hover:opacity-30 transition-opacity",
+        gradient
+      )} />
+      <Icon className="w-5 h-5 text-muted-foreground mb-2" />
+      <p className="text-3xl font-bold text-foreground leading-none">
+        {value}
+      </p>
+      <p className="text-xs text-muted-foreground mt-1.5">{label}</p>
+    </div>
+  );
+}
+
+function RecentSnagCard({ 
   analysis, 
   onClick 
 }: { 
   analysis: SavedAnalysis; 
   onClick: () => void;
 }) {
+  const result = analysis.result as any;
+  const verdict = result?.bottom_line?.verdict;
+  const verdictInfo = verdict ? VERDICT_MAP[verdict] : null;
   const category = analysis.category || "other";
-  const colors = CATEGORY_COLORS[category] || CATEGORY_COLORS.other;
-  const result = analysis.result as { blind_spots?: unknown[]; failure_modes?: unknown[] };
-  const blindSpots = result?.blind_spots?.length || 0;
-  const failureModes = result?.failure_modes?.length || 0;
 
   return (
     <button
       onClick={onClick}
-      className="w-full bg-card border border-border rounded-xl p-4 text-left hover:border-primary/30 hover:shadow-sm transition-all"
+      className="w-full rounded-2xl bg-card border border-border p-4 text-left hover:border-primary/30 transition-all group"
     >
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-start gap-3">
         <div className="flex-1 min-w-0">
-          <span className={cn(
-            "inline-block text-xs font-medium uppercase tracking-wide px-2 py-0.5 rounded-full mb-2",
-            colors.bg, colors.text
-          )}>
-            {category}
-          </span>
-          <p className="text-sm text-foreground line-clamp-2 mb-2">
-            {analysis.original_input.slice(0, 100)}
-            {analysis.original_input.length > 100 && "..."}
-          </p>
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="text-base">
+              {verdictInfo?.emoji || "⚪"}
+            </span>
+            <p className="text-sm font-medium text-foreground line-clamp-1">
+              {analysis.original_input.slice(0, 60)}
+              {analysis.original_input.length > 60 && "..."}
+            </p>
+          </div>
+          
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            {verdictInfo && (
+              <span className="font-medium text-foreground/70">
+                {verdictInfo.label}
+              </span>
+            )}
             <span>{formatDistanceToNow(new Date(analysis.created_at), { addSuffix: true })}</span>
-            {blindSpots > 0 && (
-              <span className="text-primary">{blindSpots} blind spot{blindSpots !== 1 ? "s" : ""}</span>
-            )}
-            {failureModes > 0 && (
-              <span className="text-destructive">{failureModes} failure mode{failureModes !== 1 ? "s" : ""}</span>
-            )}
           </div>
         </div>
-        <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+        
+        <div className="flex items-center gap-1.5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+          <span className="text-xs text-primary font-medium">View</span>
+          <Share2 className="w-3.5 h-3.5 text-muted-foreground" />
+        </div>
       </div>
     </button>
   );
