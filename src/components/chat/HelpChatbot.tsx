@@ -196,11 +196,12 @@ export function HelpChatbot({ mode = "app" }: HelpChatbotProps) {
     }
   };
 
-  // Update lead signals
+  // Update lead signals via edge function (server-side, bypasses RLS)
   const updateLeadSignals = useCallback(async (text: string) => {
     if (!leadId) return;
     const lower = text.toLowerCase();
     const updates: Record<string, any> = {
+      leadId,
       last_interaction_at: new Date().toISOString(),
     };
     if (lower.includes("price") || lower.includes("cost") || lower.includes("plan")) updates.asked_about_pricing = true;
@@ -208,8 +209,15 @@ export function HelpChatbot({ mode = "app" }: HelpChatbotProps) {
     if (lower.includes("enterprise")) updates.asked_about_enterprise = true;
     if (lower.includes("team")) updates.interested_in_team = true;
 
-    await supabase.from("chat_leads").update(updates).eq("id", leadId);
-  }, [leadId]);
+    fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-support`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({ leadUpdate: updates, messages: [], context: { mode } }),
+    }).catch(() => {});
+  }, [leadId, mode]);
 
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim() || isStreaming) return;
@@ -294,9 +302,16 @@ export function HelpChatbot({ mode = "app" }: HelpChatbotProps) {
         }
       }
 
-      // Update message count
+      // Update message count via edge function
       if (isMarketing && leadId) {
-        await supabase.from("chat_leads").update({ messages_count: newMessages.length }).eq("id", leadId);
+        fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-support`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ leadUpdate: { leadId, messages_count: newMessages.length }, messages: [], context: { mode } }),
+        }).catch(() => {});
       }
     } catch (e: any) {
       setMessages((prev) => [
