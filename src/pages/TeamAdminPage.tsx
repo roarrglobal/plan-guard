@@ -56,20 +56,7 @@ export default function TeamAdminPage() {
 
   const activeMembers = members.filter((m) => m.status === "active");
 
-  // Access control
-  if (!isAdmin) {
-    return (
-      <div className="flex h-[60vh] items-center justify-center">
-        <div className="text-center space-y-2">
-          <Shield className="w-12 h-12 text-muted-foreground mx-auto" />
-          <h2 className="text-lg font-semibold text-foreground">Access Denied</h2>
-          <p className="text-sm text-muted-foreground">Only team owners and admins can access the admin dashboard.</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Queries
+  // Queries — must be called before any early return
   const { data: totalDecisions = 0 } = useQuery({
     queryKey: ["admin-decisions-count", team?.id],
     queryFn: async () => {
@@ -291,6 +278,19 @@ export default function TeamAdminPage() {
     a.click();
     URL.revokeObjectURL(url);
   };
+
+  // Access control — after all hooks
+  if (!isAdmin) {
+    return (
+      <div className="flex h-[60vh] items-center justify-center">
+        <div className="text-center space-y-2">
+          <Shield className="w-12 h-12 text-muted-foreground mx-auto" />
+          <h2 className="text-lg font-semibold text-foreground">Access Denied</h2>
+          <p className="text-sm text-muted-foreground">Only team owners and admins can access the admin dashboard.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-6">
