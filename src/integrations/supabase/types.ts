@@ -103,6 +103,66 @@ export type Database = {
           },
         ]
       }
+      chat_leads: {
+        Row: {
+          asked_about_enterprise: boolean | null
+          asked_about_pricing: boolean | null
+          asked_for_demo: boolean | null
+          converted_to_signup: boolean | null
+          created_at: string | null
+          email: string
+          first_message: string | null
+          first_name: string
+          id: string
+          interested_in_team: boolean | null
+          last_interaction_at: string | null
+          messages_count: number | null
+          referrer: string | null
+          source_page: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          asked_about_enterprise?: boolean | null
+          asked_about_pricing?: boolean | null
+          asked_for_demo?: boolean | null
+          converted_to_signup?: boolean | null
+          created_at?: string | null
+          email: string
+          first_message?: string | null
+          first_name: string
+          id?: string
+          interested_in_team?: boolean | null
+          last_interaction_at?: string | null
+          messages_count?: number | null
+          referrer?: string | null
+          source_page?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          asked_about_enterprise?: boolean | null
+          asked_about_pricing?: boolean | null
+          asked_for_demo?: boolean | null
+          converted_to_signup?: boolean | null
+          created_at?: string | null
+          email?: string
+          first_message?: string | null
+          first_name?: string
+          id?: string
+          interested_in_team?: boolean | null
+          last_interaction_at?: string | null
+          messages_count?: number | null
+          referrer?: string | null
+          source_page?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Relationships: []
+      }
       decision_templates: {
         Row: {
           blind_spot_library: Json
