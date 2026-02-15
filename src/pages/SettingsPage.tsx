@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { SubscriptionSettings } from "@/components/subscription/SubscriptionSettings";
 import { ThemeToggle } from "@/components/settings/ThemeToggle";
+import { PersonalDetailsSection } from "@/components/settings/PersonalDetailsSection";
 
 export default function SettingsPage() {
   const navigate = useNavigate();
@@ -121,6 +122,11 @@ export default function SettingsPage() {
             </button>
           </div>
         </section>
+
+        {/* Personal Details - Individual users only */}
+        {(profile?.user_type === "individual" || !profile?.user_type) && (
+          <PersonalDetailsSection />
+        )}
 
         {/* Account section */}
         <section className="mb-8">

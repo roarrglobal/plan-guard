@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ChevronLeft, ChevronRight, Check, Sparkles, Target, Rocket } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const HOBBY_OPTIONS = [
+export const HOBBY_OPTIONS = [
   { label: "Reading", emoji: "📚" },
   { label: "Travel", emoji: "✈️" },
   { label: "Fitness", emoji: "💪" },
@@ -27,7 +27,7 @@ const HOBBY_OPTIONS = [
   { label: "Finance", emoji: "💰" },
 ];
 
-const LIFE_GOALS = [
+export const LIFE_GOALS = [
   "Career growth",
   "Starting a business",
   "Relationships",
@@ -45,7 +45,7 @@ const MONTHS = [
   "July", "August", "September", "October", "November", "December",
 ];
 
-function getZodiacWestern(month: number, day: number): string {
+export function getZodiacWestern(month: number, day: number): string {
   const signs = [
     { sign: "Capricorn", end: [1, 19] },
     { sign: "Aquarius", end: [2, 18] },
@@ -67,12 +67,34 @@ function getZodiacWestern(month: number, day: number): string {
   return "Capricorn";
 }
 
-function getChineseZodiac(year: number): string {
+export function getChineseZodiac(year: number): string {
   const animals = ["Rat", "Ox", "Tiger", "Rabbit", "Dragon", "Snake", "Horse", "Goat", "Monkey", "Rooster", "Dog", "Pig"];
   return animals[(year - 4) % 12];
 }
 
-function getLifePathNumber(dateStr: string): number {
+export function getVedicZodiac(month: number, day: number): string {
+  const signs = [
+    { sign: "Makara (Capricorn)", end: [1, 14] },
+    { sign: "Kumbha (Aquarius)", end: [2, 12] },
+    { sign: "Meena (Pisces)", end: [3, 14] },
+    { sign: "Mesha (Aries)", end: [4, 13] },
+    { sign: "Vrishabha (Taurus)", end: [5, 14] },
+    { sign: "Mithuna (Gemini)", end: [6, 14] },
+    { sign: "Karka (Cancer)", end: [7, 16] },
+    { sign: "Simha (Leo)", end: [8, 16] },
+    { sign: "Kanya (Virgo)", end: [9, 16] },
+    { sign: "Tula (Libra)", end: [10, 16] },
+    { sign: "Vrishchika (Scorpio)", end: [11, 15] },
+    { sign: "Dhanu (Sagittarius)", end: [12, 15] },
+    { sign: "Makara (Capricorn)", end: [12, 31] },
+  ];
+  for (const s of signs) {
+    if (month < s.end[0] || (month === s.end[0] && day <= s.end[1])) return s.sign;
+  }
+  return "Makara (Capricorn)";
+}
+
+export function getLifePathNumber(dateStr: string): number {
   const digits = dateStr.replace(/-/g, "").split("").map(Number);
   let sum = digits.reduce((a, b) => a + b, 0);
   while (sum > 9 && sum !== 11 && sum !== 22 && sum !== 33) {
@@ -82,7 +104,7 @@ function getLifePathNumber(dateStr: string): number {
 }
 
 interface Props {
-  onComplete: () => void;
+  onComplete: (skippedDob?: boolean) => void;
 }
 
 export function IndividualProfileWizard({ onComplete }: Props) {
@@ -107,6 +129,9 @@ export function IndividualProfileWizard({ onComplete }: Props) {
   // Step 3: Life goals
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
 
+  // Track if DOB was skipped
+  const [dobSkipped, setDobSkipped] = useState(false);
+
   const toggleHobby = (hobby: string) => {
     setSelectedHobbies(prev =>
       prev.includes(hobby) ? prev.filter(h => h !== hobby) : [...prev, hobby]
@@ -127,7 +152,18 @@ export function IndividualProfileWizard({ onComplete }: Props) {
     );
   };
 
-  const handleComplete = async () => {
+  const handleSkipStep = () => {
+    if (step === 1) {
+      setDobSkipped(true);
+      setStep(2);
+    } else if (step === 2) {
+      setStep(3);
+    } else {
+      handleComplete(true);
+    }
+  };
+
+  const handleComplete = async (isSkip = false) => {
     if (!user) return;
     setSaving(true);
 
@@ -138,8 +174,9 @@ export function IndividualProfileWizard({ onComplete }: Props) {
         life_goals: selectedGoals,
       };
 
-      // Build date of birth if provided
-      if (birthMonth && birthDay && birthYear) {
+      const hasDob = birthMonth && birthDay && birthYear;
+
+      if (hasDob) {
         const monthNum = MONTHS.indexOf(birthMonth) + 1;
         const dayNum = parseInt(birthDay);
         const yearNum = parseInt(birthYear);
@@ -147,6 +184,7 @@ export function IndividualProfileWizard({ onComplete }: Props) {
         updates.date_of_birth = dateStr;
         updates.zodiac_western = getZodiacWestern(monthNum, dayNum);
         updates.zodiac_chinese = getChineseZodiac(yearNum);
+        updates.zodiac_vedic = getVedicZodiac(monthNum, dayNum);
         updates.life_path_number = getLifePathNumber(dateStr);
       }
 
@@ -167,8 +205,7 @@ export function IndividualProfileWizard({ onComplete }: Props) {
       if (error) throw error;
 
       await refreshProfile();
-      toast({ title: "Profile complete!", description: "Your experience is now personalized." });
-      onComplete();
+      onComplete(dobSkipped || !hasDob);
     } catch (err: any) {
       toast({ title: "Error saving profile", description: err.message, variant: "destructive" });
     } finally {
@@ -216,27 +253,15 @@ export function IndividualProfileWizard({ onComplete }: Props) {
               <div>
                 <Label className="text-sm font-medium">Date of Birth *</Label>
                 <div className="grid grid-cols-3 gap-2 mt-1.5">
-                  <select
-                    value={birthMonth}
-                    onChange={e => setBirthMonth(e.target.value)}
-                    className="input-field text-sm"
-                  >
+                  <select value={birthMonth} onChange={e => setBirthMonth(e.target.value)} className="input-field text-sm">
                     <option value="">Month</option>
                     {MONTHS.map(m => <option key={m} value={m}>{m}</option>)}
                   </select>
-                  <select
-                    value={birthDay}
-                    onChange={e => setBirthDay(e.target.value)}
-                    className="input-field text-sm"
-                  >
+                  <select value={birthDay} onChange={e => setBirthDay(e.target.value)} className="input-field text-sm">
                     <option value="">Day</option>
                     {days.map(d => <option key={d} value={d}>{d}</option>)}
                   </select>
-                  <select
-                    value={birthYear}
-                    onChange={e => setBirthYear(e.target.value)}
-                    className="input-field text-sm"
-                  >
+                  <select value={birthYear} onChange={e => setBirthYear(e.target.value)} className="input-field text-sm">
                     <option value="">Year</option>
                     {years.map(y => <option key={y} value={y}>{y}</option>)}
                   </select>
@@ -246,27 +271,15 @@ export function IndividualProfileWizard({ onComplete }: Props) {
               <div>
                 <Label className="text-sm font-medium">Time of Birth <span className="text-muted-foreground font-normal">(optional)</span></Label>
                 <div className="grid grid-cols-3 gap-2 mt-1.5">
-                  <select
-                    value={birthHour}
-                    onChange={e => setBirthHour(e.target.value)}
-                    className="input-field text-sm"
-                  >
+                  <select value={birthHour} onChange={e => setBirthHour(e.target.value)} className="input-field text-sm">
                     <option value="">Hour</option>
                     {hours.map(h => <option key={h} value={h}>{h}</option>)}
                   </select>
-                  <select
-                    value={birthMinute}
-                    onChange={e => setBirthMinute(e.target.value)}
-                    className="input-field text-sm"
-                  >
+                  <select value={birthMinute} onChange={e => setBirthMinute(e.target.value)} className="input-field text-sm">
                     <option value="">Min</option>
                     {minutes.map(m => <option key={m} value={m}>{m}</option>)}
                   </select>
-                  <select
-                    value={birthAmPm}
-                    onChange={e => setBirthAmPm(e.target.value)}
-                    className="input-field text-sm"
-                  >
+                  <select value={birthAmPm} onChange={e => setBirthAmPm(e.target.value)} className="input-field text-sm">
                     <option value="AM">AM</option>
                     <option value="PM">PM</option>
                   </select>
@@ -275,12 +288,7 @@ export function IndividualProfileWizard({ onComplete }: Props) {
 
               <div>
                 <Label className="text-sm font-medium">Birth Place <span className="text-muted-foreground font-normal">(optional)</span></Label>
-                <Input
-                  value={birthPlace}
-                  onChange={e => setBirthPlace(e.target.value)}
-                  placeholder="City, Country"
-                  className="mt-1.5"
-                />
+                <Input value={birthPlace} onChange={e => setBirthPlace(e.target.value)} placeholder="City, Country" className="mt-1.5" />
               </div>
 
               <Button
@@ -301,9 +309,7 @@ export function IndividualProfileWizard({ onComplete }: Props) {
                   <Target className="w-7 h-7 text-primary" />
                 </div>
                 <h2 className="text-h3 font-bold text-foreground">What are you into?</h2>
-                <p className="text-body-small text-muted-foreground mt-2">
-                  Select your hobbies (optional)
-                </p>
+                <p className="text-body-small text-muted-foreground mt-2">Select your hobbies (optional)</p>
               </div>
 
               <div className="flex flex-wrap gap-2">
@@ -332,23 +338,15 @@ export function IndividualProfileWizard({ onComplete }: Props) {
                     placeholder="Type and press Enter..."
                     onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addCustomHobby())}
                   />
-                  <Button variant="outline" onClick={addCustomHobby} disabled={!customHobby.trim()}>
-                    Add
-                  </Button>
+                  <Button variant="outline" onClick={addCustomHobby} disabled={!customHobby.trim()}>Add</Button>
                 </div>
                 {selectedHobbies.filter(h => !HOBBY_OPTIONS.find(o => o.label === h)).length > 0 && (
                   <div className="flex flex-wrap gap-1.5 mt-2">
-                    {selectedHobbies
-                      .filter(h => !HOBBY_OPTIONS.find(o => o.label === h))
-                      .map(h => (
-                        <span
-                          key={h}
-                          className="px-2.5 py-1 rounded-full text-xs bg-primary text-primary-foreground cursor-pointer"
-                          onClick={() => toggleHobby(h)}
-                        >
-                          {h} ×
-                        </span>
-                      ))}
+                    {selectedHobbies.filter(h => !HOBBY_OPTIONS.find(o => o.label === h)).map(h => (
+                      <span key={h} className="px-2.5 py-1 rounded-full text-xs bg-primary text-primary-foreground cursor-pointer" onClick={() => toggleHobby(h)}>
+                        {h} ×
+                      </span>
+                    ))}
                   </div>
                 )}
               </div>
@@ -372,9 +370,7 @@ export function IndividualProfileWizard({ onComplete }: Props) {
                   <Rocket className="w-7 h-7 text-primary" />
                 </div>
                 <h2 className="text-h3 font-bold text-foreground">What matters most right now?</h2>
-                <p className="text-body-small text-muted-foreground mt-2">
-                  Select your current life focus (optional)
-                </p>
+                <p className="text-body-small text-muted-foreground mt-2">Select your current life focus (optional)</p>
               </div>
 
               <div className="space-y-2">
@@ -405,7 +401,7 @@ export function IndividualProfileWizard({ onComplete }: Props) {
                   <ChevronLeft className="w-4 h-4 mr-1" /> Back
                 </Button>
                 <Button
-                  onClick={handleComplete}
+                  onClick={() => handleComplete(false)}
                   disabled={saving}
                   className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
@@ -419,12 +415,7 @@ export function IndividualProfileWizard({ onComplete }: Props) {
         {/* Skip link */}
         <p className="text-center mt-4">
           <button
-            onClick={async () => {
-              if (!user) return;
-              await supabase.from("profiles").update({ profile_completed: true }).eq("user_id", user.id);
-              await refreshProfile();
-              onComplete();
-            }}
+            onClick={handleSkipStep}
             className="text-caption text-muted-foreground hover:text-foreground hover:underline"
           >
             Skip for now

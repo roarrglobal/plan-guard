@@ -25,6 +25,8 @@ import { IndividualDashboard } from "@/components/dashboard/IndividualDashboard"
 import { BusinessDashboard } from "@/components/dashboard/BusinessDashboard";
 import { usePendingInvitations } from "@/hooks/usePendingInvitations";
 import { IndividualProfileWizard } from "@/components/onboarding/IndividualProfileWizard";
+import { ProfileCompletionBanner } from "@/components/dashboard/ProfileCompletionBanner";
+import { CelebrationOverlay } from "@/components/dashboard/CelebrationOverlay";
 
 interface SavedAnalysis {
   id: string;
@@ -70,6 +72,8 @@ export default function Dashboard() {
   const [showWaitlistModal, setShowWaitlistModal] = useState(false);
   const [showTrialExpiredModal, setShowTrialExpiredModal] = useState(false);
   const [waitlistLimitType, setWaitlistLimitType] = useState<"deep_snag" | "journal" | "retro" | "general">("general");
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [dobSkipped, setDobSkipped] = useState(false);
   
   // Show trial expired modal on first load if trial expired
   useEffect(() => {
@@ -169,12 +173,20 @@ export default function Dashboard() {
   };
 
   if (showProfileWizard) {
-    return <IndividualProfileWizard onComplete={() => {}} />;
+    return (
+      <IndividualProfileWizard
+        onComplete={(skippedDob) => {
+          setDobSkipped(!!skippedDob);
+          setShowCelebration(true);
+        }}
+      />
+    );
   }
 
 
   return (
     <>
+      <CelebrationOverlay show={showCelebration} onDone={() => setShowCelebration(false)} />
       {showRecap && hasAnalyses && (
         <MonthlyRecapModal analyses={analyses} onClose={closeRecap} />
       )}
@@ -182,6 +194,7 @@ export default function Dashboard() {
       <div className="min-h-screen bg-background">
         <PullToRefresh onRefresh={handleRefresh}>
           <main className="px-4 py-6 max-w-4xl mx-auto w-full min-h-full">
+            <ProfileCompletionBanner />
             
             {showEmptyState ? (
               <DashboardEmptyState />
