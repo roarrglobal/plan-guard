@@ -56,6 +56,53 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_log: {
+        Row: {
+          created_at: string
+          entity_id: string | null
+          entity_type: Database["public"]["Enums"]["audit_entity_type"]
+          event_data: Json
+          event_type: Database["public"]["Enums"]["audit_event_type"]
+          id: string
+          ip_address: string | null
+          team_id: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          entity_id?: string | null
+          entity_type: Database["public"]["Enums"]["audit_entity_type"]
+          event_data?: Json
+          event_type: Database["public"]["Enums"]["audit_event_type"]
+          id?: string
+          ip_address?: string | null
+          team_id: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: Database["public"]["Enums"]["audit_entity_type"]
+          event_data?: Json
+          event_type?: Database["public"]["Enums"]["audit_event_type"]
+          id?: string
+          ip_address?: string | null
+          team_id?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_log_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       decision_templates: {
         Row: {
           blind_spot_library: Json
@@ -1729,6 +1776,42 @@ export type Database = {
       }
     }
     Enums: {
+      audit_entity_type:
+        | "decision"
+        | "analysis"
+        | "outcome"
+        | "team"
+        | "member"
+        | "template"
+        | "settings"
+        | "export"
+      audit_event_type:
+        | "decision.created"
+        | "decision.updated"
+        | "decision.deleted"
+        | "decision.status_changed"
+        | "decision.visibility_changed"
+        | "analysis.started"
+        | "analysis.completed"
+        | "analysis.failed"
+        | "outcome.logged"
+        | "outcome.updated"
+        | "team.created"
+        | "team.updated"
+        | "team.settings_changed"
+        | "member.invited"
+        | "member.joined"
+        | "member.role_changed"
+        | "member.removed"
+        | "member.left"
+        | "template.created"
+        | "template.updated"
+        | "template.deleted"
+        | "auth.login"
+        | "auth.logout"
+        | "auth.password_changed"
+        | "export.pdf_generated"
+        | "export.csv_downloaded"
       department_type:
         | "sales"
         | "finance"
@@ -1880,6 +1963,44 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      audit_entity_type: [
+        "decision",
+        "analysis",
+        "outcome",
+        "team",
+        "member",
+        "template",
+        "settings",
+        "export",
+      ],
+      audit_event_type: [
+        "decision.created",
+        "decision.updated",
+        "decision.deleted",
+        "decision.status_changed",
+        "decision.visibility_changed",
+        "analysis.started",
+        "analysis.completed",
+        "analysis.failed",
+        "outcome.logged",
+        "outcome.updated",
+        "team.created",
+        "team.updated",
+        "team.settings_changed",
+        "member.invited",
+        "member.joined",
+        "member.role_changed",
+        "member.removed",
+        "member.left",
+        "template.created",
+        "template.updated",
+        "template.deleted",
+        "auth.login",
+        "auth.logout",
+        "auth.password_changed",
+        "export.pdf_generated",
+        "export.csv_downloaded",
+      ],
       department_type: [
         "sales",
         "finance",

@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { ArrowLeft, Trash2, Zap, Eye, Lock, Shield, CalendarDays, Timer, ClipboardCheck, Download } from "lucide-react";
+import { logAuditEvent } from "@/lib/auditLog";
 import { format, differenceInDays, isPast } from "date-fns";
 import { DecisionExportModal, type ExportSections } from "@/components/export/DecisionExportModal";
 import { exportTeamDecisionPDF, type TeamDecisionExportData } from "@/lib/teamPdfExport";
@@ -127,6 +128,12 @@ export default function TeamDecisionDetailPage() {
       } else {
         toast.success("Analysis complete!");
         queryClient.invalidateQueries({ queryKey: ["team-decision-analyses", decisionId] });
+        logAuditEvent({
+          teamId: team.id, userId: user.id,
+          eventType: "analysis.completed", entityType: "analysis",
+          entityId: decision.id,
+          eventData: { decision_title: decision.decision_text, analysis_type: aType },
+        });
         await supabase.from("team_activity").insert({
           team_id: team.id, user_id: user.id,
           action_type: "analysis_run", entity_type: "decision", entity_id: decision.id,
@@ -154,6 +161,12 @@ export default function TeamDecisionDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["team-decision", decisionId] });
       queryClient.invalidateQueries({ queryKey: ["team-decisions", team.id] });
       if (status !== decision.status) {
+        logAuditEvent({
+          teamId: team.id, userId: user!.id,
+          eventType: "decision.status_changed", entityType: "decision",
+          entityId: decision.id,
+          eventData: { title: decision.decision_text, old_status: decision.status, new_status: status },
+        });
         await supabase.from("team_activity").insert({
           team_id: team.id, user_id: user!.id,
           action_type: "status_changed", entity_type: "decision", entity_id: decision.id,
@@ -191,6 +204,12 @@ export default function TeamDecisionDetailPage() {
     const { error } = await supabase.from("team_decisions").delete().eq("id", decision.id);
     if (error) toast.error(error.message);
     else {
+      logAuditEvent({
+        teamId: team.id, userId: user!.id,
+        eventType: "decision.deleted", entityType: "decision",
+        entityId: decision.id,
+        eventData: { title: decision.decision_text },
+      });
       toast.success("Decision deleted");
       navigate(`/team/${team.slug}/decisions`);
     }
