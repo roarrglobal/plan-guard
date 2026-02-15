@@ -61,6 +61,7 @@ import PremortemAnalysisPage from "./pages/PremortemAnalysisPage";
 import JournalDetailPage from "./pages/JournalDetailPage";
 import ReportsPage from "./pages/ReportsPage";
 import DecisionOutcomePage from "./pages/DecisionOutcomePage";
+import ReadingPage from "./pages/ReadingPage";
 import TeamNewPage from "./pages/TeamNewPage";
 import TeamDashboardPage from "./pages/TeamDashboardPage";
 import TeamMembersPage from "./pages/TeamMembersPage";
@@ -148,6 +149,7 @@ const App = () => {
                 <Route path="/settings/notifications" element={<NotificationSettingsPage />} />
                 <Route path="/profile" element={<ProfileSettings />} />
                 <Route path="/reports" element={<ReportsPage />} />
+                <Route path="/reading/:id" element={<ReadingPage />} />
               </Route>
               
               {/* Team routes */}
