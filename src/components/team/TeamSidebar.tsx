@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, ListChecks, BarChart3, Users, Settings, X, Keyboard, FileText, ShieldCheck, ScrollText } from "lucide-react";
+import { LayoutDashboard, ListChecks, BarChart3, Users, Settings, X, Keyboard, FileText, ShieldCheck, ScrollText, Home, LogOut } from "lucide-react";
 import { useTeamPermissions } from "@/hooks/useTeamPermissions";
+import { useAuth } from "@/contexts/AuthContext";
 import type { Team } from "@/hooks/useTeams";
 import { KeyboardShortcutsModal } from "./KeyboardShortcutsModal";
 
@@ -16,8 +17,15 @@ interface TeamSidebarProps {
 
 export function TeamSidebar({ slug, teamName, open, onClose, teamId }: TeamSidebarProps) {
   const location = useLocation();
+  const navigate = useNavigate();
   const { can } = useTeamPermissions(teamId);
+  const { signOut } = useAuth();
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
 
   const items = [
     { label: "Dashboard", icon: LayoutDashboard, href: `/team/${slug}/dashboard`, show: can("view_dashboard") },
@@ -66,7 +74,15 @@ export function TeamSidebar({ slug, teamName, open, onClose, teamId }: TeamSideb
             );
           })}
         </nav>
-        <div className="p-2 border-t border-[hsl(var(--sidebar-border))]">
+        <div className="p-2 border-t border-[hsl(var(--sidebar-border))] space-y-1">
+          <Link
+            to="/dashboard"
+            onClick={onClose}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[hsl(var(--sidebar-foreground))]/60 hover:text-[hsl(var(--sidebar-foreground))] hover:bg-white/5 transition-colors w-full"
+          >
+            <Home className="w-4 h-4 shrink-0" />
+            My Account
+          </Link>
           <button
             onClick={() => setShortcutsOpen(true)}
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[hsl(var(--sidebar-foreground))]/60 hover:text-[hsl(var(--sidebar-foreground))] hover:bg-white/5 transition-colors w-full"
@@ -74,6 +90,13 @@ export function TeamSidebar({ slug, teamName, open, onClose, teamId }: TeamSideb
             <Keyboard className="w-4 h-4 shrink-0" />
             Shortcuts
             <kbd className="ml-auto text-[10px] bg-white/10 px-1.5 py-0.5 rounded font-mono border border-white/20">?</kbd>
+          </button>
+          <button
+            onClick={handleSignOut}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-destructive/80 hover:text-destructive hover:bg-destructive/10 transition-colors w-full"
+          >
+            <LogOut className="w-4 h-4 shrink-0" />
+            Log out
           </button>
         </div>
         <KeyboardShortcutsModal open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
