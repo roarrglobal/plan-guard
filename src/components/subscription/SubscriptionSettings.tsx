@@ -25,10 +25,13 @@ export function SubscriptionSettings() {
   const { usage, daysUntilReset } = useUsage();
   const { tier, isFree, isPro, isTeam, isBusiness } = useTierCheck();
 
-  const tierName = tierDisplayNames[tier] || "Free";
+  const isIndividual = profile?.user_type === "individual" || !profile?.user_type;
+  
+  // For individuals, cap displayed tier at Pro (they can't have team/business)
+  const effectiveTier = isIndividual && (tier === "team" || tier === "business") ? "pro" : tier;
+  const tierName = tierDisplayNames[effectiveTier] || "Free";
   const subscriptionStatus = (profile as any)?.subscription_status || "active";
   const isTrialing = subscriptionStatus === "trialing";
-  const isIndividual = profile?.user_type === "individual" || !profile?.user_type;
 
   return (
     <div className="space-y-6">
@@ -45,7 +48,7 @@ export function SubscriptionSettings() {
               </p>
               {!isFree && (
                 <p className="text-sm text-muted-foreground">
-                  ${tierPricing[tier]?.monthly}/month • Renews in {daysUntilReset} days
+                  ${tierPricing[effectiveTier]?.monthly}/month • Renews in {daysUntilReset} days
                 </p>
               )}
               {isFree && (
