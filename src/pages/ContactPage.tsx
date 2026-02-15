@@ -1,5 +1,6 @@
 import { MarketingHeader } from "@/components/marketing/MarketingHeader";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
+import { usePageSEO } from "@/hooks/usePageSEO";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,6 +19,7 @@ const contactInfo = [
 ];
 
 export default function ContactPage() {
+  usePageSEO({ title: "Contact Snag", description: "Questions, partnerships, or support. Get in touch with the Snag team." });
   const [sending, setSending] = useState(false);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {

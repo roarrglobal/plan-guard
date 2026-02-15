@@ -1,5 +1,6 @@
 import { MarketingHeader } from "@/components/marketing/MarketingHeader";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
+import { usePageSEO } from "@/hooks/usePageSEO";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,6 +10,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 export default function BlogPage() {
+  usePageSEO({ title: "The Snag Blog", description: "Insights on decision-making, pre-mortems, and building better teams." });
   const [email, setEmail] = useState("");
 
   const handleSubscribe = (e: React.FormEvent) => {

@@ -1,5 +1,6 @@
 import { MarketingHeader } from "@/components/marketing/MarketingHeader";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
+import { usePageSEO } from "@/hooks/usePageSEO";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -140,6 +141,7 @@ function FeatureCard({ icon: Icon, title, desc, bullets, details, footer, cta, c
 }
 
 export default function ProductPage() {
+  usePageSEO({ title: "Product — Snag Decision Intelligence", description: "The SNAG Framework: Surface, Name, Alert, Gate. AI-powered pre-mortem analysis for every decision." });
   const [email, setEmail] = useState("");
 
   return (

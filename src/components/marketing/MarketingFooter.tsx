@@ -23,16 +23,17 @@ const footerLinks = {
   ],
   Company: [
     { label: "About Us", href: "/about" },
-    { label: "Blog", href: "/about" },
-    { label: "Careers", href: "/about" },
-    { label: "Contact", href: "/about" },
+    { label: "Blog", href: "/blog" },
+    { label: "Careers", href: "/careers" },
+    { label: "Contact", href: "/contact" },
+    { label: "Help", href: "/help" },
   ],
   Legal: [
     { label: "Privacy Policy", href: "/privacy" },
     { label: "Terms of Service", href: "/terms" },
-    { label: "Refund Policy", href: "/terms" },
-    { label: "GDPR", href: "/privacy" },
-    { label: "Security", href: "/privacy" },
+    { label: "Refund Policy", href: "/refund" },
+    { label: "GDPR", href: "/gdpr" },
+    { label: "Security", href: "/security" },
   ],
 };
 

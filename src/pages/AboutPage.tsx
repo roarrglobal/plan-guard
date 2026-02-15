@@ -1,5 +1,6 @@
 import { MarketingHeader } from "@/components/marketing/MarketingHeader";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
+import { usePageSEO } from "@/hooks/usePageSEO";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
@@ -21,6 +22,7 @@ const timeline = [
 ];
 
 export default function AboutPage() {
+  usePageSEO({ title: "About Snag — Better decisions, fewer regrets", description: "We're building the decision layer every company is missing. Learn about Snag's mission, team, and values." });
   return (
     <div className="min-h-screen bg-background">
       <MarketingHeader />
