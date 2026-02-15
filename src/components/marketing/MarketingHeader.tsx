@@ -31,7 +31,7 @@ export function MarketingHeader() {
     <header
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-        scrolled ? "bg-white/90 backdrop-blur-lg shadow-sm border-b border-border" : "bg-white/70 backdrop-blur-sm"
+        scrolled ? "bg-background/90 backdrop-blur-lg shadow-sm border-b border-border" : "bg-background/70 backdrop-blur-sm"
       )}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -54,7 +54,7 @@ export function MarketingHeader() {
               </button>
               {solutionsOpen && (
                 <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2">
-                  <div className="bg-white rounded-xl shadow-lg border border-border py-2 min-w-[220px]">
+                  <div className="bg-card rounded-xl shadow-lg border border-border py-2 min-w-[220px]">
                     {solutionsItems.map((item) => (
                       <div key={item.href}>
                       <Link
@@ -94,7 +94,7 @@ export function MarketingHeader() {
               </Button>
               {getStartedOpen && (
                 <div className="absolute top-full right-0 pt-2">
-                  <div className="bg-white rounded-xl shadow-lg border border-border py-2 min-w-[200px]">
+                  <div className="bg-card rounded-xl shadow-lg border border-border py-2 min-w-[200px]">
                     <Link
                       to="/signup?type=individual"
                       className="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-muted transition-colors"
@@ -126,7 +126,7 @@ export function MarketingHeader() {
 
       {/* Mobile Panel */}
       {mobileOpen && (
-        <div className="lg:hidden bg-white border-t border-border shadow-lg">
+        <div className="lg:hidden bg-background border-t border-border shadow-lg">
           <div className="px-4 py-6 space-y-4">
           <Link to="/product" className="block text-base font-medium text-foreground py-2" onClick={() => setMobileOpen(false)}>
               Product

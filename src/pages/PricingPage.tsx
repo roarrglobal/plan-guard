@@ -112,7 +112,7 @@ const comparisonRows = [
 function CellValue({ value }: { value: string | boolean }) {
   if (typeof value === "string") {
     if (value === "—") return <Minus className="w-4 h-4 text-muted-foreground/40 mx-auto" />;
-    return <span className="text-sm text-[#1A1A1A]">{value}</span>;
+    return <span className="text-sm text-foreground">{value}</span>;
   }
   return value ? <Check className="w-4 h-4 text-emerald-600 mx-auto" /> : <X className="w-4 h-4 text-red-400 mx-auto" />;
 }
@@ -133,14 +133,14 @@ export default function PricingPage() {
   const plans = tab === "individual" ? individualPlans : teamPlans;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       <MarketingHeader />
 
       {/* ─── HERO ─── */}
-      <section className="pt-32 pb-16 md:pt-40 md:pb-20 bg-gradient-to-b from-[#F9FAFB] to-white">
+      <section className="pt-32 pb-16 md:pt-40 md:pb-20 bg-gradient-to-b from-muted to-background">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-[#1A1A1A] leading-[1.1] mb-6">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-foreground leading-[1.1] mb-6">
               Simple pricing for better decisions
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-10">
@@ -148,16 +148,16 @@ export default function PricingPage() {
             </p>
 
             {/* Toggle */}
-            <div className="inline-flex items-center bg-[#F9FAFB] border border-border rounded-full p-1">
+            <div className="inline-flex items-center bg-muted border border-border rounded-full p-1">
               <button
                 onClick={() => setTab("individual")}
-                className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${tab === "individual" ? "bg-white shadow-sm text-[#1A1A1A]" : "text-muted-foreground"}`}
+                className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${tab === "individual" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground"}`}
               >
                 Individual
               </button>
               <button
                 onClick={() => setTab("teams")}
-                className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${tab === "teams" ? "bg-white shadow-sm text-[#1A1A1A]" : "text-muted-foreground"}`}
+                className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${tab === "teams" ? "bg-card shadow-sm text-foreground" : "text-muted-foreground"}`}
               >
                 Teams
               </button>
@@ -178,8 +178,8 @@ export default function PricingPage() {
                 transition={{ duration: 0.4, delay: i * 0.08 }}
                 className={`rounded-2xl p-6 md:p-8 flex flex-col ${
                   plan.highlighted
-                    ? "border-2 border-cobalt bg-white shadow-lg relative"
-                    : "border border-border bg-white"
+                    ? "border-2 border-cobalt bg-card shadow-lg relative"
+                    : "border border-border bg-card"
                 }`}
               >
                 {plan.badge && (
@@ -189,10 +189,10 @@ export default function PricingPage() {
                     {plan.badge}
                   </span>
                 )}
-                <h3 className="text-xl font-bold text-[#1A1A1A] mb-1">{plan.name}</h3>
+                <h3 className="text-xl font-bold text-foreground mb-1">{plan.name}</h3>
                 <p className="text-sm text-muted-foreground mb-4">{plan.subtitle}</p>
                 <div className="mb-1">
-                  <span className="text-4xl font-bold text-[#1A1A1A]">{plan.price}</span>
+                  <span className="text-4xl font-bold text-foreground">{plan.price}</span>
                   {plan.period && <span className="text-muted-foreground text-sm">{plan.period}</span>}
                 </div>
                 {"annual" in plan && plan.annual && (
@@ -207,7 +207,7 @@ export default function PricingPage() {
                         ? <Check className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
                         : <X className="w-4 h-4 text-red-300 mt-0.5 shrink-0" />
                       }
-                      <span className={f.included ? "text-[#1A1A1A]" : "text-muted-foreground"}>{f.text}</span>
+                      <span className={f.included ? "text-foreground" : "text-muted-foreground"}>{f.text}</span>
                     </li>
                   ))}
                 </ul>
@@ -216,7 +216,7 @@ export default function PricingPage() {
                   <Button
                     className={`w-full h-11 font-semibold ${
                       plan.ctaStyle === "outline"
-                        ? "border border-border bg-white text-[#1A1A1A] hover:bg-muted"
+                        ? "border border-border bg-card text-foreground hover:bg-muted"
                         : "bg-cobalt hover:bg-cobalt-hover text-white"
                     }`}
                     variant={plan.ctaStyle === "outline" ? "outline" : "default"}
@@ -231,9 +231,9 @@ export default function PricingPage() {
       </section>
 
       {/* ─── COMPARISON TABLE ─── */}
-      <section className="py-20 md:py-28 bg-[#F9FAFB]">
+      <section className="py-20 md:py-28 bg-muted">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-[#1A1A1A] text-center mb-12">Compare all plans</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground text-center mb-12">Compare all plans</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-left min-w-[700px]">
               <thead>
@@ -249,7 +249,7 @@ export default function PricingPage() {
               <tbody>
                 {comparisonRows.map((row) => (
                   <tr key={row.feature} className="border-b border-border/50">
-                    <td className="py-3.5 pr-4 text-sm text-[#1A1A1A] font-medium">{row.feature}</td>
+                    <td className="py-3.5 pr-4 text-sm text-foreground font-medium">{row.feature}</td>
                     <td className="py-3.5 px-3 text-center"><CellValue value={row.free} /></td>
                     <td className="py-3.5 px-3 text-center"><CellValue value={row.pro} /></td>
                     <td className="py-3.5 px-3 text-center"><CellValue value={row.team} /></td>
@@ -264,13 +264,13 @@ export default function PricingPage() {
       </section>
 
       {/* ─── FAQ ─── */}
-      <section className="py-20 md:py-28 bg-white">
+      <section className="py-20 md:py-28 bg-background">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-[#1A1A1A] text-center mb-12">Frequently asked questions</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground text-center mb-12">Frequently asked questions</h2>
           <Accordion type="single" collapsible className="space-y-3">
             {faqs.map((faq, i) => (
-              <AccordionItem key={i} value={`faq-${i}`} className="border border-border rounded-xl px-6 data-[state=open]:bg-[#F9FAFB]">
-                <AccordionTrigger className="text-sm font-semibold text-[#1A1A1A] py-4 hover:no-underline">
+              <AccordionItem key={i} value={`faq-${i}`} className="border border-border rounded-xl px-6 data-[state=open]:bg-muted">
+                <AccordionTrigger className="text-sm font-semibold text-foreground py-4 hover:no-underline">
                   {faq.q}
                 </AccordionTrigger>
                 <AccordionContent className="text-sm text-muted-foreground pb-4">

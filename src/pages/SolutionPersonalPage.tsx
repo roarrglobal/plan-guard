@@ -42,15 +42,15 @@ const sampleBlindSpots = [
 export default function SolutionPersonalPage() {
   usePageSEO({ title: "Personal Decision Intelligence — Snag", description: "Make better personal decisions. Career moves, life choices, and major purchases — stress-test them all." });
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       <MarketingHeader />
 
       {/* Hero */}
-      <section className="pt-32 pb-20 md:pt-40 md:pb-28 bg-gradient-to-b from-crimson/5 to-white">
+      <section className="pt-32 pb-20 md:pt-40 md:pb-28 bg-gradient-to-b from-crimson/5 to-background">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <span className="inline-block text-xs font-semibold bg-crimson/10 text-crimson px-3 py-1.5 rounded-full mb-6">For Personal Use</span>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-[#1A1A1A] leading-[1.1] mb-6">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-foreground leading-[1.1] mb-6">
               Make confident personal decisions
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
@@ -64,16 +64,16 @@ export default function SolutionPersonalPage() {
       </section>
 
       {/* Problem */}
-      <section className="py-20 md:py-28 bg-[#F9FAFB]">
+      <section className="py-20 md:py-28 bg-muted">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-[#1A1A1A] text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground text-center mb-12">
             The most important decisions of your life don't come with an instruction manual.
           </h2>
           <div className="grid md:grid-cols-3 gap-6">
             {["Job offers that keep you up at night", "Investments where the stakes feel too high", "Life transitions with no clear answer"].map((t, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
-                className="border border-border rounded-2xl p-6 bg-white text-center">
-                <p className="text-base font-medium text-[#1A1A1A]">{t}</p>
+                className="border border-border rounded-2xl p-6 bg-card text-center">
+                <p className="text-base font-medium text-foreground">{t}</p>
               </motion.div>
             ))}
           </div>
@@ -81,9 +81,9 @@ export default function SolutionPersonalPage() {
       </section>
 
       {/* Use cases */}
-      <section className="py-20 md:py-28 bg-white">
+      <section className="py-20 md:py-28 bg-background">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-[#1A1A1A] text-center mb-4">Decisions Snag helps with</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground text-center mb-4">Decisions Snag helps with</h2>
           <p className="text-muted-foreground text-center mb-12 max-w-xl mx-auto">From career moves to life transitions</p>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {useCases.map((uc, i) => (
@@ -92,7 +92,7 @@ export default function SolutionPersonalPage() {
                 <div className="w-10 h-10 rounded-lg bg-crimson/10 flex items-center justify-center mb-4">
                   <uc.icon className="w-5 h-5 text-crimson" />
                 </div>
-                <h3 className="text-base font-semibold text-[#1A1A1A] mb-3">{uc.title}</h3>
+                <h3 className="text-base font-semibold text-foreground mb-3">{uc.title}</h3>
                 <ul className="space-y-2">
                   {uc.items.map((item) => (
                     <li key={item} className="text-sm text-muted-foreground flex items-start gap-2">
@@ -107,16 +107,16 @@ export default function SolutionPersonalPage() {
       </section>
 
       {/* Blind spots */}
-      <section className="py-20 md:py-28 bg-[#F9FAFB]">
+      <section className="py-20 md:py-28 bg-muted">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-[#1A1A1A] text-center mb-4">Your brain has blind spots. Snag doesn't.</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground text-center mb-4">Your brain has blind spots. Snag doesn't.</h2>
           <p className="text-muted-foreground text-center mb-12">Blind spots specific to personal decisions</p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {blindSpots.map((bs, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}
-                className="flex items-start gap-4 bg-white border border-border rounded-xl p-5">
+                className="flex items-start gap-4 bg-card border border-border rounded-xl p-5">
                 <bs.icon className="w-5 h-5 text-crimson shrink-0 mt-0.5" />
-                <p className="text-sm text-[#1A1A1A]">{bs.text}</p>
+                <p className="text-sm text-foreground">{bs.text}</p>
               </motion.div>
             ))}
           </div>
@@ -124,9 +124,9 @@ export default function SolutionPersonalPage() {
       </section>
 
       {/* Personal features */}
-      <section className="py-20 md:py-28 bg-white">
+      <section className="py-20 md:py-28 bg-background">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-[#1A1A1A] text-center mb-4">Personal Features</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground text-center mb-4">Personal Features</h2>
           <p className="text-muted-foreground text-center mb-12">Build your personal decision intelligence over time.</p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((f, i) => (
@@ -135,7 +135,7 @@ export default function SolutionPersonalPage() {
                 <div className="w-10 h-10 rounded-lg bg-crimson/10 flex items-center justify-center mb-4">
                   <f.icon className="w-5 h-5 text-crimson" />
                 </div>
-                <h3 className="text-base font-semibold text-[#1A1A1A] mb-2">{f.title}</h3>
+                <h3 className="text-base font-semibold text-foreground mb-2">{f.title}</h3>
                 <p className="text-sm text-muted-foreground">{f.desc}</p>
               </motion.div>
             ))}
@@ -144,13 +144,13 @@ export default function SolutionPersonalPage() {
       </section>
 
       {/* Sample analysis */}
-      <section className="py-20 md:py-28 bg-[#F9FAFB]">
+      <section className="py-20 md:py-28 bg-muted">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-[#1A1A1A] text-center mb-12">Sample Analysis</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground text-center mb-12">Sample Analysis</h2>
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-            className="bg-white border border-border rounded-2xl p-6 md:p-8">
+            className="bg-card border border-border rounded-2xl p-6 md:p-8">
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Decision</p>
-            <p className="text-lg font-semibold text-[#1A1A1A] mb-6">"Should I accept this startup job offer?"</p>
+            <p className="text-lg font-semibold text-foreground mb-6">"Should I accept this startup job offer?"</p>
 
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold mb-6">
               <AlertTriangle className="w-3.5 h-3.5" /> Proceed with Caution
@@ -160,16 +160,16 @@ export default function SolutionPersonalPage() {
               The offer presents exciting growth potential but carries significant financial and career risks that need careful evaluation against your current stability.
             </p>
 
-            <h4 className="text-sm font-semibold text-[#1A1A1A] mb-3">Top Blind Spots</h4>
+            <h4 className="text-sm font-semibold text-foreground mb-3">Top Blind Spots</h4>
             <ul className="space-y-2 mb-6">
               {sampleBlindSpots.map((bs, i) => (
-                <li key={i} className="flex items-start gap-2.5 text-sm text-[#1A1A1A]">
+                <li key={i} className="flex items-start gap-2.5 text-sm text-foreground">
                   <Eye className="w-4 h-4 text-crimson shrink-0 mt-0.5" />{bs}
                 </li>
               ))}
             </ul>
 
-            <h4 className="text-sm font-semibold text-[#1A1A1A] mb-3">Key Failure Mode</h4>
+            <h4 className="text-sm font-semibold text-foreground mb-3">Key Failure Mode</h4>
             <p className="text-sm text-muted-foreground mb-6 pl-6 border-l-2 border-crimson/30">
               Startup runs out of runway within 18 months, leaving you job-hunting in a down market with a résumé gap.
             </p>
@@ -178,7 +178,7 @@ export default function SolutionPersonalPage() {
               <div className="flex items-start gap-3">
                 <HelpCircle className="w-5 h-5 text-crimson shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-sm font-semibold text-[#1A1A1A] mb-1">The Unasked Question</p>
+                  <p className="text-sm font-semibold text-foreground mb-1">The Unasked Question</p>
                   <p className="text-sm text-muted-foreground italic">"If this fails, will you regret trying or regret not knowing?"</p>
                 </div>
               </div>
@@ -188,18 +188,18 @@ export default function SolutionPersonalPage() {
       </section>
 
       {/* Pricing */}
-      <section className="py-20 md:py-28 bg-white">
+      <section className="py-20 md:py-28 bg-background">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-[#1A1A1A] mb-4">Start free. Upgrade when you're ready.</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Start free. Upgrade when you're ready.</h2>
           <div className="grid sm:grid-cols-2 gap-6 mt-10 max-w-xl mx-auto">
             <div className="border border-border rounded-2xl p-6 text-left">
-              <h3 className="font-bold text-[#1A1A1A]">Free</h3>
-              <p className="text-3xl font-bold text-[#1A1A1A] mt-2">$0</p>
+              <h3 className="font-bold text-foreground">Free</h3>
+              <p className="text-3xl font-bold text-foreground mt-2">$0</p>
               <p className="text-sm text-muted-foreground mt-1">Basic access</p>
             </div>
             <div className="border-2 border-crimson rounded-2xl p-6 text-left">
-              <h3 className="font-bold text-[#1A1A1A]">Pro</h3>
-              <p className="text-3xl font-bold text-[#1A1A1A] mt-2">$12<span className="text-base font-normal text-muted-foreground">/month</span></p>
+              <h3 className="font-bold text-foreground">Pro</h3>
+              <p className="text-3xl font-bold text-foreground mt-2">$12<span className="text-base font-normal text-muted-foreground">/month</span></p>
               <p className="text-sm text-muted-foreground mt-1">Full features</p>
             </div>
           </div>
