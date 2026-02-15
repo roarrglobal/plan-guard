@@ -22,13 +22,13 @@ interface AnalysisInputProps {
 }
 
 const MAX_CHARS = 5000;
-const MIN_CHARS = 20;
+const MIN_CHARS = 200;
 
 export function AnalysisInput({
   onSubmit,
   isLoading = false,
   className,
-  placeholder = "Describe your plan or decision...",
+  placeholder = "Describe your plan or decision in detail — include context, options you're weighing, stakes, and timeline for a thorough analysis...",
   compact = false,
   showAttachLink = true,
 }: AnalysisInputProps) {
@@ -224,7 +224,7 @@ export function AnalysisInput({
             placeholder={placeholder}
             disabled={isLoading}
             className={cn(
-              "w-full bg-white border border-[#E0E0E0] rounded-lg px-4 py-4 text-[16px] text-[#1A1A1A] placeholder:text-[#999999] focus:outline-none focus:border-[#0047AB] transition-colors resize-none",
+              "w-full bg-card border border-border rounded-lg px-4 py-4 text-[16px] text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors resize-none",
               compact ? "min-h-[120px]" : "min-h-[180px]",
               "leading-relaxed"
             )}
@@ -244,7 +244,7 @@ export function AnalysisInput({
               {showAttachLink && (
                 <button
                   onClick={handleAttachClick}
-                  className="flex items-center gap-1.5 text-[14px] text-[#0047AB] hover:text-[#003A8C] transition-colors"
+                  className="flex items-center gap-1.5 text-[14px] text-primary hover:text-primary/80 transition-colors"
                 >
                   <Paperclip className="w-4 h-4" />
                   Attach document
@@ -255,7 +255,7 @@ export function AnalysisInput({
             <Button
               onClick={handleSubmit}
               disabled={!isValid || isLoading}
-              className="bg-[#BE3455] hover:bg-[#A02D48] text-white font-semibold px-6 py-3 rounded-lg gap-2"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-6 py-3 rounded-lg gap-2"
             >
               {isLoading ? (
                 <>
@@ -278,7 +278,7 @@ export function AnalysisInput({
         
         {charCount > 0 && charCount < MIN_CHARS && (
           <p className="text-sm text-muted-foreground mt-2">
-            Need at least {MIN_CHARS - charCount} more characters
+            Add more detail for a better analysis — {MIN_CHARS - charCount} more characters needed
           </p>
         )}
       </div>

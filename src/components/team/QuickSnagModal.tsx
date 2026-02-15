@@ -191,7 +191,7 @@ export function QuickSnagModal({ open, onOpenChange, teamId, teamSlug }: QuickSn
                 <textarea
                   ref={inputRef}
                   value={input}
-                  onChange={(e) => setInput(e.target.value.slice(0, 200))}
+                  onChange={(e) => setInput(e.target.value.slice(0, 500))}
                   placeholder="What decision are you facing?"
                   rows={3}
                   className="w-full resize-none text-sm border rounded-lg p-3 bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
@@ -220,7 +220,7 @@ export function QuickSnagModal({ open, onOpenChange, teamId, teamSlug }: QuickSn
                       ))}
                     </div>
                   </div>
-                  <span className="text-[10px] text-muted-foreground">{input.length}/200</span>
+                  <span className="text-[10px] text-muted-foreground">{input.length}/500</span>
                 </div>
               </div>
 
