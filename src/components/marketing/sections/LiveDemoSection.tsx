@@ -37,16 +37,16 @@ export function LiveDemoSection() {
   };
 
   return (
-    <section className="py-20 md:py-28 bg-white">
+    <section className="py-20 md:py-28 bg-background">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-[#1A1A1A] mb-4">Try it now</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Try it now</h2>
           <p className="text-lg text-muted-foreground">See what Snag reveals about a decision</p>
         </div>
 
         <div className="space-y-4 mb-4">
           <textarea
-            className="w-full border border-border rounded-xl px-5 py-4 text-base bg-[#F9FAFB] placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-cobalt/30 focus:border-cobalt transition-all resize-none h-28"
+            className="w-full border border-border rounded-xl px-5 py-4 text-base bg-muted placeholder:text-muted-foreground text-foreground focus:outline-none focus:ring-2 focus:ring-cobalt/30 focus:border-cobalt transition-all resize-none h-28"
             placeholder="Describe a decision you're facing..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -56,7 +56,7 @@ export function LiveDemoSection() {
               <button
                 key={ex}
                 onClick={() => setInput(ex)}
-                className="text-xs px-3 py-1.5 rounded-full border border-border text-muted-foreground hover:bg-muted hover:text-[#1A1A1A] transition-colors"
+                className="text-xs px-3 py-1.5 rounded-full border border-border text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
               >
                 {ex}
               </button>
@@ -85,13 +85,13 @@ export function LiveDemoSection() {
               className="border border-border rounded-2xl overflow-hidden"
             >
               <div className="p-6 md:p-8">
-                <div className="inline-flex items-center gap-2 bg-amber-50 text-amber-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
+                <div className="inline-flex items-center gap-2 bg-warning/10 text-warning text-xs font-semibold px-3 py-1.5 rounded-full mb-4">
                   <AlertTriangle className="w-3.5 h-3.5" />
                   {sampleOutput.verdict}
                 </div>
-                <p className="text-sm text-[#1A1A1A] leading-relaxed mb-6">{sampleOutput.summary}</p>
+                <p className="text-sm text-foreground leading-relaxed mb-6">{sampleOutput.summary}</p>
 
-                <h4 className="text-sm font-semibold text-[#1A1A1A] mb-3">Top Blind Spots</h4>
+                <h4 className="text-sm font-semibold text-foreground mb-3">Top Blind Spots</h4>
                 <ul className="space-y-2 mb-6">
                   {sampleOutput.blindSpots.map((b, i) => (
                     <li key={i} className="flex items-start gap-3 text-sm text-muted-foreground">
@@ -106,12 +106,12 @@ export function LiveDemoSection() {
                     <HelpCircle className="w-4 h-4 text-cobalt" />
                     <span className="text-sm font-semibold text-cobalt">The Unasked Question</span>
                   </div>
-                  <p className="text-sm text-[#1A1A1A] italic">"{sampleOutput.unaskedQuestion}"</p>
+                  <p className="text-sm text-foreground italic">"{sampleOutput.unaskedQuestion}"</p>
                 </div>
 
                 {/* Blurred teaser */}
                 <div className="relative">
-                  <div className="h-24 bg-gradient-to-b from-transparent to-white/90 backdrop-blur-sm rounded-xl flex items-end justify-center pb-4">
+                  <div className="h-24 bg-gradient-to-b from-transparent to-background/90 backdrop-blur-sm rounded-xl flex items-end justify-center pb-4">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Lock className="w-4 h-4" />
                       More insights available...
@@ -120,7 +120,7 @@ export function LiveDemoSection() {
                 </div>
               </div>
 
-              <div className="border-t border-border p-4 bg-[#F9FAFB]">
+              <div className="border-t border-border p-4 bg-muted">
                 <a href="/signup?type=individual">
                   <Button className="w-full bg-cobalt hover:bg-cobalt-hover text-white">
                     See Full Analysis — Sign Up Free

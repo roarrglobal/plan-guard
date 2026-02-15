@@ -10,7 +10,7 @@ const steps = [
 
 export function HowItWorksSection() {
   return (
-    <section id="how-it-works" className="py-20 md:py-28 bg-white relative overflow-hidden">
+    <section id="how-it-works" className="py-20 md:py-28 bg-background relative overflow-hidden">
       {/* Background accent */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-crimson/3 to-cobalt/3 rounded-full blur-[150px]" />
       

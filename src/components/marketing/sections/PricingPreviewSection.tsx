@@ -15,7 +15,7 @@ const teams = [
 
 export function PricingPreviewSection() {
   return (
-    <section className="py-20 md:py-28 bg-[#F9FAFB]">
+    <section className="py-20 md:py-28 bg-muted/30">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div 
           className="text-center mb-16"
@@ -23,7 +23,7 @@ export function PricingPreviewSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-[#1A1A1A] mb-4">Simple pricing. Serious value.</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Simple pricing. Serious value.</h2>
         </motion.div>
 
         <div className="grid md:grid-cols-2 gap-8 mb-12">
@@ -36,15 +36,15 @@ export function PricingPreviewSection() {
             <h3 className="text-sm font-semibold uppercase tracking-wider text-crimson mb-6">For Individuals</h3>
             <div className="space-y-3">
               {individual.map((p) => (
-                <div key={p.name} className={`flex items-center justify-between bg-white border rounded-xl px-5 py-4 transition-all duration-300 ${p.popular ? "border-crimson/30 shadow-md hover:shadow-lg" : "border-border hover:shadow-md"}`}>
+                <div key={p.name} className={`flex items-center justify-between bg-card border rounded-xl px-5 py-4 transition-all duration-300 ${p.popular ? "border-crimson/30 shadow-md hover:shadow-lg" : "border-border hover:shadow-md"}`}>
                   <div className="flex items-center gap-2">
                     <div>
-                      <p className="text-sm font-semibold text-[#1A1A1A]">{p.name}</p>
+                      <p className="text-sm font-semibold text-foreground">{p.name}</p>
                       <p className="text-xs text-muted-foreground">{p.desc}</p>
                     </div>
                     {p.popular && <Sparkles className="w-4 h-4 text-crimson" />}
                   </div>
-                  <p className="text-lg font-bold text-[#1A1A1A]">{p.price}</p>
+                  <p className="text-lg font-bold text-foreground">{p.price}</p>
                 </div>
               ))}
             </div>
@@ -60,15 +60,15 @@ export function PricingPreviewSection() {
             <h3 className="text-sm font-semibold uppercase tracking-wider text-cobalt mb-6">For Teams</h3>
             <div className="space-y-3">
               {teams.map((p) => (
-                <div key={p.name} className={`flex items-center justify-between bg-white border rounded-xl px-5 py-4 transition-all duration-300 ${p.popular ? "border-cobalt/30 shadow-md hover:shadow-lg" : "border-border hover:shadow-md"}`}>
+                <div key={p.name} className={`flex items-center justify-between bg-card border rounded-xl px-5 py-4 transition-all duration-300 ${p.popular ? "border-cobalt/30 shadow-md hover:shadow-lg" : "border-border hover:shadow-md"}`}>
                   <div className="flex items-center gap-2">
                     <div>
-                      <p className="text-sm font-semibold text-[#1A1A1A]">{p.name}</p>
+                      <p className="text-sm font-semibold text-foreground">{p.name}</p>
                       <p className="text-xs text-muted-foreground">{p.desc}</p>
                     </div>
                     {p.popular && <Sparkles className="w-4 h-4 text-cobalt" />}
                   </div>
-                  <p className="text-lg font-bold text-[#1A1A1A]">{p.price}</p>
+                  <p className="text-lg font-bold text-foreground">{p.price}</p>
                 </div>
               ))}
             </div>
