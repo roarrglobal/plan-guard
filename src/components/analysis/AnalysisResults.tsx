@@ -5,7 +5,7 @@ import { AnalysisSection } from "./AnalysisSection";
 import { FailureModeItem } from "./FailureModeItem";
 import { AnalysisDisclaimer } from "./AnalysisDisclaimer";
 import { FirstUseAcknowledgment, useFirstUseAcknowledgment } from "./FirstUseAcknowledgment";
-import { ShareModal } from "@/components/sharing/ShareModal";
+import { ShareModalEnhanced } from "@/components/sharing/ShareModalEnhanced";
 import { BottomLineSection, type BottomLine } from "./BottomLineSection";
 import { CosmicTimingSection, type CosmicTiming } from "./CosmicTimingSection";
 import { exportPreMortemPDF, type PreMortemData } from "@/lib/pdfExport";
@@ -54,6 +54,7 @@ interface AnalysisResultsProps {
   onNewAnalysis: () => void;
   onSave?: () => void;
   isLoggedIn?: boolean;
+  analysisId?: string;
 }
 
 // Helper to check if blind spot is enhanced format
@@ -82,6 +83,7 @@ export function AnalysisResults({
   onNewAnalysis,
   onSave,
   isLoggedIn = false,
+  analysisId,
 }: AnalysisResultsProps) {
   const [copied, setCopied] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
@@ -439,12 +441,14 @@ export function AnalysisResults({
       </div>
 
       {/* Share Modal */}
-      <ShareModal
+      <ShareModalEnhanced
         isOpen={showShareModal}
         onClose={() => setShowShareModal(false)}
         planPreview={originalInput.slice(0, 80)}
         blindSpotsCount={blindSpots.length}
         failureModesCount={failureModes.length}
+        analysisId={analysisId}
+        verdict={result?.bottom_line?.verdict}
       />
     </>
   );

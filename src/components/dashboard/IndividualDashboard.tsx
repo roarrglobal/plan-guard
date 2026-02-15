@@ -22,6 +22,7 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { DashboardPatterns } from "@/components/dashboard/DashboardPatterns";
+import { DashboardAchievements } from "@/components/dashboard/DashboardAchievements";
 import { DashboardPendingOutcomes } from "@/components/dashboard/DashboardPendingOutcomes";
 import { CosmicInsightsSection } from "@/components/dashboard/CosmicInsightsSection";
 import type { Json } from "@/integrations/supabase/types";
@@ -301,6 +302,14 @@ export function IndividualDashboard({ displayName, greeting, softLaunch }: Indiv
           </button>
         </section>
       )}
+
+      {/* Achievements */}
+      <DashboardAchievements 
+        totalAnalyses={stats.analyses} 
+        streak={stats.streak} 
+        accuracy={stats.accuracy} 
+        outcomes={stats.outcomes} 
+      />
 
       {/* Pending Outcomes */}
       <DashboardPendingOutcomes />

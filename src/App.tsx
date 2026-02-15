@@ -78,6 +78,7 @@ import AcceptInvitePage from "./pages/AcceptInvitePage";
 import TeamAdminPage from "./pages/TeamAdminPage";
 import TeamAuditLogPage from "./pages/TeamAuditLogPage";
 import { TeamLayout } from "@/components/team/TeamLayout";
+import SharedSnagPage from "./pages/SharedSnagPage";
 
 const queryClient = new QueryClient();
 
@@ -122,6 +123,7 @@ const App = () => {
               <Route path="/security" element={<SecurityPage />} />
               <Route path="/invite/:token" element={<AcceptInvitePage />} />
               <Route path="/unsubscribe" element={<UnsubscribePage />} />
+              <Route path="/s/:code" element={<SharedSnagPage />} />
               
               {/* App routes with layout */}
               <Route element={<AppLayout />}>
