@@ -141,6 +141,104 @@ If someone invited you:
 | Audit Log | Activity history (Owner/Admin only) |
 | Settings | Team preferences |`,
       },
+      {
+        id: "quick-reference",
+        title: "Quick Reference Card",
+        content: `A printable cheat sheet for the SNAG Framework, verdicts, shortcuts, and more.
+
+### The SNAG Framework™
+
+| Letter | Meaning | What It Does |
+|--------|---------|--------------|
+| **S** | Surface | Reveals blind spots and hidden assumptions |
+| **N** | Name | Maps specific ways this could fail |
+| **A** | Alert | Warning signals to watch (30/60/90 days) |
+| **G** | Gate | Clear criteria for when to abandon |
+
+Plus:
+- 🤔 **The Unasked Question** — The uncomfortable truth
+- ✅ **Verdict** — Clear recommendation
+
+### Verdicts
+
+| Verdict | Meaning | Action |
+|---------|---------|--------|
+| 🟢 Proceed with Confidence | Risks manageable | Go for it |
+| 🟡 Proceed with Caution | Notable risks | Proceed + monitor |
+| 🔵 Investigate Further | Too many unknowns | Get more info |
+| 🔴 Reconsider | Risks outweigh benefits | Don't proceed |
+
+### When to Use What
+
+| Tool | Time | Use For |
+|------|------|---------|
+| **Deep Snag** | 2-5 min | Major decisions, high stakes |
+| **Quick Snag** | 30 sec | Daily decisions, sanity checks |
+| **Templates** | 2-5 min | Department-specific decisions |
+
+### Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| \`Cmd/Ctrl + K\` | Quick Snag |
+| \`Cmd/Ctrl + N\` | New Decision |
+| \`Cmd/Ctrl + /\` | Search |
+| \`Esc\` | Close modal |
+
+### Writing Better Decisions
+
+**Include:**
+- ✅ Specific numbers (budget, timeline)
+- ✅ Named stakeholders
+- ✅ Your concerns
+- ✅ Context and constraints
+
+**Avoid:**
+- ❌ Vague descriptions
+- ❌ Missing context
+- ❌ Hypotheticals with no stakes
+
+### TRACE Outcome Tracking
+
+| Letter | Meaning |
+|--------|---------|
+| **T** | Truth — What actually happened |
+| **R** | Root cause — Why it happened |
+| **A** | Assumptions — Which were right/wrong |
+| **C** | Corrections — What you'd do differently |
+| **E** | Evidence — What you learned |
+
+Track outcomes to build your accuracy score, discover blind spot patterns, and get personalized recommendations.
+
+### Team Roles
+
+| Role | Permissions |
+|------|-------------|
+| **Owner** | Everything + billing + delete team |
+| **Admin** | Invite/remove + settings + all decisions |
+| **Member** | Create + analyze + team decisions |
+| **Viewer** | Read-only access |
+
+### Decision Visibility
+
+| Setting | Who Sees It |
+|---------|-------------|
+| **Private** | Only you |
+| **Team** | All team members |
+| **Leadership** | Admins + Owners only |
+
+### Templates Available
+
+| Department | Template |
+|------------|----------|
+| Sales | Deal Pursuit |
+| Finance | Budget Approval |
+| Product | Feature Prioritization |
+| HR | Hiring Decision |
+| Marketing | Campaign Launch |
+| Operations | Process Automation |
+| Strategy | M&A Evaluation |`,
+      },
     ],
   },
   {
