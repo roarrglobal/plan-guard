@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -21,15 +22,40 @@ export default function Login() {
 
   useEffect(() => {
     if (!authLoading && user) {
-      const redirect = searchParams.get("redirect");
-      const pendingInvite = localStorage.getItem("pending_invite_token");
-      if (pendingInvite && !redirect) {
-        navigate(`/invite/${pendingInvite}`, { replace: true });
-      } else {
-        navigate(redirect || "/dashboard", { replace: true });
-      }
+      resolveRedirect(user.id).then((dest) => {
+        navigate(dest, { replace: true });
+      });
     }
   }, [user, authLoading, navigate, searchParams]);
+
+  const resolveRedirect = async (userId: string) => {
+    const redirect = searchParams.get("redirect");
+    const pendingInvite = localStorage.getItem("pending_invite_token");
+
+    if (pendingInvite) {
+      localStorage.removeItem("pending_invite_token");
+      return `/invite/${pendingInvite}`;
+    }
+    if (redirect) return redirect;
+
+    // Check if user belongs to a team → redirect to team dashboard
+    try {
+      const { data: membership } = await supabase
+        .from("team_members")
+        .select("team_id, teams(slug)")
+        .eq("user_id", userId)
+        .eq("status", "active")
+        .limit(1)
+        .maybeSingle();
+
+      if (membership?.teams && typeof membership.teams === "object" && "slug" in membership.teams) {
+        return `/team/${(membership.teams as any).slug}/dashboard`;
+      }
+    } catch {
+      // fallback
+    }
+    return "/dashboard";
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,13 +71,10 @@ export default function Login() {
           variant: "destructive",
         });
       } else {
-        const redirect = searchParams.get("redirect");
-        const pendingInvite = localStorage.getItem("pending_invite_token");
-        if (pendingInvite) {
-          navigate(`/invite/${pendingInvite}`, { replace: true });
-        } else {
-          navigate(redirect || "/dashboard", { replace: true });
-        }
+        // Get the signed-in user to resolve redirect
+        const { data: { user: signedInUser } } = await supabase.auth.getUser();
+        const dest = await resolveRedirect(signedInUser?.id || "");
+        navigate(dest, { replace: true });
       }
     } finally {
       setIsLoading(false);

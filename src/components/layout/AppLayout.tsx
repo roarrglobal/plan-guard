@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation, Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { AppSidebar } from "./AppSidebar";
 import { AppTopNav } from "./AppTopNav";
 import { cn } from "@/lib/utils";
 
 export function AppLayout() {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -16,11 +16,18 @@ export function AppLayout() {
     setSidebarOpen(false);
   }, [location.pathname]);
 
-  // Check if we're on a public page (no sidebar)
-  const isPublicPage = ["/", "/login", "/terms", "/privacy", "/disclaimer"].includes(location.pathname);
+  // Show loading spinner while auth state resolves
+  if (isLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-background">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
+  }
 
-  if (isPublicPage || !user) {
-    return <Outlet />;
+  // Redirect unauthenticated users to login, preserving intended destination
+  if (!user) {
+    return <Navigate to={`/login?redirect=${encodeURIComponent(location.pathname)}`} replace />;
   }
 
   return (
@@ -45,7 +52,6 @@ export function AppLayout() {
           className={cn(
             "flex-1 overflow-auto",
             "transition-all duration-300",
-            // Desktop: adjust margin based on sidebar state
             "md:ml-0"
           )}
         >
