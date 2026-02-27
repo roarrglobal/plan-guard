@@ -76,18 +76,19 @@ serve(async (req) => {
       global: { headers: { Authorization: authHeader } }
     });
 
-    // Validate the JWT and get user
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    // Validate the JWT using getClaims
+    const token = authHeader.replace('Bearer ', '');
+    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
     
-    if (userError || !user) {
-      console.log("Invalid token:", userError?.message);
+    if (claimsError || !claimsData?.claims) {
+      console.log("Invalid token:", claimsError?.message);
       return new Response(
         JSON.stringify({ error: "Invalid or expired token" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const userId = user.id;
+    const userId = claimsData.claims.sub;
     console.log("Authenticated user:", userId);
 
     const body = await req.json();
