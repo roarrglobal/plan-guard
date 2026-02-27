@@ -1,7 +1,8 @@
 import * as pdfjsLib from 'pdfjs-dist';
+import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
-// Set up the worker - use CDN for the worker file
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+// Use Vite's ?url import for the worker to avoid CDN/CORS issues
+pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
 
 /**
  * Extract text content from a PDF file
@@ -38,7 +39,9 @@ export async function extractTextFromPDF(file: File): Promise<string> {
     
     const fullText = textParts.join('\n\n');
     
-    if (!fullText.trim()) {
+    // Check quality — if too little text, it might be a scanned PDF
+    const letterCount = (fullText.match(/[a-zA-Z]/g) || []).length;
+    if (!fullText.trim() || letterCount < 50) {
       throw new Error('No text could be extracted from this PDF. It may be a scanned document or contain only images.');
     }
     
@@ -57,6 +60,21 @@ export async function extractTextFromPDF(file: File): Promise<string> {
     
     throw new Error('Failed to extract text from PDF. Please try uploading a different document.');
   }
+}
+
+/**
+ * Convert a file to base64 string
+ */
+export async function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      resolve(result.split(',')[1]);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 }
 
 /**

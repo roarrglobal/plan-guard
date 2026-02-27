@@ -10,7 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useUsage } from "@/hooks/useUsage";
-import { extractTextFromPDF, isPDF } from "@/lib/pdfExtract";
+import { extractTextFromPDF, fileToBase64, isPDF } from "@/lib/pdfExtract";
 
 interface AnalysisInputProps {
   onSubmit: (text: string) => void;
@@ -138,12 +138,18 @@ export function AnalysisInput({
         try {
           extractedText = await extractTextFromPDF(file);
         } catch (pdfError) {
-          console.error("PDF extraction error:", pdfError);
-          // Fall back to context if PDF extraction fails
-          if (context && context.length > 20) {
-            extractedText = `Document: ${file.name}\n\nUser provided context: ${context}`;
-          } else {
-            throw new Error(pdfError instanceof Error ? pdfError.message : "Failed to extract text from PDF");
+          console.error("PDF text extraction failed, falling back to base64:", pdfError);
+          // Fall back: send PDF as base64 for server-side vision analysis
+          try {
+            imageBase64 = await fileToBase64(file);
+            sourceType = "pdf-image";
+          } catch (b64Error) {
+            console.error("Base64 conversion failed:", b64Error);
+            if (context && context.length > 20) {
+              extractedText = `Document: ${file.name}\n\nUser provided context: ${context}`;
+            } else {
+              throw new Error(pdfError instanceof Error ? pdfError.message : "Failed to extract text from PDF");
+            }
           }
         }
       } else if (file.type === "text/plain") {
@@ -160,9 +166,9 @@ export function AnalysisInput({
         body: {
           extractedText,
           userContext: context,
-          sourceType,
-          imageBase64: sourceType === "image" ? imageBase64 : undefined,
-          mimeType: sourceType === "image" ? file.type : undefined,
+          sourceType: sourceType === "pdf-image" ? "image" : sourceType,
+          imageBase64: (sourceType === "image" || sourceType === "pdf-image") ? imageBase64 : undefined,
+          mimeType: sourceType === "pdf-image" ? "application/pdf" : (sourceType === "image" ? file.type : undefined),
         },
       });
 
