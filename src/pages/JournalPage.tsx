@@ -45,13 +45,13 @@ interface JournalEntry {
   linked_post_mortem_id: string | null;
 }
 
-const ENTRY_TYPES = [
+const ALL_ENTRY_TYPES = [
   { id: "all", label: "All Entries", icon: FileText },
-  { id: "gratitude", label: "Gratitude", icon: Heart },
-  { id: "manifestation", label: "Manifestation", icon: Sparkles },
+  { id: "gratitude", label: "Gratitude", icon: Heart, personalOnly: true },
+  { id: "manifestation", label: "Manifestation", icon: Sparkles, personalOnly: true },
   { id: "reflection", label: "Reflections", icon: PenLine },
-  { id: "morning", label: "Morning", icon: Sun },
-  { id: "evening", label: "Evening", icon: Moon },
+  { id: "morning", label: "Morning", icon: Sun, personalOnly: true },
+  { id: "evening", label: "Evening", icon: Moon, personalOnly: true },
 ];
 
 const MOOD_COLORS: Record<string, string> = {
@@ -73,7 +73,12 @@ const MOOD_EMOJIS: Record<string, string> = {
 export default function JournalPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, profile } = useAuth();
+  const userType = profile?.user_type || "individual";
+  const isBusiness = userType === "business";
+  const ENTRY_TYPES = isBusiness
+    ? ALL_ENTRY_TYPES.filter(t => !t.personalOnly)
+    : ALL_ENTRY_TYPES;
   const { toast } = useToast();
   
   const [entries, setEntries] = useState<JournalEntry[]>([]);
@@ -191,7 +196,7 @@ export default function JournalPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Journal</h1>
+            <h1 className="text-2xl font-bold text-foreground">{isBusiness ? "Notes" : "Journal"}</h1>
             {streak > 0 && (
               <p className="text-sm text-muted-foreground mt-1">
                 🔥 {streak} day streak
