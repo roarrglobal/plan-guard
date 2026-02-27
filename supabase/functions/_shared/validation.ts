@@ -169,6 +169,7 @@ export function validateMimeType(
     'image/webp',
     'image/heic',
     'image/heif',
+    'application/pdf',
   ];
   
   if (!allowedMimeTypes.includes(value)) {
