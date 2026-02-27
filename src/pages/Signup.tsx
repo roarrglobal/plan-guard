@@ -47,7 +47,7 @@ export default function Signup() {
     }
     setIsLoading(true);
     try {
-      const { error } = await signUp(email, password, displayName, userType || "individual");
+      const { error } = await signUp(email, password, displayName, userType || "individual", teamName || undefined);
       if (error) {
         toast({ title: "Sign up failed", description: error.message, variant: "destructive" });
       } else {
