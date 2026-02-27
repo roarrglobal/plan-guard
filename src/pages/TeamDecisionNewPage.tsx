@@ -10,7 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowRight, Save, Zap, FileText, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Save, Zap, FileText, X, Upload, Paperclip } from "lucide-react";
 import { logAuditEvent } from "@/lib/auditLog";
 import { DepartmentBadge } from "@/components/templates/DepartmentBadge";
 import { TemplateSelectorModal } from "@/components/templates/TemplateSelectorModal";
@@ -87,6 +87,9 @@ export default function TeamDecisionNewPage() {
   const [inputContext, setInputContext] = useState("");
   const [visibility, setVisibility] = useState("team");
   const [analysisType, setAnalysisType] = useState("standard");
+  const [attachedFile, setAttachedFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
 
   // Auto-select template from URL param
   useEffect(() => {
@@ -113,7 +116,7 @@ export default function TeamDecisionNewPage() {
 
   const canProceedStep1 = title.trim().length >= 5;
 
-  const buildInputContext = () => {
+  const buildInputContext = (fileUrl?: string | null) => {
     let context = inputContext.trim();
     if (selectedTemplate && Object.keys(templateFieldValues).length > 0) {
       const templateContext = selectedTemplate.input_fields
@@ -128,12 +131,65 @@ export default function TeamDecisionNewPage() {
         .join("\n");
       context = templateContext + (context ? "\n\n" + context : "");
     }
+    if (fileUrl) {
+      context = (context ? context + "\n\n" : "") + `[Attached file: ${attachedFile?.name || "document"}]`;
+    }
     return context || null;
+  };
+
+  const ACCEPTED_FILE_TYPES = ".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt";
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error("File too large. Maximum size is 10MB.");
+      return;
+    }
+    setAttachedFile(file);
+    setUploadedFileUrl(null);
+  };
+
+  const handleRemoveFile = () => {
+    setAttachedFile(null);
+    setUploadedFileUrl(null);
+  };
+
+  const uploadFile = async (): Promise<string | null> => {
+    if (!attachedFile || !user) return null;
+    if (uploadedFileUrl) return uploadedFileUrl;
+
+    setIsUploading(true);
+    const ext = attachedFile.name.split(".").pop();
+    const path = `team-decisions/${team.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+    const { error } = await supabase.storage
+      .from("analysis-uploads")
+      .upload(path, attachedFile);
+
+    setIsUploading(false);
+    if (error) {
+      toast.error("Failed to upload file: " + error.message);
+      return null;
+    }
+
+    const url = `analysis-uploads/${path}`;
+    setUploadedFileUrl(url);
+    return url;
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
   const handleSaveDraft = async () => {
     if (!user || !team || !title.trim()) return;
     setIsSaving(true);
+
+    const fileUrl = await uploadFile();
 
     const { data, error } = await supabase
       .from("team_decisions")
@@ -147,7 +203,7 @@ export default function TeamDecisionNewPage() {
         reversibility,
         timeline,
         deadline: deadline || null,
-        input_context: buildInputContext(),
+        input_context: buildInputContext(fileUrl),
         visibility,
         status: "open",
         template_id: selectedTemplate?.id || null,
@@ -185,6 +241,8 @@ export default function TeamDecisionNewPage() {
     if (!user || !team || !title.trim()) return;
     setIsSaving(true);
 
+    const fileUrl = await uploadFile();
+
     const { data, error } = await supabase
       .from("team_decisions")
       .insert({
@@ -197,7 +255,7 @@ export default function TeamDecisionNewPage() {
         reversibility,
         timeline,
         deadline: deadline || null,
-        input_context: buildInputContext(),
+        input_context: buildInputContext(fileUrl),
         visibility,
         status: "open",
         template_id: selectedTemplate?.id || null,
@@ -537,6 +595,35 @@ export default function TeamDecisionNewPage() {
                 rows={3}
                 className="bg-input resize-none"
               />
+            </div>
+
+            {/* File Attachment */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Attachment (optional)</Label>
+              <p className="text-xs text-muted-foreground">PDF, Word, Excel, CSV, or Text • Max 10MB</p>
+              {!attachedFile ? (
+                <label className="flex items-center gap-2 px-4 py-3 rounded-lg border-2 border-dashed border-border hover:border-primary/40 bg-muted/30 cursor-pointer transition-colors">
+                  <Paperclip className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">Attach a file for more context</span>
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept={ACCEPTED_FILE_TYPES}
+                    onChange={handleFileSelect}
+                  />
+                </label>
+              ) : (
+                <div className="flex items-center gap-3 px-4 py-3 rounded-lg border border-border bg-card">
+                  <FileText className="w-5 h-5 text-primary shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground truncate">{attachedFile.name}</p>
+                    <p className="text-xs text-muted-foreground">{formatFileSize(attachedFile.size)}</p>
+                  </div>
+                  <button onClick={handleRemoveFile} className="text-muted-foreground hover:text-destructive transition-colors">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="flex justify-between">
