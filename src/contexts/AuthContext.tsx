@@ -56,7 +56,7 @@ interface AuthContextType {
   session: Session | null;
   profile: Profile | null;
   isLoading: boolean;
-  signUp: (email: string, password: string, displayName?: string, userType?: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, displayName?: string, userType?: string, teamName?: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: ProfileUpdates) => Promise<{ error: Error | null }>;
@@ -128,7 +128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, displayName?: string, userType?: string) => {
+  const signUp = async (email: string, password: string, displayName?: string, userType?: string, teamName?: string) => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -137,6 +137,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         data: {
           display_name: displayName,
           user_type: userType || 'individual',
+          pending_team_name: userType === 'business' ? teamName : undefined,
         },
       },
     });

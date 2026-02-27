@@ -54,6 +54,54 @@ export default function Login() {
     } catch {
       // fallback
     }
+
+    // If business user with no team, auto-create one from signup metadata
+    try {
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      const userType = currentUser?.user_metadata?.user_type;
+      const pendingTeamName = currentUser?.user_metadata?.pending_team_name;
+
+      if (userType === "business" && pendingTeamName) {
+        // Create slug from team name
+        const slug = pendingTeamName
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-|-$/g, "")
+          .substring(0, 50) || `team-${Date.now()}`;
+
+        // Create the team
+        const { data: newTeam, error: teamError } = await supabase
+          .from("teams")
+          .insert({
+            name: pendingTeamName,
+            slug,
+            owner_id: userId,
+          })
+          .select()
+          .single();
+
+        if (!teamError && newTeam) {
+          // Add owner as team member
+          await supabase.from("team_members").insert({
+            team_id: newTeam.id,
+            user_id: userId,
+            role: "owner",
+            status: "active",
+            joined_at: new Date().toISOString(),
+          });
+
+          // Clear the pending team name from metadata
+          await supabase.auth.updateUser({
+            data: { pending_team_name: null },
+          });
+
+          return `/team/${slug}/dashboard`;
+        }
+      }
+    } catch {
+      // fallback to individual dashboard
+    }
+
     return "/dashboard";
   };
 
